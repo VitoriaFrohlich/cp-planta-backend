@@ -1,8 +1,8 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateStokDto } from './create-stok.dto';
+import { CreateStockDto } from './create-stock.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateStokDto extends PartialType(CreateStokDto) {
+export class UpdateStockDto extends PartialType(CreateStockDto) {
   @ApiProperty()
   readonly name: string;
 

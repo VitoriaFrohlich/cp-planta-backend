@@ -8,6 +8,8 @@ tsconfig.tsbuildinfo
 database/
 
 # custom
+tsconfig.build.json
+openapitools.json
 
 # Logs
 logs

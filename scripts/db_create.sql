@@ -80,6 +80,7 @@ CREATE TABLE "groups" (
     "id" SERIAL NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "father_id" INTEGER,
+    "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -238,6 +239,7 @@ CREATE TABLE "persons" (
     "id" SERIAL NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "type" "Person_Type" NOT NULL DEFAULT 'SUPPLIER',
+    "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

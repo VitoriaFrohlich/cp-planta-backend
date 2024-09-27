@@ -1,4 +1,4 @@
-export class Stok {
+export class Stock {
   id: number;
   name: string;
   price: number;
