@@ -1,0 +1,31 @@
+stages:
+  - build
+
+variables:
+  DOCKER_REGISTRY: docker.io
+  DOCKER_IMAGE_NODE: norokai/cp-planta-back:node-latest
+  DOCKER_IMAGE_POSTGRES: norokai/cp-planta-back:postgres-latest
+
+before_script:
+  # Docker login using environment variables for credentials
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+
+build-node:
+  stage: build
+  script:
+    # Build the Node.js Docker image
+    - docker build -f dockerfile.node -t $DOCKER_IMAGE_NODE .
+    # Push the Node.js image to Docker Hub
+    - docker push $DOCKER_IMAGE_NODE
+  only:
+    - main
+
+build-postgres:
+  stage: build
+  script:
+    # Build the PostgreSQL Docker image
+    - docker build -f dockerfile.postgres -t $DOCKER_IMAGE_POSTGRES .
+    # Push the PostgreSQL image to Docker Hub
+    - docker push $DOCKER_IMAGE_POSTGRES
+  only:
+    - main

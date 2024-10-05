@@ -4,10 +4,6 @@ zz/
 yarn.lock
 package-lock.json
 tsconfig.tsbuildinfo
-.env
-#database/
-
-# custom
 tsconfig.build.json
 openapitools.json
 
