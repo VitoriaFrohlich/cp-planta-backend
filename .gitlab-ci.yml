@@ -1,0 +1,81 @@
+stages:
+  - pre-commit-check
+  - commit-msg-check
+  - lint
+  - test
+  - build
+  - push
+
+variables:
+  DOCKER_REGISTRY: docker.io
+  DOCKER_IMAGE_NODE: norohim/cp-planta-backend:latest 
+  DOCKER_IMAGE_POSTGRES: norohim/cp-planta-database:latest  
+
+default:
+  image: docker:latest  # Usando Docker como imagem base
+  services:
+    - docker:dind  # Habilitando Docker in Docker (DinD)
+  before_script:
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+    - npm ci  # Instala as dependências do Node.js
+
+# Job para simular o pre-commit
+pre-commit-check:
+  stage: pre-commit-check
+  script:
+    - bash ci/pre-commit-check.sh  # Executa o script de pre-commit
+  only:
+    - merge_requests
+    - branches
+
+# Job para simular o commit-msg
+commit-msg-check:
+  stage: commit-msg-check
+  script:
+    - bash ci/commit-msg-check.sh "$CI_COMMIT_MESSAGE"  # Passa a mensagem de commit para validação
+  only:
+    - merge_requests
+    - branches
+
+# Job para verificar o lint
+lint:
+  stage: lint
+  script:
+    - npm run lint  # Comando para verificar o lint
+  only:
+    - merge_requests
+    - branches
+
+# Job para executar os testes
+test:
+  stage: test
+  script:
+    - npm run test  # Comando para executar os testes
+  only:
+    - merge_requests
+    - branches
+
+# Build da imagem do Node.js
+build-node:
+  stage: build
+  script:
+    - docker build -f dockerfile.node -t $DOCKER_IMAGE_NODE .
+  only:
+    - main
+
+# Build da imagem do PostgreSQL
+build-postgres:
+  stage: build
+  script:
+    - docker build -f dockerfile.postgres -t $DOCKER_IMAGE_POSTGRES .
+  only:
+    - main
+
+# Push das imagens para o Docker Hub
+push-images:
+  stage: push
+  script:
+    - docker push $DOCKER_IMAGE_NODE
+    - docker push $DOCKER_IMAGE_POSTGRES
+  only:
+    - main

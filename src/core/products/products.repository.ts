@@ -46,12 +46,11 @@ export class ProductsRepository {
       where: { id }
     });
 
-    const productWithoutSensitiveFields = {
-      ...product,
-      active: undefined
-    };
+    if (!product) {
+      return null;
+    }
 
-    return productWithoutSensitiveFields;
+    return product;
   }
 
   async findManyByIds(ids: number[]): Promise<products[]> {
@@ -59,15 +58,6 @@ export class ProductsRepository {
       where: {
         id: { in: ids }
       }
-    });
-  }
-
-  async bulkUpdateStatus(ids: number[], data: Partial<products>) {
-    await this.prisma.products.updateMany({
-      where: {
-        id: { in: ids }
-      },
-      data
     });
   }
 
@@ -100,6 +90,16 @@ export class ProductsRepository {
   }
 
   async delete(id: number): Promise<void> {
+    await this.prisma.products.update({
+      where: { id },
+      data: {
+        active: false,
+        updated_at: new Date()
+      }
+    });
+  }
+
+  async reactivate(id: number): Promise<void> {
     if (!id) {
       throw new Error('ID not found');
     }
@@ -111,7 +111,7 @@ export class ProductsRepository {
     await this.prisma.products.update({
       where: { id },
       data: {
-        active: false,
+        active: true,
         updated_at: new Date()
       }
     });
