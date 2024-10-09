@@ -4,12 +4,12 @@ import { UpdateOccurrenceDto } from './dto/update-occurrence.dto';
 
 @Injectable()
 export class OccurrenceService {
-  create(_createProductionDto: CreateOccurrenceDto) {
-    return 'This action adds a new production';
+  create(_CreateOccurrenceDto: CreateOccurrenceDto) {
+    return {};
   }
 
   findAll() {
-    return 'This action returns all production';
+    return {};
   }
 
   findOne(id: number) {

@@ -5,29 +5,75 @@ import {
   Body,
   Patch,
   Param,
-  Delete
+  Delete,
+  BadRequestException
 } from '@nestjs/common';
 import { OccurrenceService } from './occurrence.service';
 import { CreateOccurrenceDto } from './dto/create-occurrence.dto';
 import { UpdateOccurrenceDto } from './dto/update-occurrence.dto';
+import { CreateOccurrenceSchema } from './dto/occurrence.schema';
 
 @Controller('occurences')
 export class OccurrenceController {
   constructor(private readonly occurrenceService: OccurrenceService) {}
 
   @Post()
-  create(@Body() createOccurrenceDto: CreateOccurrenceDto) {
-    return this.occurrenceService.create(createOccurrenceDto);
+  async create(@Body() createOccurrenceDto: CreateOccurrenceDto) {
+    const errors = [];
+
+    const descriptionValidation =
+      CreateOccurrenceSchema.shape.description.safeParse(
+        createOccurrenceDto.description
+      );
+
+    if (!descriptionValidation.success) {
+      errors.push({
+        field: 'description',
+        message: descriptionValidation.error[0].message
+      });
+    }
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    const createdOccurence =
+      await this.occurrenceService.create(createOccurrenceDto);
+
+    return {
+      id: createdOccurence.id,
+      description: createdOccurence.description,
+      created_at: createdOccurence.created_at,
+      created_by: createdOccurence.created_by
+    };
   }
 
   @Get()
-  findAll() {
-    return this.occurrenceService.findAll();
+  async findAll() {
+    const occurrences = await this.occurrenceService.findAll();
+    return occurrences.map(occurrence => ({
+      id: occurrence.id,
+      description: occurrence.description,
+      created_at: occurrence.created_at,
+      updated_at: occurrence.updated_at,
+      created_by: occurrence.created_by,
+      updated_by: occurrence.updated_by
+    }));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.occurrenceService.findOne(+id);
+  async findById(@Param('id') id: string) {
+    const idNumber = +id;
+
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('ID Inválido');
+    }
+
+    const occurrence = await this.occurrenceService.findOne(idNumber);
+    if (!occurrence) {
+      throw new BadRequestException('Ocorrencia não encontrada');
+    }
+    return occurrence;
   }
 
   @Patch(':id')

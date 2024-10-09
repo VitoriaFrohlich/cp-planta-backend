@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OccurrenceController } from './occurrence.controller';
 import { OccurrenceService } from './occurrence.service';
 
-describe('OccurenciesController', () => {
+describe('OccurenceController', () => {
   let controller: OccurrenceController;
 
   beforeEach(async () => {
