@@ -101,6 +101,7 @@
     "lint-staged": "^15.2.9",
     "prettier": "3.3.3",
     "pretty-quick": "^4.0.0",
+    "prisma": "^5.20.0",
     "prisma-erd-generator": "^1.11.2",
     "semantic-release": "^24.1.0",
     "standard-version": "^9.5.0",

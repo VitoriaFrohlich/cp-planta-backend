@@ -6,7 +6,7 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
-import { Product } from './entities/product.entity';
+import { products } from '@prisma/client';
 import { format } from 'date-fns';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class ProductsService {
   }
 
   async findAll(orderBy: string): Promise<
-    (Omit<Product, 'created_at' | 'updated_at'> & {
+    (Omit<products, 'created_at' | 'updated_at'> & {
       created_at: string;
       updated_at: string;
     })[]
@@ -47,8 +47,8 @@ export class ProductsService {
     return this.formatProductDate(product);
   }
 
-  private formatProductDate(product: Product): Omit<
-    Product,
+  private formatProductDate(product: products): Omit<
+    products,
     'created_at' | 'updated_at'
   > & {
     created_at: string;

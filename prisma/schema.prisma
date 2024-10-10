@@ -101,7 +101,7 @@ model products {
   production_progress progress_of_productions_orders_steps[]
   categories          categories                             @relation(fields: [category_id], references: [id])
   groups              groups                                 @relation(fields: [group_id], references: [id])
-  supplier            persons?                                @relation(fields: [supplier_id], references: [id])
+  supplier            persons?                               @relation(fields: [supplier_id], references: [id])
   stock_items         stock_items[]
 }
 
@@ -247,11 +247,11 @@ model stock_items {
   updated_at                                 DateTime       @default(now()) @db.Timestamp(6)
   created_by                                 Int?
   updated_by                                 Int?
-  customers                                  persons?        @relation(fields: [costumer], references: [id])
+  customers                                  persons?       @relation(fields: [costumer], references: [id])
   products                                   products       @relation(fields: [product_id], references: [id])
   stock                                      stock          @relation(fields: [stock_id], references: [id])
   stock_location                             stock_location @relation(fields: [stock_location_id], references: [id])
-  suppliers_stock_items_suppliersTosuppliers persons?        @relation("stock_items_suppliersTosuppliers", fields: [supplier], references: [id])
+  suppliers_stock_items_suppliersTosuppliers persons?       @relation("stock_items_suppliersTosuppliers", fields: [supplier], references: [id])
 }
 
 // locais de estoque
