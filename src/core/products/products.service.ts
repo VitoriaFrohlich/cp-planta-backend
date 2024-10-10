@@ -120,38 +120,8 @@ export class ProductsService {
     return this.formatProductDate(updatedPorduct);
   }
 
-  remove(id: number) {
-    return this.productsRepository.delete(id);
-  }
-
-  async bulkRemove(ids: number[]) {
-    const existingProducts = await this.productsRepository.findManyByIds(ids);
-
-    const errors = [];
-    const validIds = [];
-
-    for (const id of ids) {
-      const product = existingProducts.find(p => p.id === id);
-
-      if (!product) {
-        errors.push(`Product with ID ${id} not found`);
-        continue;
-      }
-
-      if (!product.active) {
-        errors.push(`Product with ID ${id} is not active`);
-        continue;
-      }
-
-      validIds.push(id);
-    }
-
-    if (validIds.length > 0) {
-      await this.productsRepository.bulkUpdateStatus(validIds, {
-        active: false
-      });
-    }
-
-    return { removedIds: validIds, errors };
+  async remove(id: number) {
+    await this.isValid(id);
+    await this.productsRepository.delete(id);
   }
 }
