@@ -8,22 +8,22 @@ stages:
 
 variables:
   DOCKER_REGISTRY: docker.io
-  DOCKER_IMAGE_NODE: norohim/cp-planta-backend:latest 
-  DOCKER_IMAGE_POSTGRES: norohim/cp-planta-database:latest  
+  DOCKER_IMAGE_NODE: norohim/cp-planta-backend:latest
+  DOCKER_IMAGE_POSTGRES: norohim/cp-planta-database:latest
 
 default:
-  image: docker:latest  # Usando Docker como imagem base
+  image: docker:latest # Usando Docker como imagem base
   services:
-    - docker:dind  # Habilitando Docker in Docker (DinD)
+    - docker:dind # Habilitando Docker in Docker (DinD)
   before_script:
     - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
-    - npm ci  # Instala as dependências do Node.js
+    - npm ci # Instala as dependências do Node.js
 
 # Job para simular o pre-commit
 pre-commit-check:
   stage: pre-commit-check
   script:
-    - bash ci/pre-commit-check.sh  # Executa o script de pre-commit
+    - bash ci/pre-commit-check.sh # Executa o script de pre-commit
   only:
     - merge_requests
     - branches
@@ -32,7 +32,7 @@ pre-commit-check:
 commit-msg-check:
   stage: commit-msg-check
   script:
-    - bash ci/commit-msg-check.sh "$CI_COMMIT_MESSAGE"  # Passa a mensagem de commit para validação
+    - bash ci/commit-msg-check.sh "$CI_COMMIT_MESSAGE" # Passa a mensagem de commit para validação
   only:
     - merge_requests
     - branches
@@ -41,7 +41,7 @@ commit-msg-check:
 lint:
   stage: lint
   script:
-    - npm run lint  # Comando para verificar o lint
+    - npm run lint # Comando para verificar o lint
   only:
     - merge_requests
     - branches
@@ -50,7 +50,7 @@ lint:
 test:
   stage: test
   script:
-    - npm run test  # Comando para executar os testes
+    - npm run test # Comando para executar os testes
   only:
     - merge_requests
     - branches
