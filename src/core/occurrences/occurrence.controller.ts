@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
+  // Delete,
   BadRequestException
 } from '@nestjs/common';
 import { OccurrenceService } from './occurrence.service';
@@ -13,7 +13,7 @@ import { CreateOccurrenceDto } from './dto/create-occurrence.dto';
 import { UpdateOccurrenceDto } from './dto/update-occurrence.dto';
 import { CreateOccurrenceSchema } from './dto/occurrence.schema';
 
-@Controller('occurences')
+@Controller('occurrences')
 export class OccurrenceController {
   constructor(private readonly occurrenceService: OccurrenceService) {}
 
@@ -84,8 +84,8 @@ export class OccurrenceController {
     return this.occurrenceService.update(+id, updateOccurrenceDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.occurrenceService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.occurrenceService.remove(+id);
+  // }
 }
