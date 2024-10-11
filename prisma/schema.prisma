@@ -11,6 +11,8 @@ datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
 }
+// usar
+  
 
 model Production {
   id                                          Int               @id @default(autoincrement())
