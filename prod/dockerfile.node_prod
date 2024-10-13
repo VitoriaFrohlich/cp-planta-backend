@@ -1,7 +1,7 @@
 # Stage 1: Build the backend
 FROM node:20 AS builder
 
-WORKDIR /app/build
+WORKDIR /app
 
 # Set NODE_ENV to development to install devDependencies
 ENV NODE_ENV=development
@@ -50,7 +50,7 @@ RUN npm install -g npm@latest
 RUN npm install --omit=dev
 
 # Copy the built application from the builder stage
-COPY --from=builder /app/build/dist ./dist
+COPY --from=builder /app/dist ./dist
 
 # Expose the port used by the backend
 EXPOSE 3000

@@ -4,6 +4,7 @@ variables:
   DOCKER_IMAGE_NAME2: norohim/postgres-optimal
   DOCKER_IMAGE_TAG: latest
   DOCKER_DRIVER: overlay2
+  PUPPETEER_SKIP_DOWNLOAD: true
 
 stages:
   - commit-msg-check
@@ -20,6 +21,7 @@ cache:
 default:
   image: node:20
   before_script:
+    - npm cache clean --force
     - rm -rf node_modules/ # Remove node_modules directory
     - npm install --force # Install dependencies cleanly
 
@@ -30,6 +32,7 @@ commit-msg-check:
     - echo "$CI_COMMIT_MESSAGE" | npx commitlint
   only:
     - branches
+    - merge_requests
 
 # Linting and formatting job
 lint:
