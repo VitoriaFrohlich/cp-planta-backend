@@ -1,0 +1,59 @@
+# Stage 1: Build the backend
+FROM node:20 AS builder
+
+WORKDIR /app
+
+# Set NODE_ENV to development to install devDependencies
+ENV NODE_ENV=development
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Upgrade npm to the latest version
+RUN npm install -g npm@latest
+
+RUN npm install -g @nestjs/cli
+
+# Install only production dependencies using --omit=dev
+RUN npm install
+
+# Add node_modules/.bin to PATH along with the system paths
+ENV PATH=/app/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Verify that @nestjs/cli is installed
+RUN npm list @nestjs/cli
+
+# Verify that nest is accessible
+RUN which nest
+
+# Copy the rest of the application source code
+COPY . .
+
+# Build the application
+RUN npm run build:only
+
+# Stage 2: Production environment
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Set NODE_ENV to production
+ENV NODE_ENV=production
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Upgrade npm to the latest version
+RUN npm install -g npm@latest
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
+# Copy the built application from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Expose the port used by the backend
+EXPOSE 3000
+
+# Command to run the application
+CMD ["node", "dist/main.js"]

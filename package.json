@@ -28,13 +28,14 @@
     "start:prod": "NODE_ENV=production nest start",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci",
+    "test:ci": "jest --ci --passWithNoTests",
     "build": "npm run lint && nest build",
+    "build:only": "nest build",
     "lint": "eslint src --max-warnings=0",
     "prettier": "npx prettier --write --ignore-unknown .",
     "format": "npm run prettier",
     "commit": "git-cz",
-    "prepare": "husky install",
+    "prepare": "if [ \"$NODE_ENV\" = \"development\" ]; then husky install; fi",
     "release": "semantic-release"
   },
   "husky": {

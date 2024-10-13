@@ -1,0 +1,108 @@
+variables:
+  # Docker image details
+  DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
+  DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
+  DOCKER_IMAGE_TAG: "latest"
+  DOCKER_DRIVER: "overlay2"
+  PUPPETEER_SKIP_DOWNLOAD: "true"
+
+stages:
+  - commit-msg-check
+  - lint
+  - test
+  - build
+  - push
+
+cache:
+  paths:
+    - node_modules/
+
+# Default settings for all jobs
+default:
+  image: node:20
+  before_script:
+    - npm cache clean --force
+    - rm -rf node_modules/ # Remove node_modules directory
+    - npm install --force # Install dependencies cleanly
+
+# Commit message check using commitlint
+commit-msg-check:
+  stage: commit-msg-check
+  script:
+    - echo "$CI_COMMIT_MESSAGE" | npx commitlint
+  only:
+    - branches
+    - merge_requests
+
+# Linting and formatting job
+lint:
+  stage: lint
+  before_script:
+    - npm install -g eslint@8.x.x prettier@3.x.x
+  script:
+    - npm run lint
+    - npm run prettier
+  only:
+    - merge_requests
+    - branches
+
+# Testing job
+test:
+  stage: test
+  before_script:
+    - npm install -g jest@29.x.x
+  script:
+    - npm run test:ci
+  only:
+    - merge_requests
+    - branches
+
+# Build Docker image job
+build_docker_image:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info
+  script:
+    - cd prod
+    - docker build -f ./dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
+    - docker save "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" -o image1.tar
+    - docker build -f ./dockerfile.postgres_prod -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
+    - docker save "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" -o image2.tar
+    - cd ..
+  artifacts:
+    paths:
+      - image1.tar
+      - image2.tar
+    expire_in: 1 hour
+  only:
+    - master
+
+# Push Docker image job
+push_docker_image:
+  stage: push
+  image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - docker load -i image1.tar
+    - docker push "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG"
+    - docker load -i image2.tar
+    - docker push "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG"
+  dependencies:
+    - build_docker_image
+  only:
+    - master
