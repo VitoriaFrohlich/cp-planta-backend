@@ -1,10 +1,10 @@
 variables:
   # Docker image details
-  DOCKER_IMAGE_NAME1: norohim/cp-planta-backend
-  DOCKER_IMAGE_NAME2: norohim/postgres-optimal
-  DOCKER_IMAGE_TAG: latest
-  DOCKER_DRIVER: overlay2
-  PUPPETEER_SKIP_DOWNLOAD: true
+  DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
+  DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
+  DOCKER_IMAGE_TAG: "latest"
+  DOCKER_DRIVER: "overlay2"
+  PUPPETEER_SKIP_DOWNLOAD: "true"
 
 stages:
   - commit-msg-check
