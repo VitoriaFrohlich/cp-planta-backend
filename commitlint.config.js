@@ -1,22 +1,30 @@
-// commitlint.config.js
 module.exports = {
   extends: ['@commitlint/config-conventional'],
   rules: {
+    // Enforce the use of conventional commit types
     'type-enum': [
       2,
       'always',
       [
-        'feat', // Feature: minor version bump
-        'fix', // Bugfix: patch version bump
-        'chore', // Other changes that don't modify src or test files: no bump
-        'docs', // Documentation only changes: no bump
-        'style', // Changes that do not affect the meaning of the code: no bump
-        'refactor', // A code change that neither fixes a bug nor adds a feature: no bump
-        'perf', // A code change that improves performance: patch version bump
-        'test', // Adding missing tests or correcting existing tests: no bump
-        'build', // Changes that affect the build system or external dependencies: no bump
-        'ci' // Changes to our CI configuration files and scripts: no bump
-      ]
-    ]
-  }
+        'feat',     // Features
+        'fix',      // Bug fixes
+        'chore',    // Maintenance tasks
+        'docs',     // Documentation changes
+        'style',    // Code style changes (formatting, missing semi-colons, etc.)
+        'refactor', // Code refactoring without adding features or fixing bugs
+        'perf',     // Performance improvements
+        'test',     // Adding or updating tests
+        'build',    // Changes to build process or dependencies
+        'ci',       // CI configuration changes
+      ],
+    ],
+    // Enforce that the subject is not empty
+    'subject-empty': [2, 'never'],
+
+    // Enforce lowercase for the subject
+    'subject-case': [2, 'always', 'lower-case'],
+
+    // Optional: Enforce lowercase for the type as well
+    'type-case': [2, 'always', 'lower-case'],
+  },
 };
