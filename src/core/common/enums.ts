@@ -6,13 +6,12 @@ export enum Gender {
 }
 
 export enum Role {
+  DEFAULT = 'DEFAULT',
   ROOT = 'ROOT',
   ADMIN = 'ADMIN',
-  PUBLIC = 'PUBLIC',
-  ERP = 'ERP',
+  DEMO = 'DEMO',
   API = 'API',
-  SYSTEM = 'SYSTEM',
-  ANONYMOUS = 'ANONYMOUS'
+  SYSTEM = 'SYSTEM'
 }
 
 export enum Person_Type {
