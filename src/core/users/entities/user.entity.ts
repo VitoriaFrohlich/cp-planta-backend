@@ -1,8 +1,17 @@
+import { Role, Gender } from '../../common/enums';
+
 export class User {
   id: number;
-  username: string;
-  password: string;
   email: string;
-  role: string;
-  isActive: boolean;
+  password: string;
+  role: Role;
+  username: string;
+  first_name: string;
+  last_name: string;
+  gender: Gender;
+  active: boolean;
+  created_at: Date;
+  updated_at: Date;
+  created_by: number;
+  updated_by: number;
 }

@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, VersioningType } from '@nestjs/common';
 import { AppModule } from './app.module.js';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
@@ -19,6 +19,11 @@ async function bootstrap(): Promise<void> {
     }
 
     const app = await NestFactory.create(AppModule);
+
+    app.enableVersioning({
+      type: VersioningType.HEADER,
+      header: 'API-Version'
+    });
 
     const config = new DocumentBuilder()
       .setTitle('API Documentation')

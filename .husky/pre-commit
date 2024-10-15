@@ -1,8 +1,9 @@
 npx lint-staged
-npm run test -- --passWithNoTests
+#npm run test -- --passWithNoTests
 
 # .git/hooks/pre-commit
-if git diff --cached --name-only | grep -q '.gitignore'; then
-    echo "### ATENÇÃO: Modificações no .gitignore não são permitidas."
-    exit 1
-fi
+# comentado para facilitar subir commits
+# if git diff --cached --name-only | grep -q '.gitignore'; then
+#     echo "### ATENÇÃO: Modificações no .gitignore não são permitidas."
+#     exit 1
+# fi

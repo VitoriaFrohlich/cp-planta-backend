@@ -1,31 +1,131 @@
-stages:
-  - build
-
 variables:
-  DOCKER_REGISTRY: docker.io
-  DOCKER_IMAGE_NODE: norokai/cp-planta-back:node-latest
-  DOCKER_IMAGE_POSTGRES: norokai/cp-planta-back:postgres-latest
+  # Docker image details
+  DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
+  DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
+  DOCKER_IMAGE_TAG: "latest"
+  DOCKER_DRIVER: "overlay2"
+  PUPPETEER_SKIP_DOWNLOAD: "true"
 
-before_script:
-  # Docker login using environment variables for credentials
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+stages:
+  - commit-msg-check
+  - lint
+  - test
+  - build
+  - push
+  - deploy
 
-build-node:
-  stage: build
+cache:
+  paths:
+    - node_modules/
+
+# Default settings for all jobs
+default:
+  image: node:20
+  before_script:
+    - cp .env.example .env
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
+    - npm cache clean --force
+    - rm -rf node_modules/ package-lock.json # Remove node_modules directory
+    - npm install --force --ignore-scripts # Install dependencies cleanly
+
+# Commit message check using commitlint
+commit-msg-check:
+  stage: commit-msg-check
   script:
-    # Build the Node.js Docker image
-    - docker build -f dockerfile.node -t $DOCKER_IMAGE_NODE .
-    # Push the Node.js image to Docker Hub
-    - docker push $DOCKER_IMAGE_NODE
+    - echo "$CI_COMMIT_MESSAGE" | npx commitlint
+  only:
+    - branches
+    - merge_requests
+
+# Linting and formatting job
+lint:
+  stage: lint
+  before_script:
+    - npm install -g eslint@8.x.x prettier@3.x.x
+  script:
+    - npm run lint
+    - npm run prettier
+  only:
+    - merge_requests
+    - branches
+
+# Testing job
+test:
+  stage: test
+  before_script:
+    - npm install -g jest@29.x.x
+  script:
+    - npm run test:ci
+  only:
+    - merge_requests
+    - branches
+
+# Build Docker image job
+build_docker_image:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info
+    - cp .env.example .env
+    - sed -i "s/NODE_ENV=dev/NODE_ENV=prod/g" .env
+    - npm cache clean --force
+    - rm -rf node_modules/ package-lock.json # Remove node_modules directory
+  script:
+    - docker build -f ./prod/dockerfile.node_prod -t "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" .
+    - docker save "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG" -o image1.tar
+    - cd prod
+    - docker build -f ./dockerfile.postgres_prod -t "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" .
+    - docker save "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG" -o image2.tar
+    - cd ..
+  artifacts:
+    paths:
+      - image1.tar
+      - image2.tar
+    expire_in: 1 hour
+  only:
+    - master
+
+# Push Docker image job
+push_docker_image:
+  stage: push
+  image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - docker load -i image1.tar
+    - docker push "$DOCKER_IMAGE_NAME1:$DOCKER_IMAGE_TAG"
+    - docker load -i image2.tar
+    - docker push "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG"
+  dependencies:
+    - build_docker_image
+  only:
+    - master
+
+# trigger deploy when build an push succeed
+trigger-infra-pipeline:
+  stage: deploy
+  script:
+    - echo "Triggering infrastructure pipeline..."
+    - curl -X POST \
+        --fail \
+        -F token=90cbad47a562a7bae7cf8de55d3e34 \
+        -F ref=main \
+        https://tools.ages.pucrs.br/api/v4/projects/683/trigger/pipeline
   only:
     - main
-
-build-postgres:
-  stage: build
-  script:
-    # Build the PostgreSQL Docker image
-    - docker build -f dockerfile.postgres -t $DOCKER_IMAGE_POSTGRES .
-    # Push the PostgreSQL image to Docker Hub
-    - docker push $DOCKER_IMAGE_POSTGRES
-  only:
-    - main
+  dependencies:
+    - build_docker_image
+    - push_docker_image
