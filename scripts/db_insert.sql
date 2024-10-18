@@ -7,7 +7,18 @@ VALUES
     ('Ana', 'ana@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
     ('Maria', 'maria@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Maria', 'Silva', 'DEMO', 'FEMALE');
 	
-    
+-- Insert into settings
+INSERT INTO "settings" ("key", "value", "description", "created_by", "updated_by") 
+VALUES
+('enableNegativeStock', 'true', 'Serve para habilitar ou desabilitar o controle de estoque negativo','root','root'),
+('defaultStockLocation', '1', 'Serve para definir o local de estoque padrão','root','root'),
+('defaultRoleForNewUser', 'DEFAULT', 'Serve para definir o papel padrão para novos usuários','root','root'),
+('defaultLoteInputMask', 'P', 'Define o padrão de máscara para lote de entrada','root','root'),
+('defaultLoteOutputMask', 'PD', 'Define o padrão de máscara para lote de saída','root','root'),
+('lastDocumentNumber', '3000', 'Serve para guardar o último número de documento criado para incrementar a partir dele','root','root'),
+('lastLoteNumber', '1000', 'Serve para guardar o último número de lote criado para incrementar a partir dele','root','root'),
+('loteNumberLength', '5', 'Define o tamanho do número do lote para preenchimento com zeros à esquerda (ex: 00001)','root','root');
+
 -- Insert into persons
 INSERT INTO "persons" ("name")
 VALUES 
@@ -312,7 +323,9 @@ VALUES
     ('NFE123', '2024-09-01 09:00:00', 'INPUT','nota entrada'),
     ('OP124', '2024-09-02 10:00:00', 'INPUT', 'ordem de produção'),
     ('DOC123', '2024-09-01 09:00:00', 'OUTPUT','documento entrada'),
-    ('NFE124', '2024-09-02 10:00:00', 'OUTPUT','documento saida');
+    ('NFE124', '2024-09-02 10:00:00', 'OUTPUT','documento saida'),
+    ('1001','2024-09-02 10:00:00', 'RESERVED','reserva producao');
+
 
 
 -- Insert into stock_items
@@ -345,9 +358,9 @@ VALUES
     (4, 3, 11, 20.0, 20.0, 4000.0, 'LoteER56', '2024-12-15 23:59:59', 3),
 	(4, 4, 12, 10.0, 10.0, 1000.0, 'LoteOI123', '2024-12-31 23:59:59', 1),
     (4, 5, 13, 10.0, 10.0, 1000.0, 'LoteABC123', '2024-12-31 23:59:59', 1),
-    (4, 6, 14, 20.0, 20.0, 4000.0, 'LoteWW456', '2024-12-15 23:59:59', 3);
-
-
+    (4, 6, 14, 20.0, 20.0, 4000.0, 'LoteWW456', '2024-12-15 23:59:59', 3),
+    (5, 5, 13, 10.0, 10.0, 1000.0, 'LOTE-TESTE', '2024-12-31 23:59:59', 1),
+    (5, 6, 14, 20.0, 20.0, 4000.0, 'LOTE-TESTE', '2024-12-15 23:59:59', 3);
 	
 -- Insert into production_orders
 INSERT INTO "production_orders" ("number","description", "production_date","Production_Status")

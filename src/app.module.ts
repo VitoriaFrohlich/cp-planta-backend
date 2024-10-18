@@ -7,7 +7,7 @@ import { StockModule } from './core/stock/stock.module';
 import { AuthModule } from './auth/auth.module';
 import { ControlPanelController } from './control-panel/control-panel.controller';
 import { ControlPanelModule } from './control-panel/control-panel.module';
-import { Config } from './config/config.module';
+import { SettingsModule } from './settings/settings.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { PrismaService } from './database/prisma/prisma.service';
 import { FeatureFlagsService } from './feature-flags/feature-flags.service';
@@ -26,7 +26,7 @@ import { StockLocationsModule } from './core/stock-locations/stock_locations.mod
     StockModule,
     AuthModule,
     ControlPanelModule,
-    Config,
+    SettingsModule,
     PrismaModule,
     StockLocationsModule,
     PrismaModule,
