@@ -1,12 +1,27 @@
-import { ApiProperty } from '@nestjs/swagger';
-
+import { Production_Status } from '../../common/enums';
 export class CreateProductionDto {
-  @ApiProperty()
-  readonly name: string;
+  readonly number: number;
+  readonly description: string;
+  readonly production_date: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+  readonly created_by: number;
+  readonly updated_by: number;
+  readonly Production_Status: Production_Status;
+  readonly production_items: CreateProductionItemsDto[];
+}
 
-  @ApiProperty()
-  readonly price: number;
-
-  @ApiProperty()
-  readonly stock: number;
+export class CreateProductionItemsDto {
+  readonly production_order_id: number;
+  readonly sequence: number;
+  readonly final_product_id: number;
+  readonly prodution_quantity_estimated: number;
+  readonly production_quantity_real: number;
+  readonly production_quantity_loss: number;
+  readonly lote: string;
+  readonly lote_expiration: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+  readonly created_by: number;
+  readonly updated_by: number;
 }

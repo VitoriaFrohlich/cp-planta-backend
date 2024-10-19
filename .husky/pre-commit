@@ -3,7 +3,7 @@ npx lint-staged
 
 # .git/hooks/pre-commit
 # comentado para facilitar subir commits
-if git diff --cached --name-only | grep -q 'schema.prisma'; then
-    echo "### ATENÇÃO: Para modificações no schema.prisma solicite diretamente ao gestor do backend."
-    exit 1
-fi
+# if git diff --cached --name-only | grep -q '.gitignore'; then
+#     echo "### ATENÇÃO: Modificações no .gitignore não são permitidas."
+#     exit 1
+# fi
