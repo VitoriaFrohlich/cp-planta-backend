@@ -43,9 +43,7 @@ export class LoteService {
 
     const newLote = `${prefix}${await this.formatLoteNumber(nextLoteNumber)}`;
 
-    await this.settingsService.set('lastLoteNumber', {
-      value: nextLoteNumber.toString()
-    });
+    await this.settingsService.incrementLoteNumber();
 
     return `${newLote}-${formattedExpirationDate}`;
   }

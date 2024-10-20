@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { Prisma, settings } from '@prisma/client';
@@ -25,50 +26,85 @@ export class SettingsRepository {
     const config = this.prisma.settings.findUnique({
       where: { id }
     });
+
+    if (!config) {
+      throw new Error(`Settings with ID ${id} not found`);
+    }
+
     return config;
   }
 
-  async update(
-    key: string,
-    data: Prisma.settingsUpdateInput
-  ): Promise<settings> {
-    const config = await this.prisma.settings.update({
+  async matchSettingByData(key: string): Promise<settings[]> {
+    return await this.prisma.settings.findMany({
+      where: { key }
+    });
+  }
+  async set(key: string, value: any): Promise<void> {
+    const config = await this.findByKey(key);
+    if (!config) {
+      throw new Error('Setting not found');
+    }
+
+    await this.prisma.settings.update({
       where: { key },
       data: {
-        ...data,
+        value,
         updated_at: new Date()
       }
     });
-
-    return config;
   }
 
-  async incrementLoteNumber(): Promise<void> {
-    const config = await this.findByKey('lastLoteNumber');
-    if (config) {
-      config.value += 1;
-      await this.update(config.key, config);
+  async update(
+    id: number,
+    data: Prisma.settingsUpdateInput
+  ): Promise<settings> {
+    if (!id) {
+      throw new Error('ID not found');
     }
+    const exists = await this.findById(id);
+    if (!exists) {
+      throw new Error('Setting not found');
+    }
+
+    const result = await this.prisma.settings.update({
+      where: { id },
+      data: {
+        value: data.value,
+        updated_at: new Date()
+      }
+    });
+    return result;
   }
 
-  async findByKey(key: string): Promise<settings | null> {
+  async updateByKey(
+    key: string,
+    data: Prisma.settingsUpdateInput
+  ): Promise<settings> {
+    const config = await this.findByKey(key);
+    if (!config) {
+      throw new Error('Setting not found');
+    }
+
+    const result = await this.prisma.settings.update({
+      where: { key },
+      data: {
+        value: data.value,
+        updated_at: new Date()
+      }
+    });
+    return result;
+  }
+
+  async findByKey(key: string): Promise<any> {
     const config = this.prisma.settings.findUnique({
       where: { key }
     });
     return config;
   }
 
-  async delete(key: string): Promise<void> {
-    if (!key) {
-      throw new Error('ID not found');
-    }
-    const exists = await this.findByKey(key);
-    if (!exists) {
-      throw new Error('Setting not found');
-    }
-
+  async delete(id: number): Promise<void> {
     await this.prisma.settings.update({
-      where: { key },
+      where: { id },
       data: {
         active: false,
         updated_at: new Date()
@@ -76,17 +112,9 @@ export class SettingsRepository {
     });
   }
 
-  async reactivate(key: string): Promise<void> {
-    if (!key) {
-      throw new Error('ID not found');
-    }
-    const exists = await this.findByKey(key);
-    if (!exists) {
-      throw new Error('Setting not found');
-    }
-
+  async reactivate(id: number): Promise<void> {
     await this.prisma.settings.update({
-      where: { key },
+      where: { id },
       data: {
         active: true,
         updated_at: new Date()

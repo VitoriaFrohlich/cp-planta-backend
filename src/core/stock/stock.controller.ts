@@ -60,7 +60,7 @@ export class StockController {
     return stock;
   }
 
-  @Get('lots')
+  @Get('batchs')
   async getAllProductLots(
     @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc',
     @Query('origin') origin?: 'RAW_MATERIAL' | 'MADE'

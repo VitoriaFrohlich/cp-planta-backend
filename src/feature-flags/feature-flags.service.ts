@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class FeatureFlagsService {
   private features = {
-    'public-feature': ['PUBIC', 'ADMIN', 'ROOT'],
+    'public-feature': ['DEMO', 'ADMIN', 'ROOT', 'DEFAULT'],
     'admin-feature': ['ADMIN', 'ROOT']
   };
 
