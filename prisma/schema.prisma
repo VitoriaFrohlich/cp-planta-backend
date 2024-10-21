@@ -3,19 +3,31 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
-// generator erd {
-//   provider = "prisma-erd-generator"
-//   output   = "../database/erd.svg"
-// }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                            USUÁRIOS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// importante para definir os acessos e papéis na aplicação
+enum Role {
+  DEFAULT
+  ROOT
+  ADMIN
+  DEMO
+  API
+  SYSTEM
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 // usuários do sistema
 model users {
   id                        Int                         @id @default(autoincrement())
@@ -36,25 +48,14 @@ model users {
   user_who_updated          settings[]                  @relation("whoUpdated")
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
-// importante para definir os acessos e papéis na aplicação
-enum Role {
-  DEFAULT
-  ROOT
-  ADMIN
-  DEMO
-  API
-  SYSTEM
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                    FORNECEDORES / CLIENTES
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum Person_Type {
+  COSTUMER
+  SUPPLIER
+}
 
 model persons {
   id                    Int           @id @default(autoincrement())
@@ -70,119 +71,9 @@ model persons {
   stock_items_costumers stock_items[] @relation("stock_items_costumers")
 }
 
-enum Person_Type {
-  COSTUMER
-  SUPPLIER
-}
-
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //                                            PRODUTOS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                            PRODUTOS
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-model products {
-  id                        Int                         @id @default(autoincrement())
-  description               String                      @db.VarChar(255)
-  code                      String                      @unique @db.VarChar(255)
-  sku                       String                      @unique @db.VarChar(255)
-  origin                    Origin                      @default(RAW_MATERIAL)
-  unit_measure              Unit_Measure                @default(UN)
-  category_id               Int                         @default(1)
-  group_id                  Int                         @default(1)
-  supplier_id               Int?
-  nutritional_info          Json?
-  image_link                String?
-  photo                     Bytes[]
-  active                    Boolean                     @default(true)
-  created_at                DateTime                    @default(now()) @db.Timestamp(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
-  created_by                Int?
-  updated_by                Int?
-  composition_items         composition_items[]
-  compositions              compositions[]
-  prices                    prices[]
-  final_product_made        production_orders_items[]   @relation("final_product_made")
-  production_steps_progress production_steps_progress[]
-  categories                categories                  @relation(fields: [category_id], references: [id])
-  groups                    groups                      @relation(fields: [group_id], references: [id])
-  supplier                  persons?                    @relation(fields: [supplier_id], references: [id])
-  stock_items               stock_items[]
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                PRODUTO FINAL - COMPOSIÇÃO/ RECEITA
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// composições
-model compositions {
-  id                Int                 @id @default(autoincrement())
-  product_id        Int
-  description       String              @db.VarChar(255)
-  created_at        DateTime            @default(now()) @db.Timestamp(6)
-  updated_at        DateTime            @default(now()) @db.Timestamp(6)
-  created_by        Int?
-  updated_by        Int?
-  production_steps  Json?               @db.Json
-  composition_items composition_items[]
-  products          products            @relation(fields: [product_id], references: [id])
-}
-
-// itens de composição
-model composition_items {
-  id             Int          @id @default(autoincrement())
-  composition_id Int
-  sequence       Int
-  product_id     Int
-  quantity       Float
-  created_at     DateTime     @default(now()) @db.Timestamp(6)
-  updated_at     DateTime     @default(now()) @db.Timestamp(6)
-  created_by     Int?
-  updated_by     Int?
-  compositions   compositions @relation(fields: [composition_id], references: [id])
-  products       products     @relation(fields: [product_id], references: [id])
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                 COMPLEMENTO DE CADASTRO DE PRODUTOS
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-model groups {
-  id           Int        @id @default(autoincrement())
-  description  String     @db.VarChar(255)
-  father_id    Int?
-  active       Boolean    @default(true)
-  created_at   DateTime   @default(now()) @db.Timestamp(6)
-  updated_at   DateTime   @default(now()) @db.Timestamp(6)
-  created_by   Int?
-  updated_by   Int?
-  groups       groups?    @relation("groupsTogroups", fields: [father_id], references: [id])
-  other_groups groups[]   @relation("groupsTogroups")
-  products     products[]
-}
-
-// categorias
-model categories {
-  id          Int        @id @default(autoincrement())
-  description String     @unique @db.VarChar(255)
-  active      Boolean    @default(true)
-  created_at  DateTime   @default(now()) @db.Timestamp(6)
-  updated_at  DateTime   @default(now()) @db.Timestamp(6)
-  created_by  Int?
-  updated_by  Int?
-  products    products[]
-}
-
-// tabela de preços
-model prices {
-  id         Int        @id @default(autoincrement())
-  product_id Int
-  price      Float
-  type       Price_Type @default(COST)
-  is_current Boolean    @default(true)
-  created_at DateTime   @default(now()) @db.Timestamp(6)
-  updated_at DateTime   @default(now()) @db.Timestamp(6)
-  created_by Int?
-  updated_by Int?
-  products   products   @relation(fields: [product_id], references: [id])
-}
 
 // Origem do produto - matéria prima ou produto final
 enum Origin {
@@ -190,12 +81,6 @@ enum Origin {
   MADE
   CONSUMABLE
   OTHER
-}
-
-// Preço de custo ou venda
-enum Price_Type {
-  COST
-  SALE
 }
 
 // unidade de medida
@@ -210,64 +95,58 @@ enum Unit_Measure {
   TON
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                           ESTOQUE - LANÇAMENTOS DE ENTRADA E SAÍDA, SALDO E LOTES
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// para alimentar estoque
-// lancamento de estoque (documento de entrada, saida, transferencia)
-model stock {
-  id              Int            @id @default(autoincrement())
-  document_number String         @unique @db.VarChar(255)
-  document_date   DateTime       @db.Timestamp(6)
-  stock_moviment  Stock_Moviment
-  is_balance      Boolean        @default(false)
-  document_type   String?        @db.VarChar(255)
-  created_at      DateTime       @default(now()) @db.Timestamp(6)
-  updated_at      DateTime       @default(now()) @db.Timestamp(6)
-  created_by      Int?
-  updated_by      Int?
-  stock_items     stock_items[]
+model products {
+  id                        Int                         @id @default(autoincrement())
+  description               String                      @db.VarChar(255)
+  code                      String                      @unique @db.VarChar(255)
+  sku                       String                      @unique @db.VarChar(255)
+  unit_measure              Unit_Measure                @default(UN)
+  category_id               Int                         @default(1)
+  group_id                  Int                         @default(1)
+  supplier_id               Int?
+  nutritional_info          Json?
+  photo                     Bytes[]
+  active                    Boolean                     @default(true)
+  origin                    Origin                      @default(RAW_MATERIAL)
+  prices                    prices[]
+  final_product_made        production_orders_items[]   @relation("final_product_made")
+  production_steps_progress production_steps_progress[]
+  categories                categories                  @relation(fields: [category_id], references: [id])
+  supplier                  persons?                    @relation(fields: [supplier_id], references: [id])
+  stock_items               stock_items[]
 }
 
-// itens de estoque (entrada, saida, transferencia)
-model stock_items {
-  id                Int            @id @default(autoincrement())
-  stock_id          Int
-  sequence          Int
-  product_id        Int
-  quantity          Float
-  unit_price        Float
-  total_price       Float
-  lote              String?
-  expiration        DateTime?
-  image_link        String?
-  photo             Bytes[]
-  supplier          Int?
-  costumer          Int?
-  stock_location_id Int
-  observation       String?
-  created_at        DateTime       @default(now()) @db.Timestamp(6)
-  updated_at        DateTime       @default(now()) @db.Timestamp(6)
-  created_by        Int?
-  updated_by        Int?
-  products          products       @relation(fields: [product_id], references: [id])
-  stock             stock          @relation(fields: [stock_id], references: [id])
-  stock_location    stock_location @relation("stock_items_location", fields: [stock_location_id], references: [id])
-  suppliers         persons?       @relation("stock_items_suppliers", fields: [supplier], references: [id])
-  costumers         persons?       @relation("stock_items_costumers", fields: [costumer], references: [id])
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                 COMPLEMENTO DE CADASTRO DE PRODUTOS
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// categorias
+model categories {
+  id          Int        @id @default(autoincrement())
+  description String     @unique @db.VarChar(255)
+  active      Boolean    @default(true)
+  products    products[]
 }
 
-// locais de estoque
-model stock_location {
-  id          Int           @id @default(autoincrement())
-  description String        @db.VarChar(255)
-  active      Boolean       @default(true)
-  created_at  DateTime      @default(now()) @db.Timestamp(6)
-  updated_at  DateTime      @default(now()) @db.Timestamp(6)
-  created_by  Int?
-  updated_by  Int?
-  stock_items stock_items[] @relation("stock_items_location")
+// Preço de custo ou venda
+enum Price_Type {
+  COST
+  SALE
 }
+
+// tabela de preços
+model prices {
+  id         Int        @id @default(autoincrement())
+  product_id Int
+  price      Float
+  type       Price_Type @default(COST)
+  is_current Boolean    @default(true)
+  products   products   @relation(fields: [product_id], references: [id])
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //                           ESTOQUE - LANÇAMENTOS DE ENTRADA E SAÍDA, SALDO E LOTES
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum Stock_Moviment {
   INPUT
@@ -279,25 +158,65 @@ enum Stock_Moviment {
   INVENTORY
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
+model stock {
+  id              Int            @id @default(autoincrement())
+  document_number String         @unique @db.VarChar(255)
+  document_date   DateTime       @db.Timestamp(6)
+  stock_moviment  Stock_Moviment
+  document_type   String?        @db.VarChar(255)
+  is_balance      Boolean        @default(false)
+  stock_items     stock_items[]
+}
+
+// // locais de estoque
+model stock_location {
+  id          Int           @id @default(autoincrement())
+  description String        @db.VarChar(255)
+  active      Boolean       @default(true)
+  stock_items stock_items[] @relation("stock_items_location")
+}
+
+model stock_items {
+  id                Int            @id @default(autoincrement())
+  stock_id          Int
+  sequence          Int
+  product_id        Int
+  quantity          Float
+  unit_price        Float
+  total_price       Float
+  lote              String?
+  expiration        DateTime?
+  photo             Bytes[]
+  supplier          Int?
+  costumer          Int?
+  batchsid          Int?
+  stock_location_id Int
+  observation       String?
+  products          products       @relation(fields: [product_id], references: [id])
+  stock             stock          @relation(fields: [stock_id], references: [id])
+  stock_location    stock_location @relation("stock_items_location", fields: [stock_location_id], references: [id])
+  suppliers         persons?       @relation("stock_items_suppliers", fields: [supplier], references: [id])
+  costumers         persons?       @relation("stock_items_costumers", fields: [costumer], references: [id])
+  batchs            batchs?        @relation("stock_items_batchs", fields: [batchsid], references: [id])
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                      PRODUÇÃO DO PRODUTO FINAL
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // ordem de produção do produto final
 model production_orders {
   id                       Int                         @id @default(autoincrement())
   number                   Int                         @unique
   description              String?                     @db.VarChar(255)
   production_date          DateTime                    @default(now()) @db.Timestamp(6)
-  created_at               DateTime                    @default(now()) @db.Timestamp(6)
-  updated_at               DateTime                    @default(now()) @db.Timestamp(6)
-  created_by               Int?
-  updated_by               Int?
+  production_line          String?                     @db.VarChar(255)
   Production_Status        Production_Status           @default(CREATED)
   production_item          production_orders_items[]
   production_steps_progres production_steps_progress[]
 }
 
-// produto final atrelado na ordem de produção
+// // produto final atrelado na ordem de produção
 model production_orders_items {
   id                           Int               @id @default(autoincrement())
   production_order_id          Int
@@ -308,10 +227,6 @@ model production_orders_items {
   production_quantity_loss     Float
   lote                         String?           @db.VarChar(255)
   lote_expiration              DateTime?
-  created_at                   DateTime          @default(now()) @db.Timestamp(6)
-  updated_at                   DateTime          @default(now()) @db.Timestamp(6)
-  created_by                   Int?
-  updated_by                   Int?
   final_product_made           products          @relation("final_product_made", fields: [final_product_id], references: [id], onDelete: Cascade, map: "final_product_fkey")
   production_order             production_orders @relation(fields: [production_order_id], references: [id], onDelete: Cascade)
 }
@@ -332,22 +247,6 @@ model production_order_steps {
   id                        Int                         @id @default(autoincrement())
   description               String                      @db.VarChar(255)
   active                    Boolean                     @default(true)
-  created_at                DateTime                    @default(now()) @db.Timestamp(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
-  created_by                Int?
-  updated_by                Int?
-  production_steps_progress production_steps_progress[]
-}
-
-// linhas ou esteiras de produção - para controle de produção
-model production_lines {
-  id                        Int                         @id @default(autoincrement())
-  description               String                      @db.VarChar(255)
-  active                    Boolean                     @default(true)
-  created_at                DateTime                    @default(now()) @db.Timestamp(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
-  created_by                Int?
-  updated_by                Int?
   production_steps_progress production_steps_progress[]
 }
 
@@ -374,12 +273,7 @@ model production_steps_progress {
   observation                     String?
   operator_id                     Int?
   ocurrences                      Json?                             @db.Json
-  created_at                      DateTime                          @default(now()) @db.Timestamp(6)
-  updated_at                      DateTime                          @default(now()) @db.Timestamp(6)
-  created_by                      Int?
-  updated_by                      Int?
   ocurrences_of_production_stages ocurrences_of_production_stages[]
-  production_line                 production_lines?                 @relation(fields: [line_id], references: [id])
   operator                        users?                            @relation(fields: [operator_id], references: [id])
   production_order                production_orders                 @relation(fields: [production_id], references: [id])
   products                        products                          @relation(fields: [raw_product_id], references: [id])
@@ -389,17 +283,6 @@ model production_steps_progress {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                             REGISTRO DE OCORRÊNCIAS DAS ETAPAS DE PRODUÇÃO
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// ocorrências previamente registradas - para clicar e adicionar na etapa
-model ocurrences {
-  id                              Int                               @id @default(autoincrement())
-  description                     String                            @db.VarChar(255)
-  created_at                      DateTime                          @default(now()) @db.Timestamp(6)
-  updated_at                      DateTime                          @default(now()) @db.Timestamp(6)
-  created_by                      Int?
-  updated_by                      Int?
-  ocurrences_of_production_stages ocurrences_of_production_stages[]
-}
 
 // detalhamento de ocorrencias da etapa da ordem de produção
 model ocurrences_of_production_stages {
@@ -420,7 +303,15 @@ model ocurrences_of_production_stages {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                             SETTINGS - CONFIGURAÇÕES DO SISTEMA
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ocorrências previamente registradas - para clicar e adicionar na etapa
+model ocurrences {
+  id                              Int                               @id @default(autoincrement())
+  description                     String                            @db.VarChar(255)
+  ocurrences_of_production_stages ocurrences_of_production_stages[]
+}
+
 model settings {
   id          Int      @id @default(autoincrement())
   key         String   @unique @db.VarChar(255)
@@ -433,4 +324,16 @@ model settings {
   updated_by  String
   who_created users    @relation("whoCreated", fields: [created_by], references: [username])
   who_updated users    @relation("whoUpdated", fields: [updated_by], references: [username])
+}
+
+// Lote enviado ao front
+model batchs {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  active      Boolean       @default(true)
+  created_at  DateTime      @default(now()) @db.Timestamp(6)
+  updated_at  DateTime      @default(now()) @db.Timestamp(6)
+  created_by  Int?
+  updated_by  Int?
+  stock_items stock_items[] @relation("stock_items_batchs")
 }

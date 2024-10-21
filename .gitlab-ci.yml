@@ -1,12 +1,12 @@
 variables:
   # Docker image details
-  DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
-  DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
-  DOCKER_IMAGE_NAME3: "norohim/pgbouncer"
-  DOCKER_IMAGE_TAG: "latest"
-  DOCKER_DRIVER: "overlay2"
-  DOCKER_TLS_CERTDIR: ""
-  PUPPETEER_SKIP_DOWNLOAD: "true"
+  DOCKER_IMAGE_NAME1: 'norohim/cp-planta-backend'
+  DOCKER_IMAGE_NAME2: 'norohim/postgres-optimal'
+  DOCKER_IMAGE_NAME3: 'norohim/pgbouncer'
+  DOCKER_IMAGE_TAG: 'latest'
+  DOCKER_DRIVER: 'overlay2'
+  DOCKER_TLS_CERTDIR: ''
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
 
 stages:
   - commit-msg-check
@@ -14,7 +14,7 @@ stages:
   - test
   - build_and_push
   - deploy
-  
+
 # Default settings for all jobs
 default:
   image: node:20-alpine
@@ -85,7 +85,7 @@ build_and_push_docker_image:
 trigger-infra-pipeline:
   stage: deploy
   before_script:
-    - apk add --no-cache curl jq bash 
+    - apk add --no-cache curl jq bash
   script:
     - echo "Triggering infrastructure pipeline..."
     - curl -X POST --fail -F token=90cbad47a562a7bae7cf8de55d3e34 -F ref=main https://tools.ages.pucrs.br/api/v4/projects/683/trigger/pipeline

@@ -23,18 +23,25 @@ docker build -t postgres-db-cpplanta -f dockerfile.postgres .
 # build image from backend Node.js
 docker build -t backend-cpplanta -f dockerfile.node .
 
-# Execute container PostgreSQL
-docker run -d --name cpplanta_db postgres-db-cpplanta
+## Modificação: não é mais necessário criar os containers manualmente
+## por causa do docker-compose.yml (execução redundante)
 
-# Execute container backend Node.js
-docker run -d --name back backend-cpplanta
+# Execute container PostgreSQL
+# docker run -d --name cpplanta_db postgres-db-cpplanta
+
+# # Execute container backend Node.js
+# docker run -d --name back backend-cpplanta
 
 # clean the terminal
-clear
+## legal mas perde os logs de execução
+#clear
 
 # up the containers Docker with Compose
 docker compose up -d
 
-# Check logs for any issues
+# Check logs for any issues (for specific containers lookup)
 docker logs cpplanta_db
 docker logs back
+
+# Check logs for any issues
+docker compose logs
