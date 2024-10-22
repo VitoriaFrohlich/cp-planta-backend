@@ -8,7 +8,7 @@ export class UpdateStockDto {
   updated_at?: Date;
 
   @ApiHideProperty()
-  updated_by?: number;
+  updated_by?: string;
 
   @ApiHideProperty()
   readonly document_date?: Date;

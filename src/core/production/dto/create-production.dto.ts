@@ -5,8 +5,8 @@ export class CreateProductionDto {
   readonly production_date: string;
   readonly created_at: Date;
   readonly updated_at: Date;
-  readonly created_by: number;
-  readonly updated_by: number;
+  readonly created_by: string;
+  readonly updated_by: string;
   readonly Production_Status: Production_Status;
   readonly production_items: CreateProductionItemsDto[];
 }
@@ -22,6 +22,6 @@ export class CreateProductionItemsDto {
   readonly lote_expiration: string;
   readonly created_at: Date;
   readonly updated_at: Date;
-  readonly created_by: number;
-  readonly updated_by: number;
+  readonly created_by: string;
+  readonly updated_by: string;
 }

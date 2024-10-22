@@ -97,8 +97,6 @@ export class StockService {
           supplier: item.supplier!,
           costumer: item.costumer!,
           stock_location_id: item.stock_location_id || stock_location_default,
-          image_link: item.image_link!,
-
           created_at: new Date(),
           updated_at: new Date()
         });
@@ -219,8 +217,6 @@ export class StockService {
         if (existingItem.total_price !== undefined)
           fieldsToUpdate['total_price'] =
             item.unit_price * existingItem.quantity;
-        if (existingItem.image_link !== undefined)
-          fieldsToUpdate['image_link'] = item.image_link;
         if (existingItem.updated_at !== undefined)
           fieldsToUpdate['updated_at'] = new Date();
 
@@ -231,7 +227,6 @@ export class StockService {
             unit_price: item.unit_price,
             total_price: item.total_price,
             observation: item.observation,
-            image_link: item.image_link,
             updated_at: new Date(),
             updated_by: updateStockDto.updated_by ?? undefined,
             supplier: item.supplier,

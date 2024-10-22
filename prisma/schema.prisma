@@ -41,8 +41,8 @@ model users {
   active                    Boolean                     @default(true)
   created_at                DateTime                    @default(now()) @db.Timestamp(6)
   updated_at                DateTime                    @default(now()) @db.Timestamp(6)
-  created_by                Int?
-  updated_by                Int?
+  created_by                String?
+  updated_by                String?
   production_steps_progress production_steps_progress[]
   user_who_created          settings[]                  @relation("whoCreated")
   user_who_updated          settings[]                  @relation("whoUpdated")
@@ -64,8 +64,8 @@ model persons {
   active                Boolean       @default(true)
   created_at            DateTime      @default(now()) @db.Timestamp(6)
   updated_at            DateTime      @default(now()) @db.Timestamp(6)
-  created_by            Int?
-  updated_by            Int?
+  created_by            String?
+  updated_by            String?
   products              products[]
   stock_items_suppliers stock_items[] @relation("stock_items_suppliers")
   stock_items_costumers stock_items[] @relation("stock_items_costumers")
@@ -109,11 +109,19 @@ model products {
   active                    Boolean                     @default(true)
   origin                    Origin                      @default(RAW_MATERIAL)
   prices                    prices[]
+  created_at                DateTime                    @default(now()) @db.Timestamp(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
+  created_by                String?
+  updated_by                String?
   final_product_made        production_orders_items[]   @relation("final_product_made")
   production_steps_progress production_steps_progress[]
   categories                categories                  @relation(fields: [category_id], references: [id])
   supplier                  persons?                    @relation(fields: [supplier_id], references: [id])
   stock_items               stock_items[]
+  composition_items         composition_items[]
+  compositions              compositions[]
+  groups                    groups?                     @relation(fields: [groupsId], references: [id])
+  groupsId                  Int?
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,6 +133,10 @@ model categories {
   id          Int        @id @default(autoincrement())
   description String     @unique @db.VarChar(255)
   active      Boolean    @default(true)
+  created_at  DateTime   @default(now()) @db.Timestamp(6)
+  updated_at  DateTime   @default(now()) @db.Timestamp(6)
+  created_by  String?
+  updated_by  String?
   products    products[]
 }
 
@@ -141,6 +153,10 @@ model prices {
   price      Float
   type       Price_Type @default(COST)
   is_current Boolean    @default(true)
+  created_at DateTime   @default(now()) @db.Timestamp(6)
+  updated_at DateTime   @default(now()) @db.Timestamp(6)
+  created_by String?
+  updated_by String?
   products   products   @relation(fields: [product_id], references: [id])
 }
 
@@ -165,6 +181,10 @@ model stock {
   stock_moviment  Stock_Moviment
   document_type   String?        @db.VarChar(255)
   is_balance      Boolean        @default(false)
+  created_at      DateTime       @default(now()) @db.Timestamp(6)
+  updated_at      DateTime       @default(now()) @db.Timestamp(6)
+  created_by      String?
+  updated_by      String?
   stock_items     stock_items[]
 }
 
@@ -173,6 +193,10 @@ model stock_location {
   id          Int           @id @default(autoincrement())
   description String        @db.VarChar(255)
   active      Boolean       @default(true)
+  created_at  DateTime      @default(now()) @db.Timestamp(6)
+  updated_at  DateTime      @default(now()) @db.Timestamp(6)
+  created_by  String?
+  updated_by  String?
   stock_items stock_items[] @relation("stock_items_location")
 }
 
@@ -192,12 +216,15 @@ model stock_items {
   batchsid          Int?
   stock_location_id Int
   observation       String?
+  created_at        DateTime       @default(now()) @db.Timestamp(6)
+  updated_at        DateTime       @default(now()) @db.Timestamp(6)
+  created_by        String?
+  updated_by        String?
   products          products       @relation(fields: [product_id], references: [id])
   stock             stock          @relation(fields: [stock_id], references: [id])
   stock_location    stock_location @relation("stock_items_location", fields: [stock_location_id], references: [id])
   suppliers         persons?       @relation("stock_items_suppliers", fields: [supplier], references: [id])
   costumers         persons?       @relation("stock_items_costumers", fields: [costumer], references: [id])
-  batchs            batchs?        @relation("stock_items_batchs", fields: [batchsid], references: [id])
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +239,10 @@ model production_orders {
   production_date          DateTime                    @default(now()) @db.Timestamp(6)
   production_line          String?                     @db.VarChar(255)
   Production_Status        Production_Status           @default(CREATED)
+  created_at               DateTime                    @default(now()) @db.Timestamp(6)
+  updated_at               DateTime                    @default(now()) @db.Timestamp(6)
+  created_by               String?
+  updated_by               String?
   production_item          production_orders_items[]
   production_steps_progres production_steps_progress[]
 }
@@ -227,6 +258,10 @@ model production_orders_items {
   production_quantity_loss     Float
   lote                         String?           @db.VarChar(255)
   lote_expiration              DateTime?
+  created_at                   DateTime          @default(now()) @db.Timestamp(6)
+  updated_at                   DateTime          @default(now()) @db.Timestamp(6)
+  created_by                   String?
+  updated_by                   String?
   final_product_made           products          @relation("final_product_made", fields: [final_product_id], references: [id], onDelete: Cascade, map: "final_product_fkey")
   production_order             production_orders @relation(fields: [production_order_id], references: [id], onDelete: Cascade)
 }
@@ -247,6 +282,10 @@ model production_order_steps {
   id                        Int                         @id @default(autoincrement())
   description               String                      @db.VarChar(255)
   active                    Boolean                     @default(true)
+  created_at                DateTime                    @default(now()) @db.Timestamp(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
+  created_by                String?
+  updated_by                String?
   production_steps_progress production_steps_progress[]
 }
 
@@ -267,12 +306,15 @@ model production_steps_progress {
   final_quantity                  Float?
   quantity_loss                   Float?
   machine                         String?
-  line_id                         Int?                              @default(1)
-  image_link                      String?
+  production_line                 String?
   photo                           Bytes[]
   observation                     String?
   operator_id                     Int?
   ocurrences                      Json?                             @db.Json
+  created_at                      DateTime                          @default(now()) @db.Timestamp(6)
+  updated_at                      DateTime                          @default(now()) @db.Timestamp(6)
+  created_by                      String?
+  updated_by                      String?
   ocurrences_of_production_stages ocurrences_of_production_stages[]
   operator                        users?                            @relation(fields: [operator_id], references: [id])
   production_order                production_orders                 @relation(fields: [production_id], references: [id])
@@ -290,13 +332,12 @@ model ocurrences_of_production_stages {
   ocurrence_id     Int
   description      String                    @db.VarChar(255)
   observation      String?
-  image_link       String?
   photo            Bytes[]
   stage_ocurred_id Int
   created_at       DateTime                  @default(now()) @db.Timestamp(6)
   updated_at       DateTime                  @default(now()) @db.Timestamp(6)
-  created_by       Int?
-  updated_by       Int?
+  created_by       String?
+  updated_by       String?
   ocurrences       ocurrences                @relation(fields: [ocurrence_id], references: [id])
   stage            production_steps_progress @relation(fields: [stage_ocurred_id], references: [id])
 }
@@ -309,6 +350,10 @@ model ocurrences_of_production_stages {
 model ocurrences {
   id                              Int                               @id @default(autoincrement())
   description                     String                            @db.VarChar(255)
+  created_at                      DateTime                          @default(now()) @db.Timestamp(6)
+  updated_at                      DateTime                          @default(now()) @db.Timestamp(6)
+  created_by                      String?
+  updated_by                      String?
   ocurrences_of_production_stages ocurrences_of_production_stages[]
 }
 
@@ -319,8 +364,8 @@ model settings {
   description String?  @db.Text
   active      Boolean  @default(true)
   created_at  DateTime @default(now()) @db.Timestamp(6)
-  created_by  String
   updated_at  DateTime @default(now()) @db.Timestamp(6)
+  created_by  String
   updated_by  String
   who_created users    @relation("whoCreated", fields: [created_by], references: [username])
   who_updated users    @relation("whoUpdated", fields: [updated_by], references: [username])
@@ -328,12 +373,59 @@ model settings {
 
 // Lote enviado ao front
 model batchs {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  active      Boolean       @default(true)
-  created_at  DateTime      @default(now()) @db.Timestamp(6)
-  updated_at  DateTime      @default(now()) @db.Timestamp(6)
-  created_by  Int?
-  updated_by  Int?
-  stock_items stock_items[] @relation("stock_items_batchs")
+  id         Int          @id @default(autoincrement())
+  batch      String       @db.VarChar(255)
+  status     Batch_Status @default(PENDING)
+  created_at DateTime     @default(now()) @db.Timestamp(6)
+  updated_at DateTime     @default(now()) @db.Timestamp(6)
+  created_by String?
+  updated_by String?
+}
+
+enum Batch_Status {
+  PENDING
+  USED
+  CANCELED
+}
+
+model compositions {
+  id                Int                 @id @default(autoincrement())
+  product_id        Int
+  description       String              @db.VarChar(255)
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  created_by        Int?
+  updated_by        Int?
+  production_steps  Json?               @db.Json
+  composition_items composition_items[]
+  products          products            @relation(fields: [product_id], references: [id])
+}
+
+model composition_items {
+  id             Int          @id @default(autoincrement())
+  composition_id Int
+  sequence       Int
+  product_id     Int
+  quantity       Float
+  created_at     DateTime     @default(now()) @db.Timestamp(6)
+  updated_at     DateTime     @default(now()) @db.Timestamp(6)
+  created_by     String?
+  updated_by     String?
+  compositions   compositions @relation(fields: [composition_id], references: [id])
+  products       products     @relation(fields: [product_id], references: [id])
+}
+
+// permanece para facilitar a geração de relatórios, como Curva ABC e DRE (demostração de resultado do exercício)
+model groups {
+  id           Int        @id @default(autoincrement())
+  description  String     @db.VarChar(255)
+  father_id    Int?
+  active       Boolean    @default(true)
+  created_at   DateTime   @default(now()) @db.Timestamp(6)
+  updated_at   DateTime   @default(now()) @db.Timestamp(6)
+  created_by   Int?
+  updated_by   Int?
+  groups       groups?    @relation("groupsTogroups", fields: [father_id], references: [id])
+  other_groups groups[]   @relation("groupsTogroups")
+  products     products[]
 }

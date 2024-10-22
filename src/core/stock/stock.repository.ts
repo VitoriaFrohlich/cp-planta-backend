@@ -21,7 +21,6 @@ export class StockRepository {
         total_price: data.total_price,
         lote: data.lote,
         expiration: data.expiration,
-        image_link: data.image_link,
         products: { connect: { id: data.product_id } },
         stock: { connect: { id: data.stock_id } },
         stock_location: data.stock_location_id
@@ -61,7 +60,6 @@ export class StockRepository {
         total_price: data.total_price,
         lote: data.lote,
         expiration: data.expiration,
-        image_link: data.image_link,
         ...(data.stock_location_id
           ? { stock_location: { connect: { id: data.stock_location_id } } }
           : {}),
@@ -265,7 +263,6 @@ export class StockRepository {
             quantity: true,
             unit_price: true,
             total_price: true,
-            image_link: true,
             suppliers: {
               select: {
                 id: true,

@@ -57,3 +57,9 @@ export enum Unit_Measure {
   ML = 'ML',
   PC = 'PC'
 }
+
+export enum Batch_Status {
+  PENDING = 'PENDING',
+  USED = 'USED',
+  CANCELED = 'CANCELED'
+}

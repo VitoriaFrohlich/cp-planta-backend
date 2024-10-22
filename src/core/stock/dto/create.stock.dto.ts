@@ -101,9 +101,10 @@ export class CreateStockItemsDto {
   readonly observation?: string;
 
   @ApiProperty({
-    description: 'Image link',
-    example: 'http://example.com/image.jpg',
-    required: false
+    description: 'Image',
+    required: false,
+    type: 'string',
+    format: 'binary'
   })
-  readonly image_link?: string;
+  readonly image?: Buffer;
 }
