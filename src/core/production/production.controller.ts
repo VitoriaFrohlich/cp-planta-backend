@@ -40,6 +40,7 @@ export class ProductionController {
       'number',
       'description',
       'production_date',
+      'production_line',
       'Production_Status',
       'created_by',
       'updated_by'
@@ -51,6 +52,7 @@ export class ProductionController {
       'number',
       'description',
       'production_date',
+      'production_line',
       'Production_Status',
       'created_by',
       'updated_by'
@@ -75,7 +77,7 @@ export class ProductionController {
     //     production_order_id: item.production_order_id,
     //     sequence: item.sequence,
     //     final_product_id: item.final_product_id,
-    //     prodution_quantity_estimated: item.prodution_quantity_estimated,
+    //     production_quantity_estimated: item.production_quantity_estimated,
     //     production_quantity_real: item.production_quantity_real,
     //     production_quantity_loss: item.production_quantity_loss,
     //     lote: item.lote,

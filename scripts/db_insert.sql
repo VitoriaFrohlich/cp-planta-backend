@@ -318,7 +318,7 @@ VALUES
     (5,'Production E','2024-12-31 23:59:59', 'OPEN');
 
 -- Insert into production_orders_items
-INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "prodution_quantity_estimated", "production_quantity_real","production_quantity_loss", "lote", "lote_expiration")
+INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "lote", "lote_expiration")
 VALUES
 	(1, 1, 10, 1000.0, 950.0, 50.0, 'LoteTY123', '2024-12-31 23:59:59'),
     (2, 2, 11, 2000.0, 1900.0, 100.0, 'LoteER56', '2024-12-15 23:59:59'),

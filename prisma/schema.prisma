@@ -249,21 +249,21 @@ model production_orders {
 
 // // produto final atrelado na ordem de produção
 model production_orders_items {
-  id                           Int               @id @default(autoincrement())
-  production_order_id          Int
-  sequence                     Int
-  final_product_id             Int
-  prodution_quantity_estimated Float
-  production_quantity_real     Float
-  production_quantity_loss     Float
-  lote                         String?           @db.VarChar(255)
-  lote_expiration              DateTime?
-  created_at                   DateTime          @default(now()) @db.Timestamp(6)
-  updated_at                   DateTime          @default(now()) @db.Timestamp(6)
-  created_by                   String?
-  updated_by                   String?
-  final_product_made           products          @relation("final_product_made", fields: [final_product_id], references: [id], onDelete: Cascade, map: "final_product_fkey")
-  production_order             production_orders @relation(fields: [production_order_id], references: [id], onDelete: Cascade)
+  id                            Int               @id @default(autoincrement())
+  production_order_id           Int
+  sequence                      Int
+  final_product_id              Int
+  production_quantity_estimated Float
+  production_quantity_real      Float
+  production_quantity_loss      Float
+  lote                          String?           @db.VarChar(255)
+  lote_expiration               DateTime?
+  created_at                    DateTime          @default(now()) @db.Timestamp(6)
+  updated_at                    DateTime          @default(now()) @db.Timestamp(6)
+  created_by                    String?
+  updated_by                    String?
+  final_product_made            products          @relation("final_product_made", fields: [final_product_id], references: [id], onDelete: Cascade, map: "final_product_fkey")
+  production_order              production_orders @relation(fields: [production_order_id], references: [id], onDelete: Cascade)
 }
 
 // Status da ordem de produção - CRIADO, AGENDADO, ABERTO, EM ANDAMENTO, FINALIZADO, PARADO, CANCELADO

@@ -176,6 +176,62 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
+      'Field to order by. Valid fields: id, description, code, sku, origin, category_id, group_id, supplier_id',
+    enum: [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'origin',
+      'category_id',
+      'supplier_id',
+      'group_id'
+    ]
+  })
+  async findAll(
+    @Query('orderBy') orderBy: string = 'id'
+  ): Promise<ResponseProductsDto[]> {
+    const validOrderFields = [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'origin',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    }
+
+    const products = await this.productsService.findAll(orderBy);
+    return products.map(product => ({
+      id: product.id,
+      description: product.description,
+      code: product.code,
+      sku: product.sku,
+      origin: product.origin as Origin,
+      unit_measure: product.unit_measure as Unit_Measure,
+      category_id: product.category_id,
+      group_id: product.group_id,
+      supplier_id: product.supplier_id,
+      nutritional_info:
+        typeof product.nutritional_info === 'string'
+          ? JSON.parse(product.nutritional_info)
+          : product.nutritional_info,
+      active: product.active,
+      created_at: product.created_at,
+      updated_at: product.updated_at
+    }));
+  }
+
+  @Get('made')
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description:
       'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
     enum: [
       'id',
@@ -187,7 +243,7 @@ export class ProductsController {
       'supplier_id'
     ]
   })
-  async findAll(
+  async findMade(
     @Query('orderBy') orderBy: string = 'id'
   ): Promise<ResponseProductsDto[]> {
     const validOrderFields = [
@@ -203,8 +259,62 @@ export class ProductsController {
     if (!validOrderFields.includes(orderBy)) {
       throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
+    const origin = Origin.MADE;
+    const products = await this.productsService.findByOrigin(orderBy, origin);
+    return products.map(product => ({
+      id: product.id,
+      description: product.description,
+      code: product.code,
+      sku: product.sku,
+      origin: product.origin as Origin,
+      unit_measure: product.unit_measure as Unit_Measure,
+      category_id: product.category_id,
+      group_id: product.group_id,
+      supplier_id: product.supplier_id,
+      nutritional_info:
+        typeof product.nutritional_info === 'string'
+          ? JSON.parse(product.nutritional_info)
+          : product.nutritional_info,
+      active: product.active,
+      created_at: product.created_at,
+      updated_at: product.updated_at
+    }));
+  }
 
-    const products = await this.productsService.findAll(orderBy);
+  @Get('raw-material')
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description:
+      'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
+    enum: [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ]
+  })
+  async findRaw(
+    @Query('orderBy') orderBy: string = 'id'
+  ): Promise<ResponseProductsDto[]> {
+    const validOrderFields = [
+      'id',
+      'description',
+      'code',
+      'sku',
+      'category_id',
+      'group_id',
+      'supplier_id'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    }
+    const origin = Origin.RAW_MATERIAL;
+    const products = await this.productsService.findByOrigin(orderBy, origin);
     return products.map(product => ({
       id: product.id,
       description: product.description,

@@ -17,7 +17,7 @@ export class ResponseProductionItem {
   production_order_id: number;
   sequence: number;
   final_product_id: number;
-  prodution_quantity_estimated: number;
+  production_quantity_estimated: number;
   production_quantity_real: number;
   production_quantity_loss: number;
   lote: string;

@@ -47,6 +47,7 @@ export class ProductionRepository {
       'number',
       'description',
       'production_date',
+      'production_line',
       'Production_Status',
       'created_by',
       'updated_by'
@@ -84,7 +85,7 @@ export class ProductionRepository {
             production_order_id: true,
             sequence: true,
             final_product_id: true,
-            prodution_quantity_estimated: true,
+            production_quantity_estimated: true,
             production_quantity_real: true,
             production_quantity_loss: true,
             lote: true,
@@ -117,7 +118,7 @@ export class ProductionRepository {
                 description: true
               }
             },
-            prodution_quantity_estimated: true,
+            production_quantity_estimated: true,
             production_quantity_real: true,
             production_quantity_loss: true,
             lote: true,

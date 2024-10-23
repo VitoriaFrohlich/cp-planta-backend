@@ -10,7 +10,7 @@ export class UpdateProductionDto {
 }
 
 export class UpdateProductionItemsDto {
-  readonly prodution_quantity_estimated: number;
+  readonly production_quantity_estimated: number;
   readonly production_quantity_real: number;
   readonly production_quantity_loss: number;
   readonly updated_at: Date;

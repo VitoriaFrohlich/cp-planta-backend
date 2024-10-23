@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { products, Prisma } from '@prisma/client';
+import { products, Prisma, Origin } from '@prisma/client';
 
 @Injectable()
 export class ProductsRepository {
@@ -35,6 +35,36 @@ export class ProductsRepository {
 
     const result = await this.prisma.products.findMany({
       where: { active: true },
+      orderBy: { [orderBy]: 'asc' }
+    });
+
+    return result;
+  }
+
+  async findByOrigin(orderBy: string, origin: string): Promise<products[]> {
+    const validOrderFields = [
+      'id',
+      'code',
+      'description',
+      'sku',
+      'unit_measure',
+      'category_id',
+      'group_id'
+    ];
+
+    if (!validOrderFields.includes(orderBy)) {
+      throw new Error('Invalid order field');
+    }
+    if (origin === Origin.MADE) {
+      const result = await this.prisma.products.findMany({
+        where: { active: true, origin: origin },
+        orderBy: { [orderBy]: 'asc' }
+      });
+      return result;
+    }
+
+    const result = await this.prisma.products.findMany({
+      where: { active: true, origin: { not: 'MADE' } },
       orderBy: { [orderBy]: 'asc' }
     });
 

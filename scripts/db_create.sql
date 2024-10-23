@@ -185,7 +185,7 @@ CREATE TABLE "production_orders_items" (
     "production_order_id" INTEGER NOT NULL,
     "sequence" INTEGER NOT NULL,
     "final_product_id" INTEGER NOT NULL,
-    "prodution_quantity_estimated" DOUBLE PRECISION NOT NULL,
+    "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
     "production_quantity_real" DOUBLE PRECISION NOT NULL,
     "production_quantity_loss" DOUBLE PRECISION NOT NULL,
     "lote" VARCHAR(255),

@@ -26,10 +26,10 @@ export class ProductionService {
         production_order_id: production.id,
         sequence: sequence,
         final_product_id: item.final_product_id,
-        prodution_quantity_estimated: item.prodution_quantity_estimated,
+        production_quantity_estimated: item.production_quantity_estimated,
         production_quantity_real: item.production_quantity_real,
         production_quantity_loss:
-          item.prodution_quantity_estimated - item.production_quantity_real,
+          item.production_quantity_estimated - item.production_quantity_real,
         lote: item.lote,
         lote_expiration: item.lote_expiration,
         created_at: new Date(),
@@ -100,13 +100,14 @@ export class ProductionService {
           item.production_order_id,
           {
             final_product_id: item.final_product_id,
-            prodution_quantity_estimated:
-              item.prodution_quantity_estimated ?? undefined,
+            production_quantity_estimated:
+              item.production_quantity_estimated ?? undefined,
             production_quantity_real:
               item.production_quantity_real ?? undefined,
             production_quantity_loss:
-              item.prodution_quantity_estimated && item.production_quantity_real
-                ? item.prodution_quantity_estimated -
+              item.production_quantity_estimated &&
+              item.production_quantity_real
+                ? item.production_quantity_estimated -
                   item.production_quantity_real
                 : undefined,
             updated_at: new Date(),
@@ -120,11 +121,11 @@ export class ProductionService {
           production_order_id: id,
           sequence: sequence,
           final_product_id: item.final_product_id!,
-          prodution_quantity_estimated: item.prodution_quantity_estimated!,
+          production_quantity_estimated: item.production_quantity_estimated!,
           production_quantity_real: item.production_quantity_real!,
           production_quantity_loss:
-            item.prodution_quantity_estimated && item.production_quantity_real
-              ? item.prodution_quantity_estimated -
+            item.production_quantity_estimated && item.production_quantity_real
+              ? item.production_quantity_estimated -
                 item.production_quantity_real
               : 0,
           lote: item.lote!,

@@ -21,7 +21,7 @@ export const CreateProductionSchema = z.object({
           .number()
           .int()
           .positive('Final product is required'),
-        prodution_quantity_estimated: z
+        production_quantity_estimated: z
           .number()
           .int()
           .positive('Estimated quantity is required'),
@@ -53,7 +53,7 @@ export const UpdateProductionSchema = z.object({
   production_items: z
     .array(
       z.object({
-        prodution_quantity_estimated: z
+        production_quantity_estimated: z
           .number()
           .int()
           .positive('Estimated quantity is required')
