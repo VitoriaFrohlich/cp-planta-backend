@@ -26,3 +26,8 @@ export class ProductLot {
     expiration: Date | null;
   }[];
 }
+
+export class ResponseBatchDto {
+  lote: string;
+  expiration: Date | null;
+}

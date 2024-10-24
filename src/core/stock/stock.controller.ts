@@ -13,6 +13,8 @@ import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
+import { Stock_Moviment } from '../common/enums';
+import { ResponseBatchDto } from './dto/response.stock.dto';
 
 @Controller('stock')
 export class StockController {
@@ -68,6 +70,29 @@ export class StockController {
     const result = await this.stockService.getAllProductLots(orderBy, origin);
     return result;
   }
+
+  @Get('gen-batchs')
+  async generateBatchs(
+    @Query('moviment') moviment: string
+  ): Promise<ResponseBatchDto> {
+    const stockMoviment = moviment.toUpperCase() as Stock_Moviment;
+
+    if (
+      ![Stock_Moviment.INPUT, Stock_Moviment.OUTPUT].includes(stockMoviment)
+    ) {
+      throw new BadRequestException(
+        'Movimentação inválida. Use INPUT ou OUTPUT.'
+      );
+    }
+
+    const batch = await this.stockService.getLote(stockMoviment);
+
+    return {
+      lote: batch[0],
+      expiration: batch[1]
+    } as ResponseBatchDto;
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     const idNumber = +id;
