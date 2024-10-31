@@ -16,10 +16,12 @@ import { CategoriesModule } from './core/categories/categories.module';
 import { GroupsModule } from './core/groups/groups.module';
 // import { CompositionsModule } from './core/compositions/compositions.module';
 import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
+import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    OrchestratorModule.forRoot(),
     UsersModule,
     ProductsModule,
     ProductionModule,

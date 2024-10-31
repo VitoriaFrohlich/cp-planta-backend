@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, DynamicModule } from '@nestjs/common';
 import { OrchestratorService } from './orchestrator.service';
 import { OrchestratorController } from './orchestrator.controller';
 import { OrchestratorRepository } from './orchestrator.repository';
@@ -8,6 +8,14 @@ import { PrismaModule } from 'src/database/prisma/prisma.module';
 @Module({
   imports: [PrismaModule],
   controllers: [OrchestratorController],
-  providers: [OrchestratorService, OrchestratorRepository]
+  providers: [OrchestratorService, OrchestratorRepository],
+  exports: [OrchestratorService, OrchestratorRepository]
 })
-export class OrchestratorModule {}
+export class OrchestratorModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: OrchestratorModule,
+      global: true
+    };
+  }
+}
