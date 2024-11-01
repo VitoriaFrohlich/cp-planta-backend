@@ -10,10 +10,9 @@ export class OccurrenceService {
   async create(createOccurrenceDto: CreateOccurrenceDto) {
     const newOccurrence = {
       ...createOccurrenceDto,
+      created_by: String(createOccurrenceDto.created_by),
       created_at: new Date(),
-      created_by: 1, // Replace with actual user
-      updated_at: null,
-      updated_by: null
+      updated_at: new Date()
     };
     return this.occurrenceRepository.create(newOccurrence);
   }
@@ -24,11 +23,9 @@ export class OccurrenceService {
       throw new Error('Occurrence not found');
     }
 
-    // Whitelist of allowed fields
     const allowedFields = ['description', 'updated_by'];
     const updateData = {};
 
-    // Filter the updateOccurrenceDto to only include allowed fields
     for (const key of Object.keys(updateOccurrenceDto)) {
       if (allowedFields.includes(key)) {
         updateData[key] = updateOccurrenceDto[key];
@@ -48,11 +45,11 @@ export class OccurrenceService {
     return this.occurrenceRepository.findOne(id);
   }
 
-  // async remove(id: number) {
-  //   const occurrence = await this.occurrenceRepository.findOne(id);
-  //   if (!occurrence) {
-  //     throw new Error('Occurrence not found');
-  //   }
-  //   return this.occurrenceRepository.remove(id);
-  // }
+  async remove(id: number) {
+    const occurrence = await this.occurrenceRepository.findOne(id);
+    if (!occurrence) {
+      throw new Error('Occurrence not found');
+    }
+    return this.occurrenceRepository.remove(id);
+  }
 }

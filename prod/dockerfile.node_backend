@@ -1,0 +1,72 @@
+# Stage 1: Build the backend
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Set NODE_ENV to development to install devDependencies
+RUN apk add --no-cache make gcc g++ python3
+
+# Copy package.json and package-lock.json
+COPY package.json ./ 
+
+# Install dependencies
+RUN npm cache clean --force
+RUN npm install --ignore-scripts --no-audit
+RUN npm install --save @nestjs/cli
+RUN npm install --save @prisma/client
+# Add PostgreSQL client dependency 
+RUN npm install pg --save
+
+# Verify that @nestjs/cli and prisma are installed
+RUN npm list @nestjs/cli
+RUN npm list @prisma/client
+
+COPY tsconfig.json ./
+# Copy the rest of the application source code
+COPY . .
+
+RUN npx prisma generate
+
+# Build the application
+RUN npm run build:only
+
+# Stage 2: Production environment
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Set NODE_ENV to production
+ENV NODE_ENV=production
+
+# Install build tools for bcrypt compilation
+RUN apk add --no-cache make gcc g++ python3
+
+# Copy package.json and package-lock.json
+COPY package*.json ./ 
+
+RUN npm cache clean --force
+
+# Copy the built application from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Copy the entire node_modules directory from the builder stage
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy the Prisma client from the builder stage
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copy the Prisma schema files (if needed at runtime)
+COPY --from=builder /app/prisma ./prisma
+
+# Install only production dependencies
+RUN npm install --ignore-scripts --no-audit
+
+# Rebuild bcrypt after copying node_modules
+RUN npm rebuild bcrypt --build-from-source
+
+# Expose the port used by the backend
+EXPOSE 3000
+
+# Command to run the application
+CMD ["node", "dist/main.js"]

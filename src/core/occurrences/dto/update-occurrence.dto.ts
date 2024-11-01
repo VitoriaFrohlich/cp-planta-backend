@@ -9,4 +9,10 @@ export class UpdateOccurrenceDto {
     required: false
   })
   readonly description?: string;
+
+  @ApiProperty({
+    description: 'ID do usuário que atualizou a ocorrência',
+    example: 1
+  })
+  readonly updated_by: number;
 }

@@ -2,8 +2,8 @@
 
 LOG_FILE="/app/scripts/start-with-prisma.log"
 PRISMA_CMD="npx prisma generate"
-RETRY_INTERVAL=60 # seconds
-MAX_RETRIES=5
+RETRY_INTERVAL=20 # seconds
+MAX_RETRIES=2
 
 
 log() {

@@ -10,7 +10,7 @@ export class OccurrenceRepository {
     return this.prisma.ocurrences.create({
       data: {
         ...data,
-        updated_at: new Date() // Ensure updated_at is set
+        updated_at: new Date()
       }
     });
   }
@@ -23,7 +23,7 @@ export class OccurrenceRepository {
       where: { id },
       data: {
         ...data,
-        updated_at: new Date() // Ensure updated_at is set
+        updated_at: new Date()
       }
     });
   }
@@ -38,10 +38,9 @@ export class OccurrenceRepository {
     });
   }
 
-  //   async remove(id: number): Promise<ocurrences> {
-  //     return this.prisma.ocurrences.update({
-  //       where: { id },
-  //       data: { active: false }
-  //     });
-  //   }
+  async remove(id: number): Promise<ocurrences> {
+    return this.prisma.ocurrences.delete({
+      where: { id }
+    });
+  }
 }

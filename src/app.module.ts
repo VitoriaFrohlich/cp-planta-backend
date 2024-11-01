@@ -7,15 +7,16 @@ import { StockModule } from './core/stock/stock.module';
 import { AuthModule } from './auth/auth.module';
 import { ControlPanelController } from './control-panel/control-panel.controller';
 import { ControlPanelModule } from './control-panel/control-panel.module';
-import { Config } from './config/config.module';
+import { SettingsModule } from './settings/settings.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { PrismaService } from './database/prisma/prisma.service';
 import { FeatureFlagsService } from './feature-flags/feature-flags.service';
-import { OccurrenceModule } from './core/occurrences/occurrence.module';
-// import { CategoriesModule } from './core/categories/categories.module';
-// import { PersonsModule } from './core/persons/persons.module';
-// import { GroupsModule } from './core/groups/groups.module';
+import { PersonsModule } from './core/persons/persons.module';
+import { CategoriesModule } from './core/categories/categories.module';
+import { GroupsModule } from './core/groups/groups.module';
 // import { CompositionsModule } from './core/compositions/compositions.module';
+import { StockLocationsModule } from './core/stock-locations/stock_locations.module';
+import { OccurrenceModule } from './core/occurrences/occurrence.module';
 
 @Module({
   imports: [
@@ -26,12 +27,14 @@ import { OccurrenceModule } from './core/occurrences/occurrence.module';
     StockModule,
     AuthModule,
     ControlPanelModule,
-    Config,
+    SettingsModule,
     PrismaModule,
+    StockLocationsModule,
+    PrismaModule,
+    GroupsModule,
+    PersonsModule,
+    CategoriesModule,
     OccurrenceModule
-    // CategoriesModule,
-    // PersonsModule,
-    // GroupsModule,
     // CompositionsModule
   ],
   controllers: [ControlPanelController],

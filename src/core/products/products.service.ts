@@ -42,6 +42,22 @@ export class ProductsService {
     return findedProducts.map(product => this.formatProductDate(product));
   }
 
+  async findByOrigin(
+    orderBy: string,
+    origin: string
+  ): Promise<
+    (Omit<products, 'created_at' | 'updated_at'> & {
+      created_at: string;
+      updated_at: string;
+    })[]
+  > {
+    const findedProducts = await this.productsRepository.findByOrigin(
+      orderBy,
+      origin
+    );
+    return findedProducts.map(product => this.formatProductDate(product));
+  }
+
   async findById(id: number) {
     const product = await this.isValid(id);
     return this.formatProductDate(product);

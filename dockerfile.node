@@ -1,20 +1,27 @@
 FROM node:20-alpine
 
+# Definir o diretório de trabalho dentro do container
 WORKDIR /app
 
+# Instalar o cliente do PostgreSQL e outras dependências necessárias em um único RUN
 RUN apk add --no-cache postgresql-client
 
-COPY package*.json ./
+# Copiar somente os arquivos de dependências antes de instalar as bibliotecas
+COPY package*.json ./ 
 COPY tsconfig.json ./
-COPY .env ./
 
-RUN npm install
+# Instalar dependências de produção apenas para otimizar a imagem para produção
+RUN npm install 
 
-COPY ./scripts/start-with-prisma.sh ./scripts/ 
-RUN chmod +x ./scripts/start-with-prisma.sh
 
+COPY ./scripts/start-with-prisma.sh /app/scripts/
+RUN chmod +x /app/scripts/start-with-prisma.sh
+
+# Agora copiar o restante do código da aplicação
 COPY . .
 
+# Expor a porta da aplicação (ajustar se necessário)
 EXPOSE 8000
 
-CMD ["sh", "-c", "./scripts/start-with-prisma.sh"]
+# Definir o comando de inicialização do container
+CMD ["sh", "./scripts/start-with-prisma.sh"]

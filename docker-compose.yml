@@ -1,30 +1,4 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: dockerfile.node
-    env_file:
-      - .env
-    restart: always
-    ports:
-      - '${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}'
-    expose:
-      - $NODE_DOCKER_PORT
-    stdin_open: true
-    tty: true
-    volumes:
-      - .:/app/
-        - /app/node_modules
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - NODE_ENV=${NODE_ENV}
-    depends_on:
-      - pgadmin
-      - database
-
-    networks:
-      - myapp-network
-
   database:
     build:
       context: .
@@ -51,11 +25,38 @@ services:
     networks:
       - myapp-network
 
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile.node
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - '${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}'
+    expose:
+      - $NODE_DOCKER_PORT
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app/
+        - /app/node_modules
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      - pgadmin
+      - database
+
+    networks:
+      - myapp-network
+
   pgadmin:
     image: dpage/pgadmin4
     restart: always
     ports:
       - '80:80'
+      - '443:443'
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}

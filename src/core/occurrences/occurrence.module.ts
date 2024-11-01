@@ -3,8 +3,10 @@ import { OccurrenceService } from './occurrence.service';
 import { OccurrenceController } from './occurrence.controller';
 import { OccurrenceRepository } from './occurrence.repository';
 import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaModule } from 'src/database/prisma/prisma.module';
 
 @Module({
+  imports: [PrismaModule],
   controllers: [OccurrenceController],
   providers: [OccurrenceService, OccurrenceRepository, PrismaService]
 })

@@ -6,13 +6,12 @@ export enum Gender {
 }
 
 export enum Role {
+  DEFAULT = 'DEFAULT',
   ROOT = 'ROOT',
   ADMIN = 'ADMIN',
-  PUBLIC = 'PUBLIC',
-  ERP = 'ERP',
+  DEMO = 'DEMO',
   API = 'API',
-  SYSTEM = 'SYSTEM',
-  ANONYMOUS = 'ANONYMOUS'
+  SYSTEM = 'SYSTEM'
 }
 
 export enum Person_Type {
@@ -25,12 +24,12 @@ export enum Origin {
   MADE = 'MADE'
 }
 
-enum Price_Type {
+export enum Price_Type {
   COST = 'COST',
   SALE = 'SALE'
 }
 
-enum Production_Status {
+export enum Production_Status {
   CREATED = 'CREATED',
   SCHEDULED = 'SCHEDULED',
   OPEN = 'OPEN',
@@ -40,10 +39,14 @@ enum Production_Status {
   CANCELED = 'CANCELED'
 }
 
-enum Stock_Moviment {
+export enum Stock_Moviment {
   INPUT = 'INPUT',
   TRANSIT = 'TRANSIT',
-  OUTPUT = 'OUTPUT'
+  OUTPUT = 'OUTPUT',
+  RESERVED = 'RESERVED',
+  BALANCE = 'BALANCE',
+  ADJUST = 'ADJUST',
+  INVENTORY = 'INVENTORY'
 }
 
 export enum Unit_Measure {
@@ -53,4 +56,10 @@ export enum Unit_Measure {
   GR = 'GR',
   ML = 'ML',
   PC = 'PC'
+}
+
+export enum Batch_Status {
+  PENDING = 'PENDING',
+  USED = 'USED',
+  CANCELED = 'CANCELED'
 }

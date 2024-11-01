@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  // Delete,
+  Delete,
   BadRequestException
 } from '@nestjs/common';
 import { OccurrenceService } from './occurrence.service';
@@ -29,7 +29,7 @@ export class OccurrenceController {
     if (!descriptionValidation.success) {
       errors.push({
         field: 'description',
-        message: descriptionValidation.error[0].message
+        message: descriptionValidation.error.errors[0].message
       });
     }
 
@@ -84,8 +84,8 @@ export class OccurrenceController {
     return this.occurrenceService.update(+id, updateOccurrenceDto);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.occurrenceService.remove(+id);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.occurrenceService.remove(+id);
+  }
 }
