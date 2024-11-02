@@ -3,6 +3,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ENV DB_HOST=pgbouncer
+ENV DB_PORT=6432
+ENV DATABASE_URL=postgresql://postgres:postgres@pgbouncer:6432/postgres
+
 # Set NODE_ENV to development to install devDependencies
 RUN apk add --no-cache make gcc g++ python3
 
@@ -46,6 +50,9 @@ COPY package*.json ./
 
 RUN npm cache clean --force
 
+# Install only production dependencies
+RUN npm install --ignore-scripts --no-audit
+
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist
 
@@ -58,9 +65,6 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Copy the Prisma schema files (if needed at runtime)
 COPY --from=builder /app/prisma ./prisma
-
-# Install only production dependencies
-RUN npm install --ignore-scripts --no-audit
 
 # Rebuild bcrypt after copying node_modules
 RUN npm rebuild bcrypt --build-from-source

@@ -1,12 +1,13 @@
 -- insert into users 
 -- o password dos usuários é "cpplanta"
-INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender")
+INSERT INTO "users" ("username", "email", "password", "first_name", "last_name", "role", "gender", "created_by", "updated_by")
 VALUES 
-	  ('root', 'cp.planta@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'CP', 'Planta', 'ROOT', 'MALE'),
-	  ('Cassio', 'cassio@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Cassio', 'Santos', 'ROOT', 'MALE'),
-    ('Roberto', 'fulano@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Roberto', 'Da Silva', 'DEMO', 'MALE'),
-    ('Ana', 'ana@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Ana', 'Oliveira', 'DEMO', 'FEMALE'),
-    ('Maria', 'maria@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Maria', 'Silva', 'DEMO', 'FEMALE');
+	  ('root', 'root@cpplanta.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Root', 'CP Planta', 'ROOT', 'OTHER', 'system', 'system'),
+    ('system', 'system@cpplanta.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'System', 'CP Planta', 'SYSTEM', 'OTHER', 'system', 'system'),
+	  ('cassio', 'cassio@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Cassio', 'Santos', 'ROOT', 'MALE', 'system', 'system'),
+    ('roberto', 'fulano@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Roberto', 'Da Silva', 'DEMO', 'MALE', 'system', 'system'),
+    ('ana', 'ana@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Ana', 'Oliveira', 'DEMO', 'FEMALE', 'system', 'system'),
+    ('maria', 'maria@gmail.com', '$2b$10$R6pcILCI6LhYW4wd3UjDNOjOD9Rg5nCxp4ZZmMUrfRD0UGb4rrViC', 'Maria', 'Silva', 'DEMO', 'FEMALE', 'system', 'system');
 	
 -- Insert into settings
 INSERT INTO "settings" ("key", "value", "description", "created_by", "updated_by") 
@@ -49,8 +50,8 @@ VALUES
     ('Câmara Fria B');
 	
 
--- Insert into ocurrences
-INSERT INTO "ocurrences" ("description")
+-- Insert into occurrences
+INSERT INTO "occurrences" ("description")
 VALUES 
     ('Problema na Linha de Produção'),
     ('Manutenção Necessária'),
@@ -81,9 +82,22 @@ VALUES
     ('Seleção de Peso'),
     ('Seleção de Textura'),
     ('Seleção de Sabor'),
-    ('Seleção de Aroma');
-    
-    
+    ('Seleção de Aroma');   
+
+  -- Insert into groups
+INSERT INTO "groups" ("description", "father_id" )
+VALUES 
+  ('Batata', Null),
+	('Tomate', Null),
+	('Cebola', Null),
+	('Couve', Null),
+  ('Melancia', Null),
+	('Batata Branca',1),
+	('Tomate Cereja',2),
+	('Cebola Roxa',3),
+	('Couve Mirim',4),
+  ('Melancia Gigante',5);
+	    
 -- Insert into products
 INSERT INTO "products" ("description", "code", "sku", "origin", "unit_measure","category_id", "group_id", "supplier_id", "nutritional_info")
 VALUES 
@@ -367,8 +381,8 @@ VALUES
     (3, 5, 12, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 'esteira 2'),
     (3, 6, 12, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 'esteira 2');
 
--- insert into ocurrences_of_production_stages	
-INSERT INTO "ocurrences_of_production_stages" ("ocurrence_id", "description", "observation", "stage_ocurred_id")
+-- insert into occurrences_of_production_stages	
+INSERT INTO "occurrences_of_production_stages" ("occurrence_id", "description", "observation", "stage_occurred_id")
 VALUES 
     (1, 'Problema na Linha de Produção', 'Houve um problema na linha de produção que causou um atraso.',  1),
     (2, 'Manutenção Necessária', 'Manutenção programada é necessária para o equipamento.', 2),
@@ -376,22 +390,8 @@ VALUES
     (4, 'Novo Equipamento Instalado', 'Novo equipamento foi instalado na linha de produção.', 4),
     (5, 'Incidente de Segurança', 'Ocorreu um incidente de segurança no armazém.', 5);
 
--- Insert into groups
-INSERT INTO "groups" ("description", "father_id" )
-VALUES 
-  ('Batata', Null),
-	('Tomate', Null),
-	('Cebola', Null),
-	('Couve', Null),
-  ('Melancia', Null),
-	('Batata Branca',1),
-	('Tomate Cereja',2),
-	('Cebola Roxa',3),
-	('Couve Mirim',4),
-  ('Melancia Gigante',5);
-	
 -- Insert into compositions
-INSERT INTO "compositions" ("product_id", "description")
+INSERT INTO "compositions" ("final_product", "description")
 VALUES 
 (8,'batata frita'),
 (9,'cenoura cubinhos'),
@@ -402,7 +402,7 @@ VALUES
 (14,'suco natural de uva');	
 
 -- Insert into compositions_items
-INSERT INTO "composition_items" ("composition_id", "sequence", "product_id", "quantity")
+INSERT INTO "composition_items" ("composition_id", "sequence", "raw_product", "quantity")
 values
 (1,1,1,20),
 (2,1,2,20),

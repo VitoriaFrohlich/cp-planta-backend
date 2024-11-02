@@ -49,6 +49,16 @@ export class SettingsService {
     }
   }
 
+  async incrementOrderNumber(): Promise<void> {
+    const config = await this.settingsRepository.findByKey('lastOrderNumber');
+    if (config) {
+      const orderNumber = Number(config.value);
+      config.value = (orderNumber + 1).toString();
+
+      await this.settingsRepository.updateByKey(config.key, config);
+    }
+  }
+
   async findAll(orderBy: string): Promise<
     (Omit<settings, 'created_at' | 'updated_at'> & {
       created_at: string;

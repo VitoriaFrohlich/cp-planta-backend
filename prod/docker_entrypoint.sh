@@ -37,5 +37,5 @@ fi
 chown -R postgres:postgres "$PGDATA"
 
 # Start PostgreSQL and pgBouncer
-exec postgres &
 pgbouncer /etc/pgbouncer/pgbouncer.ini
+exec postgres &

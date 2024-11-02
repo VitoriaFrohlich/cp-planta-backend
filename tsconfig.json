@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "ES2020",   
-    "moduleResolution": "node",    
+    "target": "ES2020",
+    "declaration": true,    
+    "removeComments": true,    
+    "emitDecoratorMetadata": true,    
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",    
-    "declaration": true, 
-    "removeComments": true,
-    "strict": true,
+    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -15,13 +17,13 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "moduleResolution": "node",
+    "rootDir": "./src",
+    "strict": true,
+    "strictPropertyInitialization": false,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "types": ["node", "jest"]
+    "types": ["node"],
+    "lib": ["ES2020"]
   },
   "paths": {
     "@/*": ["src/*"]

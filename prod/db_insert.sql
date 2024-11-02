@@ -318,7 +318,7 @@ VALUES
     (5,'Production E','2024-12-31 23:59:59', 'OPEN');
 
 -- Insert into production_orders_items
-INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "prodution_quantity_estimated", "production_quantity_real","production_quantity_loss", "lote", "lote_expiration")
+INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "lote", "lote_expiration")
 VALUES
 	(1, 1, 10, 1000.0, 950.0, 50.0, 'LoteTY123', '2024-12-31 23:59:59'),
     (2, 2, 11, 2000.0, 1900.0, 100.0, 'LoteER56', '2024-12-15 23:59:59'),
@@ -340,32 +340,32 @@ INSERT INTO "production_steps_progress" (
     "quantity_loss",
     "machine",
     "observation",	
-    "line_id")	
+    "production_line")	
 VALUES 
-	(1, 1, 10, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 1),
-    (1, 2, 10, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 1),
-    (1, 3, 10, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 1),
-    (1, 4, 10, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 1),
-    (1, 5, 10, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 1),
-    (1, 6, 10, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 1),
-    (1, 1, 10, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 1),
-    (1, 2, 10, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 1),
-    (1, 3, 10, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 1),
-    (1, 4, 10, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 1),
-    (1, 5, 10, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 1),
-    (1, 6, 10, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 1),
-    (2, 1, 11, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 2),
-    (2, 2, 11, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 2),
-    (2, 3, 11, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 2),
-    (2, 4, 11, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 2),
-    (2, 5, 11, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 2),
-    (2, 6, 11, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 2),	
-    (3, 1, 12, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 2),
-    (3, 2, 12, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 2),
-    (3, 3, 12, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 2),
-    (3, 4, 12, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 2),
-    (3, 5, 12, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 2),
-    (3, 6, 12, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 2);
+	(1, 1, 10, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 'esteira 1'),
+    (1, 2, 10, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 'esteira 1'),
+    (1, 3, 10, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 'esteira 1'),
+    (1, 4, 10, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 'esteira 1'),
+    (1, 5, 10, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 'esteira 1'),
+    (1, 6, 10, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 'esteira 1'),
+    (1, 1, 10, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 'esteira 1'),
+    (1, 2, 10, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 'esteira 1'),
+    (1, 3, 10, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 'esteira 1'),
+    (1, 4, 10, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 'esteira 1'),
+    (1, 5, 10, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 'esteira 1'),
+    (1, 6, 10, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 'esteira 1'),
+    (2, 1, 11, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 'esteira 2'),
+    (2, 2, 11, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 'esteira 2'),
+    (2, 3, 11, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 'esteira 2'),
+    (2, 4, 11, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 'esteira 2'),
+    (2, 5, 11, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 'esteira 2'),
+    (2, 6, 11, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 'esteira 2'),	
+    (3, 1, 12, 1, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine A', 'No issues', 'esteira 2'),
+    (3, 2, 12, 2, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine B', 'Minor issues', 'esteira 2'),
+    (3, 3, 12, 3, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine C', 'No issues', 'esteira 2'),
+    (3, 4, 12, 4, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine D', 'Minor issues', 'esteira 2'),
+    (3, 5, 12, 5, '2024-09-01 08:00:00', '2024-09-01 10:00:00', 120.0, 1000.0, 950.0, 50.0, 'Machine E', 'No issues', 'esteira 2'),
+    (3, 6, 12, 6, '2024-09-02 08:00:00', '2024-09-02 12:00:00', 240.0, 2000.0, 1900.0, 100.0, 'Machine F', 'Minor issues', 'esteira 2');
 
 -- insert into ocurrences_of_production_stages	
 INSERT INTO "ocurrences_of_production_stages" ("ocurrence_id", "description", "observation", "stage_ocurred_id")
@@ -375,3 +375,39 @@ VALUES
     (3, 'Falha na Verificação de Qualidade', 'A verificação de qualidade falhou para o lote #123.', 3),
     (4, 'Novo Equipamento Instalado', 'Novo equipamento foi instalado na linha de produção.', 4),
     (5, 'Incidente de Segurança', 'Ocorreu um incidente de segurança no armazém.', 5);
+
+-- Insert into groups
+INSERT INTO "groups" ("description", "father_id" )
+VALUES 
+  ('Batata', Null),
+	('Tomate', Null),
+	('Cebola', Null),
+	('Couve', Null),
+  ('Melancia', Null),
+	('Batata Branca',1),
+	('Tomate Cereja',2),
+	('Cebola Roxa',3),
+	('Couve Mirim',4),
+  ('Melancia Gigante',5);
+	
+-- Insert into compositions
+INSERT INTO "compositions" ("product_id", "description")
+VALUES 
+(8,'batata frita'),
+(9,'cenoura cubinhos'),
+(10,'aipim descascado'),
+(11,'mirtilos selecionados'),
+(12,'laranja fatiada'),
+(13,'mix de verduras'),
+(14,'suco natural de uva');	
+
+-- Insert into compositions_items
+INSERT INTO "composition_items" ("composition_id", "sequence", "product_id", "quantity")
+values
+(1,1,1,20),
+(2,1,2,20),
+(3,1,3,20),
+(4,1,4,20),
+(5,1,5,20),
+(6,1,6,20),
+(7,1,7,20);

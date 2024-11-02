@@ -1,12 +1,13 @@
 variables:
   # Docker image details
-  DOCKER_IMAGE_NAME1: 'norohim/cp-planta-backend'
-  DOCKER_IMAGE_NAME2: 'norohim/postgres-optimal'
-  DOCKER_IMAGE_NAME3: 'norohim/pgbouncer'
-  DOCKER_IMAGE_TAG: 'latest'
-  DOCKER_DRIVER: 'overlay2'
-  DOCKER_TLS_CERTDIR: ''
-  PUPPETEER_SKIP_DOWNLOAD: 'true'
+  DOCKER_IMAGE_NAME1: "norohim/cp-planta-backend"
+  DOCKER_IMAGE_NAME2: "norohim/postgres-optimal"
+  DOCKER_IMAGE_NAME3: "norohim/pgbouncer"
+  DOCKER_IMAGE_NAME4: "norohim/pgadmin"
+  DOCKER_IMAGE_TAG: "latest"
+  DOCKER_DRIVER: "overlay2"
+  DOCKER_TLS_CERTDIR: ""
+  PUPPETEER_SKIP_DOWNLOAD: "true"
 
 stages:
   - commit-msg-check
@@ -14,7 +15,7 @@ stages:
   - test
   - build_and_push
   - deploy
-
+  
 # Default settings for all jobs
 default:
   image: node:20-alpine
@@ -77,6 +78,8 @@ build_and_push_docker_image:
     - docker push "$DOCKER_IMAGE_NAME2:$DOCKER_IMAGE_TAG"
     - docker build -f ./dockerfile.pgbouncer -t "$DOCKER_IMAGE_NAME3:$DOCKER_IMAGE_TAG" .
     - docker push "$DOCKER_IMAGE_NAME3:$DOCKER_IMAGE_TAG"
+    - docker build -f ./dockerfile.pgadmin -t "$DOCKER_IMAGE_NAME4:$DOCKER_IMAGE_TAG" .
+    - docker push "$DOCKER_IMAGE_NAME4:$DOCKER_IMAGE_TAG"
     - cd ..
   only:
     - master

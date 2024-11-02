@@ -75,14 +75,25 @@ export class UsersRepository {
     return userResponse;
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.users.update({
-      where: { id },
-      data: {
-        active: false,
-        updated_at: new Date()
-      }
-    });
+  async delete(
+    id: number,
+    softDelete: boolean,
+    currentUser: string
+  ): Promise<void> {
+    if (softDelete) {
+      await this.prisma.users.update({
+        where: { id },
+        data: {
+          active: false,
+          updated_at: new Date(),
+          updated_by: currentUser
+        }
+      });
+    } else {
+      await this.prisma.users.delete({
+        where: { id }
+      });
+    }
   }
 
   async reactivate(id: number): Promise<void> {
