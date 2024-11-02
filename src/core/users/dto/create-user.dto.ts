@@ -21,4 +21,7 @@ export class CreateUserDto {
     default: Role.DEFAULT
   })
   readonly role: Role;
+  username: string;
+  created_by: string;
+  updated_by: string;
 }

@@ -253,13 +253,20 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(
+    @Param('id') id: string,
+    @Query('softDelete') softDelete?: string
+  ) {
     const idNumber = +id;
 
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
-    await this.usersService.remove(idNumber);
+
+    const isPermanent = softDelete === 'false';
+
+    await this.usersService.delete(idNumber, isPermanent);
+
     return { message: `User ID ${idNumber} deleted successfully` };
   }
 

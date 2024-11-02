@@ -13,16 +13,28 @@ import { format } from 'date-fns';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.usersRepository.findByEmail(
-      createUserDto.email
-    );
+  private getCurrentUser(): string {
+    // TODO: falta implementar
+    return 'root';
+  }
 
-    if (existingUser) {
-      throw new Error(
-        `User already exists: ${JSON.stringify(existingUser[0])}`
-      );
+  async create(createUserDto: CreateUserDto) {
+    let { username } = createUserDto;
+    const { email } = createUserDto;
+
+    if (username) {
+      username = username.toLowerCase();
+    } else {
+      username = email.split('@')[0].toLowerCase();
     }
+
+    const existingUser = await this.matchUserByData(email, username);
+    if (existingUser) {
+      throw new Error('User already exists with email or username.');
+    }
+    createUserDto.username = username;
+    createUserDto.created_by = 'system';
+    createUserDto.updated_by = 'system';
 
     const createdUser = await this.usersRepository.create(createUserDto);
 
@@ -70,6 +82,7 @@ export class UsersService {
   }
 
   async reactivateUser(id: number) {
+    const currentUser = this.getCurrentUser();
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
@@ -82,7 +95,8 @@ export class UsersService {
 
     const reactivatedUser = await this.usersRepository.update(id, {
       active: true,
-      updated_at: new Date()
+      updated_at: new Date(),
+      updated_by: currentUser
     });
 
     return this.formatUserDate(reactivatedUser);
@@ -98,6 +112,7 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
+    const currentUser = this.getCurrentUser();
     const user = await this.isValid(id);
 
     if (!user) {
@@ -106,7 +121,8 @@ export class UsersService {
     const updatedUserDto = {
       ...updateUserDto,
       updated_at: new Date(),
-      active: user.active
+      active: user.active,
+      updated_by: currentUser
     };
 
     const updatedPorduct = await this.usersRepository.update(
@@ -117,8 +133,9 @@ export class UsersService {
     return this.formatUserDate(updatedPorduct);
   }
 
-  async remove(id: number) {
+  async delete(id: number, softDelete: boolean) {
+    const currentUser = this.getCurrentUser();
     await this.isValid(id);
-    await this.usersRepository.delete(id);
+    await this.usersRepository.delete(id, softDelete, currentUser);
   }
 }

@@ -5,19 +5,44 @@ import { UpdateProductionDto } from './dto/update-production.dto';
 import { ProductionRepository } from './production.repository';
 import { production_orders } from '@prisma/client';
 import { format } from 'date-fns';
+import { SettingsService } from 'src/settings/settings.service';
 
 @Injectable()
 export class ProductionService {
-  constructor(private readonly productionRepository: ProductionRepository) {}
+  constructor(
+    private readonly productionRepository: ProductionRepository,
+    private readonly settingsService: SettingsService
+  ) {}
+
+  private getCurrentUser(): string {
+    // TODO: falta implementar a lógica de pegar o usuário logado
+    return 'root';
+  }
 
   async create(createProductionDto: CreateProductionDto) {
+    const firstProductId =
+      createProductionDto.production_items[0]?.final_product_id;
+
+    const descriptionProduct = firstProductId
+      ? await this.productionRepository.findProductDescriptionById(
+          firstProductId
+        )
+      : 'Produto não encontrado';
+
+    const currentUser = this.getCurrentUser();
+    const numberString = await this.settingsService.get('lastOrderNumber');
+    const number = Number(numberString);
+    const description = `Ordem ${descriptionProduct} - ${number}`;
+
     const production = await this.productionRepository.createOrder({
-      number: createProductionDto.number,
-      description: createProductionDto.description,
+      number: number,
+      description: description,
       production_date: new Date(createProductionDto.production_date),
       Production_Status: createProductionDto.Production_Status,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
     });
 
     let sequence = 1;
@@ -37,6 +62,7 @@ export class ProductionService {
       });
 
       sequence++;
+      this.settingsService.incrementOrderNumber();
     }
     return { production, items: createProductionDto.production_items };
   }
@@ -75,6 +101,7 @@ export class ProductionService {
   }
 
   async update(id: number, updateProductionDto: UpdateProductionDto) {
+    const currentUser = this.getCurrentUser();
     await this.productionRepository.updateOrder(id, {
       description: updateProductionDto.description ?? undefined,
       production_date: updateProductionDto.production_date
@@ -82,7 +109,7 @@ export class ProductionService {
         : undefined,
       Production_Status: updateProductionDto.Production_Status ?? undefined,
       updated_at: new Date(),
-      updated_by: updateProductionDto.updated_by ?? undefined
+      updated_by: currentUser
     });
 
     const existingItems = await this.productionRepository.getOrderItems(id);
@@ -111,7 +138,7 @@ export class ProductionService {
                   item.production_quantity_real
                 : undefined,
             updated_at: new Date(),
-            updated_by: updateProductionDto.updated_by ?? undefined
+            updated_by: currentUser
           }
         );
         updatedItems.push({ ...existingItem, ...item });
@@ -132,8 +159,8 @@ export class ProductionService {
           lote_expiration: item.lote_expiration!,
           created_at: new Date(),
           updated_at: new Date(),
-          created_by: updateProductionDto.updated_by!,
-          updated_by: updateProductionDto.updated_by!
+          created_by: currentUser!,
+          updated_by: currentUser!
         });
         updatedItems.push(newItem);
         sequence++;

@@ -5,27 +5,26 @@ PRISMA_CMD="npx prisma generate"
 RETRY_INTERVAL=20 # seconds
 MAX_RETRIES=2
 
-
 log() {
     echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" >> $LOG_FILE
 }
 
-> $LOG_FILE
+# Limpa o arquivo de log
+: > $LOG_FILE
 
 log "Starting configuration script."
-
 
 attempt=1
 
 while [ $attempt -le $MAX_RETRIES ]; do
-    log "Trying to run: $PRISMA_CMD (attempt $attempt to $MAX_RETRIES)"
+    log "Trying to run: $PRISMA_CMD (attempt $attempt of $MAX_RETRIES)"
     
     if $PRISMA_CMD; then
-        log "Comand '$PRISMA_CMD' executed successfully!"
+        log "Command '$PRISMA_CMD' executed successfully!"
         break
     else
-        log "Fail to execute '$PRISMA_CMD'. Trying again in $RETRY_INTERVAL seconds..."
-        attempt=$((attempt+1))
+        log "Failed to execute '$PRISMA_CMD'. Trying again in $RETRY_INTERVAL seconds..."
+        attempt=$((attempt + 1))
         sleep $RETRY_INTERVAL
     fi
 done
@@ -39,7 +38,7 @@ log "Starting server with npm run start:${NODE_ENV:-dev}"
 npm run start:${NODE_ENV:-dev}
 
 if [ $? -eq 0 ]; then
-    log "Servidor start sucessfully."
+    log "Server started successfully."
 else
     log "Failed to start server."
     exit 1

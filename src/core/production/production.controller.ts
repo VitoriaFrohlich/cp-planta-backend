@@ -20,7 +20,7 @@ import { ApiQuery } from '@nestjs/swagger';
 //import { ResponseProductionDto } from './dto/response.production.dto';
 //import { ZodError } from 'zod';
 
-@Controller('production')
+@Controller('orders')
 export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
