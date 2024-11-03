@@ -326,7 +326,6 @@ CREATE TABLE "groups" (
 CREATE TABLE "images" (
     "id" SERIAL NOT NULL,
     "hash" TEXT NOT NULL,
-    "image_bin" BYTEA[],
     "path" TEXT NOT NULL,
     "mime_type" TEXT NOT NULL,
     "file_name" TEXT NOT NULL,
