@@ -61,9 +61,22 @@ export class UsersRepository {
   async matchUserByData(email: string, username: string): Promise<users[]> {
     return this.prisma.users.findMany({
       where: {
+        OR: [
+          { email: { equals: email, mode: 'insensitive' } },
+          { username: { equals: username, mode: 'insensitive' } }
+        ]
+      }
+    });
+  }
+
+  async userAlreadyExists(email: string, username: string): Promise<boolean> {
+    const users = await this.prisma.users.findMany({
+      where: {
         OR: [{ email: { equals: email } }, { username: { equals: username } }]
       }
     });
+
+    return users.length > 0;
   }
 
   async update(id: number, data: Prisma.usersUpdateInput): Promise<users> {
