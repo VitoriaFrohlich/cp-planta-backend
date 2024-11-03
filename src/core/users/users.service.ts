@@ -28,7 +28,10 @@ export class UsersService {
       username = email.split('@')[0].toLowerCase();
     }
 
-    const existingUser = await this.matchUserByData(email, username);
+    const existingUser = await this.usersRepository.userAlreadyExists(
+      email,
+      username
+    );
     if (existingUser) {
       throw new Error('User already exists with email or username.');
     }

@@ -4,6 +4,8 @@ import { AppModule } from './app.module.js';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import detect from 'detect-port';
+import { AllExceptionsFilter } from './config/exceptions.js';
+import { ResponseFormatInterceptor } from './config/interceptor.js';
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
@@ -24,6 +26,9 @@ async function bootstrap(): Promise<void> {
       type: VersioningType.HEADER,
       header: 'API-Version'
     });
+
+    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalInterceptors(new ResponseFormatInterceptor());
 
     const config = new DocumentBuilder()
       .setTitle('API Documentation')
