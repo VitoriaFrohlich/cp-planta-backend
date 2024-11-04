@@ -2,7 +2,6 @@ import * as z from 'zod';
 
 export const CreateImageSchema = z.object({
   hash: z.string().min(3, 'Hash is required'),
-  image_bin: z.array(z.string()).min(1, 'Image binary is required'),
   path: z.string().min(3, 'Path is required'),
   mime_type: z.string().min(3, 'Mime type is required'),
   file_name: z.string().min(3, 'File name is required'),
@@ -22,9 +21,6 @@ export const CreateImageSchema = z.object({
 
 export const UpdateImageSchema = z.object({
   path: z.string().min(3, 'Path is required').optional(),
-  steps_progress: z.number().int().nullable().optional(),
-  stock_item: z.number().int().nullable().optional(),
-  product: z.number().int().nullable().optional(),
   updated_at: z.string().default(new Date().toISOString()),
   updated_by: z.number().int().nullable()
 });

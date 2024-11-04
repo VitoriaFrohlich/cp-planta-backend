@@ -23,7 +23,7 @@ import { BatchsModule } from './core/batchs/batchs.module';
 import { OrchestratorModule } from './core/orchestrator/orchestrator.module';
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     OrchestratorModule.forRoot(),
     // RedisModule.forRoot({
     //   config: {
