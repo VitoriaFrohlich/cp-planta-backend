@@ -416,7 +416,6 @@ model images {
   size          Int
   width         Int
   height        Int
-  metadata      Json?
   owner         Owner
   owner_id      Int
   created_at    DateTime @default(now()) @db.Timestamp(6)
@@ -429,5 +428,5 @@ enum Owner {
   PRODUCT
   PRODUCTION_STEP
   STOCK_ITEM
-  OCURRENCE
+  OCCURRENCE
 }

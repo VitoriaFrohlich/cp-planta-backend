@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Delete,
   Query,
@@ -15,41 +14,37 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImagesService } from './images.service';
 import * as multer from 'multer';
 import { ResponseImagesDto } from './dto/response.images.dto';
-import { CreateImagesDto } from './dto/create.images.dto';
-import { UpdateImagesDto } from './dto/update.images.dto';
 
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Post()
-  async create(
-    @Body() createImagesDto: CreateImagesDto
-  ): Promise<ResponseImagesDto> {
-    const createdImage = await this.imagesService.create(createImagesDto);
-    return {
-      id: createdImage.id,
-      path: createdImage.path,
-      created_at: createdImage.created_at
-    };
-  }
-
   @Get()
   async findAll(
-    @Query('orderBy') orderBy: string = 'id',
-    @Query('storage') storage: string
+    @Query('owner') owner: string,
+    @Query('owner_id') ownerId: string
   ): Promise<ResponseImagesDto[]> {
-    const validOrderFields = ['id', 'description'];
-    const validStorage = ['products', 'steps', 'stock'];
+    const formattedOwner = owner.toUpperCase();
+    const validStorage = [
+      'PRODUCT',
+      'PRODUCTION_STEP',
+      'STOCK_ITEM',
+      'OCCURRENCE'
+    ];
 
-    if (!validOrderFields.includes(orderBy)) {
-      throw new BadRequestException(`Invalid order field: ${orderBy}`);
+    if (!validStorage.includes(formattedOwner)) {
+      throw new BadRequestException(`Invalid storage field: ${formattedOwner}`);
     }
-    if (!validStorage.includes(storage)) {
-      throw new BadRequestException(`Invalid storage field: ${storage}`);
+    if (!ownerId) {
+      throw new BadRequestException('Owner ID is required');
+    }
+    const idNumber = +ownerId;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
     }
 
-    const images = await this.imagesService.findAll(orderBy, storage);
+    const images = await this.imagesService.findAll(formattedOwner, +ownerId);
+
     return images.map(image => ({
       id: image.id,
       path: image.path
@@ -73,32 +68,6 @@ export class ImagesController {
       created_at: image.created_at,
       updated_at: image.updated_at,
       file_name: image.file_name
-    };
-  }
-
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateImagesDto: UpdateImagesDto
-  ): Promise<ResponseImagesDto> {
-    const idNumber = +id;
-    if (isNaN(idNumber)) {
-      throw new BadRequestException('Invalid ID format');
-    }
-
-    const updatedImage = await this.imagesService.update(
-      idNumber,
-      updateImagesDto
-    );
-    return {
-      id: updatedImage.id,
-      hash: updatedImage.hash,
-      path: updatedImage.path,
-      mime_type: updatedImage.mime_type,
-      size: updatedImage.size,
-      created_at: updatedImage.created_at,
-      updated_at: updatedImage.updated_at,
-      file_name: updatedImage.file_name
     };
   }
 
@@ -132,21 +101,31 @@ export class ImagesController {
   async uploadImg(
     @UploadedFile() file: Express.Multer.File,
     @Body('owner_id') id: string,
-    @Body('owner') owner: 'PRODUCTS' | 'STEPS' | 'STOCK' | 'OCCURRENCES'
+    @Body('owner') owner: string
   ) {
     const idNumber = +id;
-    const validStorage = ['PRODUCTS', 'STEPS', 'STOCK', 'OCCURRENCES'];
+    const formattedOwner = owner.toUpperCase();
+    const validStorage = [
+      'PRODUCT',
+      'PRODUCTION_STEP',
+      'STOCK_ITEM',
+      'OCCURRENCE'
+    ];
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
     if (!file) {
       throw new BadRequestException('No image provided');
     }
-    if (!validStorage.includes(owner)) {
-      throw new BadRequestException(`Invalid storage: ${owner}`);
+    if (!validStorage.includes(formattedOwner)) {
+      throw new BadRequestException(`Invalid storage: ${formattedOwner}`);
     }
 
-    const uploadedImage = await this.imagesService.uploadImage(file);
+    const uploadedImage = await this.imagesService.uploadImage(
+      owner,
+      idNumber,
+      file
+    );
     return { message: 'Image uploaded successfully', file: uploadedImage };
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { images, Prisma } from '@prisma/client';
+import { Owner } from '../common/enums';
 
 @Injectable()
 export class ImagesRepository {
@@ -12,28 +13,14 @@ export class ImagesRepository {
     });
   }
 
-  async findAll(orderBy: string, imageType: string): Promise<images[]> {
-    const validOrderFields = ['id', 'description'];
-
-    if (!validOrderFields.includes(orderBy)) {
-      throw new Error('Invalid order field');
-    }
-
-    let whereCondition = {};
-
-    if (imageType === 'products') {
-      whereCondition = { product: { not: null } };
-    } else if (imageType === 'steps') {
-      whereCondition = { steps_progress: { not: null } };
-    } else if (imageType === 'stock') {
-      whereCondition = { stock_item: { not: null } };
-    } else {
-      throw new Error('Invalid image type');
-    }
-
+  async findAll(owner: string, ownerId: number): Promise<images[]> {
     return this.prisma.images.findMany({
-      where: whereCondition,
-      orderBy: { [orderBy]: 'asc' }
+      where: {
+        owner: Owner[owner],
+        owner_id: ownerId
+      },
+
+      orderBy: { id: 'asc' }
     });
   }
 
