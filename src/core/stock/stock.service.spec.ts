@@ -109,8 +109,7 @@ describe('StockService', () => {
       created_at: new Date('2024-11-10'),
       updated_at: new Date('2024-11-10'),
       created_by: null,
-      updated_by: null,
-      stock_items: []
+      updated_by: null
     });
     jest
       .spyOn(stockRepository, 'createStockItems')
