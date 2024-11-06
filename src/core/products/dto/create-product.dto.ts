@@ -65,7 +65,12 @@ export class CreateProductDto {
   })
   readonly nutritional_info: string;
 
-  //quantidade e preço vão ser tratados por outro serviço
+  @ApiProperty({
+    description: 'Production Step status',
+    example: true
+  })
+  readonly active: boolean;
+
   @ApiProperty({
     description: 'Product price',
     example: '10.00 or other number > 0'
