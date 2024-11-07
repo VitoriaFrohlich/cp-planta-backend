@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateGroupsDto {
+export class UpdateGroupsDto {
   @ApiProperty({
     description: 'Group description',
     minLength: 3,
@@ -13,4 +13,15 @@ export class CreateGroupsDto {
     example: 1
   })
   readonly father_id: number;
+
+  @ApiProperty({
+    description: 'Active group',
+    example: true
+  })
+  readonly active: boolean;
+
+  created_at?: Date;
+  updated_at?: Date;
+  created_by?: string;
+  updated_by?: string;
 }

@@ -77,7 +77,7 @@ export class PersonsRepository {
     return personResponse;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number, updated_by: string): Promise<void> {
     if (!id) {
       throw new Error('ID not found');
     }
@@ -90,12 +90,13 @@ export class PersonsRepository {
       where: { id },
       data: {
         active: false,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }
 
-  async reactivate(id: number): Promise<void> {
+  async reactivate(id: number, updated_by: string): Promise<void> {
     if (!id) {
       throw new Error('ID not found');
     }
@@ -108,7 +109,8 @@ export class PersonsRepository {
       where: { id },
       data: {
         active: true,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }

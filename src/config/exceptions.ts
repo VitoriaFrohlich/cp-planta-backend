@@ -17,10 +17,34 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    response.status(status).json({
-      success: false,
-      message: exception.message || 'Erro interno do servidor',
-      data: null
-    });
+    if (exception.response && exception.response.data) {
+      response.status(status).json({
+        success: false,
+        message: exception.message || 'Erro de validação',
+        data: exception.response.data
+      });
+    } else if (
+      exception instanceof Error &&
+      exception.message &&
+      exception.message.includes('Invalid `this.prisma')
+    ) {
+      const errorMessage = exception.message;
+
+      const formattedMessage = errorMessage
+        .replace(/.*Invalid `this\.prisma\.[\w.]+` invocation.*\n/g, '\n')
+        .trim();
+
+      response.status(status).json({
+        success: false,
+        message: formattedMessage,
+        data: null
+      });
+    } else {
+      response.status(status).json({
+        success: false,
+        message: exception.message || 'Erro interno do servidor',
+        data: null
+      });
+    }
   }
 }

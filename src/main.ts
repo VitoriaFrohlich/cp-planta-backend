@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import detect from 'detect-port';
 import { AllExceptionsFilter } from './config/exceptions.js';
-import { ResponseFormatInterceptor } from './config/interceptor.js';
+import { ResponseFormatInterceptor } from './config/interceptor.response.js';
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');

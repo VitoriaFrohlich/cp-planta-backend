@@ -82,7 +82,7 @@ export class ProductionStepsRepository {
     return productionStepResponse;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number, updated_by: string): Promise<void> {
     if (!id) {
       throw new Error('ID not found');
     }
@@ -95,25 +95,19 @@ export class ProductionStepsRepository {
       where: { id },
       data: {
         active: false,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }
 
-  async reactivate(id: number): Promise<void> {
-    if (!id) {
-      throw new Error('ID not found');
-    }
-    const existingCategory = await this.findById(id);
-    if (!existingCategory) {
-      throw new Error('Category not found');
-    }
-
+  async reactivate(id: number, updated_by: string): Promise<void> {
     await this.prisma.production_order_steps.update({
       where: { id },
       data: {
         active: true,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }

@@ -13,8 +13,8 @@ export class Product {
   active: boolean;
   created_at: Date;
   updated_at: Date;
-  created_by: number;
-  updated_by: number;
+  created_by: string;
+  updated_by: string;
   // relationships - fazer na sequencia
   //   prices: Price[];
   //   categories: Category;

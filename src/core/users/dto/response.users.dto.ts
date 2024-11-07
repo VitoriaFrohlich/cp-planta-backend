@@ -3,7 +3,6 @@ import { Role, Gender } from '../../common/enums';
 export class ResponseUsersDto {
   id: number;
   email: string;
-  // password: string; // Do not return password
   role: Role;
   username: string;
   first_name: string;

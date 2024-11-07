@@ -8,5 +8,7 @@ export class Stock {
   stock_moviment: Stock_Moviment;
   created_at: Date;
   updated_at: Date;
+  created_by: string;
+  updated_by: string;
   stock_items: StockItem[];
 }

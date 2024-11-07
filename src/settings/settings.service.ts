@@ -39,8 +39,8 @@ export class SettingsService {
     return this.formatDate(config);
   }
 
-  async incrementLoteNumber(): Promise<void> {
-    const config = await this.settingsRepository.findByKey('lastLoteNumber');
+  async incrementBatchNumber(): Promise<void> {
+    const config = await this.settingsRepository.findByKey('lastBatchNumber');
     if (config) {
       const loteNumber = Number(config.value);
       config.value = (loteNumber + 1).toString();

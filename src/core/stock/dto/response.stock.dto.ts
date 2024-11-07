@@ -12,22 +12,24 @@ export class ResponseStockDto {
   quantity: number;
   unit_price: number;
   total_price: number;
-  lote: string;
+  batch: string;
   created_at: string;
   updated_at: string;
+  // created_by: string;
+  // updated_by: string;
 }
 
-export class ProductLot {
+export class ProductBatch {
   productId: number;
   description: string;
-  lots: {
-    lote: string;
+  batchs: {
+    batch: string;
     totalQuantity: number;
-    expiration: Date | null;
+    batch_expiration: Date | null;
   }[];
 }
 
 export class ResponseBatchDto {
-  lote: string;
-  expiration: Date | null;
+  batch: string;
+  batch_expiration: Date | null;
 }

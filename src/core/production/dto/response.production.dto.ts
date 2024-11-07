@@ -6,8 +6,8 @@ export class ResponseProductionDto {
   production_date: string;
   created_at: string;
   updated_at: string;
-  created_by: number;
-  updated_by: number;
+  created_by: string;
+  updated_by: string;
   Production_Status: Production_Status;
   production_items: ResponseProductionItem[];
 }
@@ -20,10 +20,10 @@ export class ResponseProductionItem {
   production_quantity_estimated: number;
   production_quantity_real: number;
   production_quantity_loss: number;
-  lote: string;
-  lote_expiration: string;
+  batch: string;
+  batch_expiration: string;
   created_at: string;
   updated_at: string;
-  created_by: number;
-  updated_by: number;
+  created_by: string;
+  updated_by: string;
 }

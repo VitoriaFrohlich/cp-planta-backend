@@ -8,26 +8,28 @@ import { UpdateProductionStepsDto } from './dto/update.production-steps.dto';
 import { ProductionStepsRepository } from './production-steps.repository';
 import { production_order_steps } from '@prisma/client';
 import { format } from 'date-fns';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class ProductionStepsService {
   constructor(
+    private readonly sessionService: SessionService,
     private readonly productionStepsRepository: ProductionStepsRepository
   ) {}
 
   async create(createProductionStepsDto: CreateProductionStepsDto) {
-    const existingProductionStep = await this.matchByData(
-      createProductionStepsDto.description
-    );
+    const currentUser = this.sessionService.getCurrentUser();
 
-    if (existingProductionStep.length > 0) {
-      throw new Error(
-        `ProductionStep already exists: ${JSON.stringify(existingProductionStep[0])}`
-      );
-    }
+    const createProductionSteps = {
+      ...createProductionStepsDto,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
+    };
 
     const createdProductionStep = await this.productionStepsRepository.create(
-      createProductionStepsDto
+      createProductionSteps
     );
 
     return this.formatProductionStepDate(createdProductionStep);
@@ -84,6 +86,7 @@ export class ProductionStepsService {
   }
 
   async reactivateProductionStep(id: number) {
+    const currentUser = this.sessionService.getCurrentUser();
     const productionStep = await this.productionStepsRepository.findById(id);
 
     if (!productionStep) {
@@ -95,7 +98,7 @@ export class ProductionStepsService {
         `ProductionStep with ID ${id} is already active`
       );
     }
-    return this.productionStepsRepository.reactivate(id);
+    return this.productionStepsRepository.reactivate(id, currentUser);
   }
 
   async matchByData(description: string) {
@@ -108,6 +111,7 @@ export class ProductionStepsService {
   }
 
   async update(id: number, updateProductionStepDto: UpdateProductionStepsDto) {
+    const currentUser = this.sessionService.getCurrentUser();
     const productionStep = await this.isValid(id);
 
     if (!productionStep) {
@@ -116,7 +120,8 @@ export class ProductionStepsService {
     const updatedProductionStepsDto = {
       ...updateProductionStepDto,
       updated_at: new Date(),
-      active: productionStep.active
+      active: productionStep.active,
+      updated_by: currentUser
     };
 
     const updatedProductionStep = await this.productionStepsRepository.update(
@@ -128,6 +133,7 @@ export class ProductionStepsService {
   }
 
   remove(id: number) {
-    return this.productionStepsRepository.delete(id);
+    const currentUser = this.sessionService.getCurrentUser();
+    return this.productionStepsRepository.delete(id, currentUser);
   }
 }

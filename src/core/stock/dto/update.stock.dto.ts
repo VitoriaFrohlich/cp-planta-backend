@@ -60,20 +60,6 @@ export class UpdateStockItemsDto extends PartialType(CreateStockItemsDto) {
   @ApiHideProperty()
   total_price?: number;
 
-  // @ApiProperty({
-  //   description: 'Lote',
-  //   example: '0001',
-  //   required: true
-  // })
-  // readonly lote?: string;
-
-  // @ApiProperty({
-  //   description: 'Expiration date',
-  //   example: '2021-05-01',
-  //   required: false
-  // })
-  // readonly expiration?: Date;
-
   @ApiProperty({
     description: 'Product id',
     example: '1',
