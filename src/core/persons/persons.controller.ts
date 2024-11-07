@@ -11,11 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { PersonsService } from './persons.service';
-import { CreatePersonsDto } from './dto/create-persons.dto';
-import { UpdatePersonsDto } from './dto/update-persons.dto';
-import { CreatePersonsSchema, UpdatePersonsSchema } from './dto/person.schema';
-import { ZodError } from 'zod';
-import { ResponsePersonsDto } from './dto/response-persons.dto';
+import { CreatePersonsDto } from './dto/create.persons.dto';
+import { UpdatePersonsDto } from './dto/update.persons.dto';
+import { ResponsePersonsDto } from './dto/response.persons.dto';
 
 @Controller('persons')
 export class PersonsController {
@@ -25,22 +23,6 @@ export class PersonsController {
   async create(
     @Body() createPersonsDto: CreatePersonsDto
   ): Promise<ResponsePersonsDto> {
-    const errors = [];
-
-    const nameValidation = CreatePersonsSchema.shape.name.safeParse(
-      createPersonsDto.name
-    );
-    if (!nameValidation.success) {
-      errors.push({
-        field: 'name',
-        message: nameValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
     const matchedPersons = await this.personsService.matchPersonByData(
       createPersonsDto.name
     );
@@ -114,8 +96,7 @@ export class PersonsController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updatePersonsDto: UpdatePersonsDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updatePersonsDto: UpdatePersonsDto
   ): Promise<ResponsePersonsDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -131,50 +112,9 @@ export class PersonsController {
       throw new BadRequestException(`Person ID ${id} is not active`);
     }
 
-    const allowedFields = Object.keys(UpdatePersonsSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdatePersonsDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['person_id', 'group_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdatePersonsSchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updatedPerson = await this.personsService.update(
       idNumber,
-      updateData as UpdatePersonsDto
+      updatePersonsDto
     );
 
     return {

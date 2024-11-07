@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { ProductLot } from './dto/response.stock.dto';
+import { ProductBatch } from './dto/response.stock.dto';
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -19,8 +19,8 @@ export class StockRepository {
         quantity: data.quantity,
         unit_price: data.unit_price,
         total_price: data.total_price,
-        lote: data.lote,
-        expiration: data.expiration,
+        batch: data.batch,
+        batch_expiration: data.batch_expiration,
         products: { connect: { id: data.product_id } },
         stock: { connect: { id: data.stock_id } },
         stock_location: data.stock_location_id
@@ -58,8 +58,8 @@ export class StockRepository {
         quantity: data.quantity,
         unit_price: data.unit_price,
         total_price: data.total_price,
-        lote: data.lote,
-        expiration: data.expiration,
+        batch: data.batch,
+        batch_expiration: data.batch_expiration,
         ...(data.stock_location_id
           ? { stock_location: { connect: { id: data.stock_location_id } } }
           : {}),
@@ -96,11 +96,11 @@ export class StockRepository {
     });
   }
 
-  async checkStock(product_id: number, lote: string): Promise<number> {
+  async checkStock(product_id: number, batch: string): Promise<number> {
     const inputs = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
-        lote: lote,
+        batch: batch,
         stock: {
           stock_moviment: Stock_Moviment.INPUT
         }
@@ -115,7 +115,7 @@ export class StockRepository {
     const outputs = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
-        lote: lote,
+        batch: batch,
         stock: {
           stock_moviment: Stock_Moviment.OUTPUT
         }
@@ -130,7 +130,7 @@ export class StockRepository {
     const reserved = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
-        lote: lote,
+        batch: batch,
         stock: {
           stock_moviment: Stock_Moviment.RESERVED
         }
@@ -145,7 +145,7 @@ export class StockRepository {
     const transit = await this.prisma.stock_items.aggregate({
       where: {
         product_id: product_id,
-        lote: lote,
+        batch: batch,
         stock: {
           stock_moviment: Stock_Moviment.TRANSIT
         }
@@ -169,7 +169,7 @@ export class StockRepository {
     const validOrderFields = [
       'id',
       'product_id',
-      'lote',
+      'batch',
       'quantity',
       'stock_id',
       'sequence',
@@ -188,7 +188,7 @@ export class StockRepository {
           select: {
             id: true,
             product_id: true,
-            lote: true,
+            batch: true,
             quantity: true,
             stock_id: true,
             sequence: true,
@@ -258,8 +258,8 @@ export class StockRepository {
                 sku: true
               }
             },
-            lote: true,
-            expiration: true,
+            batch: true,
+            batch_expiration: true,
             quantity: true,
             unit_price: true,
             total_price: true,
@@ -298,7 +298,7 @@ export class StockRepository {
     });
   }
 
-  async findAllWithLots(orderBy: string): Promise<stock_items[]> {
+  async findAllWithBatchs(orderBy: string): Promise<stock_items[]> {
     const validOrderFields = ['product_id'];
 
     if (!validOrderFields.includes(orderBy)) {
@@ -329,12 +329,12 @@ export class StockRepository {
     });
   }
 
-  async teste(orderBy: 'asc' | 'desc'): Promise<ProductLot[]> {
-    const lots = await this.prisma.stock_items.findMany({
+  async teste(orderBy: 'asc' | 'desc'): Promise<ProductBatch[]> {
+    const batchs = await this.prisma.stock_items.findMany({
       select: {
         product_id: true,
-        lote: true,
-        expiration: true,
+        batch: true,
+        batch_expiration: true,
         quantity: true
       },
       orderBy: {
@@ -342,86 +342,87 @@ export class StockRepository {
       }
     });
 
-    const productLotSummary: Record<number, ProductLot> = {};
+    const productBatchSummary: Record<number, ProductBatch> = {};
 
-    for (const lot of lots) {
-      const productId = lot.product_id;
-      const lote = lot.lote || 'sem lote';
-      const expiration = lot.expiration || new Date('1900-01-01');
+    for (const myBatch of batchs) {
+      const productId = myBatch.product_id;
+      const batch = myBatch.batch || 'sem batch';
+      const batch_expiration =
+        myBatch.batch_expiration || new Date('1900-01-01');
 
-      if (!productLotSummary[productId]) {
+      if (!productBatchSummary[productId]) {
         const description = await this.prisma.products.findUnique({
           where: { id: productId },
           select: { description: true }
         });
 
-        productLotSummary[productId] = {
+        productBatchSummary[productId] = {
           productId,
           description: description?.description || '',
-          lots: []
+          batchs: []
         };
       }
 
-      productLotSummary[productId].lots.push({
-        lote: lote,
+      productBatchSummary[productId].batchs.push({
+        batch: batch,
         totalQuantity: 0,
-        expiration: expiration
+        batch_expiration: batch_expiration
       });
     }
 
-    return Object.values(productLotSummary);
+    return Object.values(productBatchSummary);
   }
 
-  async getAllProductLots(
+  async getAllProductBatchs(
     orderBy: 'asc' | 'desc' = 'asc',
     origin?: 'RAW_MATERIAL' | 'MADE'
-  ): Promise<ProductLot[]> {
+  ): Promise<ProductBatch[]> {
     const productFilter = origin ? { origin } : {};
 
-    const lots = await this.prisma.stock_items.findMany({
-      distinct: ['product_id', 'lote'],
+    const batchs = await this.prisma.stock_items.findMany({
+      distinct: ['product_id', 'batch'],
       where: {
         products: productFilter
       },
       select: {
         product_id: true,
-        lote: true,
-        expiration: true,
+        batch: true,
+        batch_expiration: true,
         quantity: true
       },
       orderBy: { product_id: orderBy }
     });
 
-    const productLotSummary: Record<number, ProductLot> = {};
+    const productBatchSummary: Record<number, ProductBatch> = {};
 
-    for (const lot of lots) {
-      const productId = lot.product_id;
-      const lote = lot.lote;
+    for (const myBatch of batchs) {
+      const productId = myBatch.product_id;
+      const batch = myBatch.batch;
 
       if (typeof productId !== 'number') {
         console.error(`Product ID ${productId} tem um formato inválido!`);
       }
-      if (!productLotSummary[productId]) {
+      if (!productBatchSummary[productId]) {
         const description = await this.prisma.products.findUnique({
           where: { id: productId },
           select: { description: true }
         });
 
-        productLotSummary[productId] = {
+        productBatchSummary[productId] = {
           productId,
           description: description?.description || '',
-          lots: []
+          batchs: []
         };
       }
-      const availableStock = await this.checkStock(productId, lote);
+      const availableStock = await this.checkStock(productId, batch);
 
-      productLotSummary[productId].lots.push({
-        lote: lote,
+      productBatchSummary[productId].batchs.push({
+        batch: batch,
         totalQuantity: availableStock,
-        expiration: lot.expiration
+        batch_expiration: myBatch.batch_expiration
       });
     }
 
-    return Object.values(productLotSummary);
+    return Object.values(productBatchSummary);
   }
 }

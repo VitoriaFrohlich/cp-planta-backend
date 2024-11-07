@@ -3,17 +3,23 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dto/create.products.dto';
+import { UpdateProductDto } from './dto/update.products.dto';
 import { ProductsRepository } from './products.repository';
 import { products } from '@prisma/client';
 import { format } from 'date-fns';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly productsRepository: ProductsRepository) {}
+  constructor(
+    private readonly sessionService: SessionService,
+    private readonly productsRepository: ProductsRepository
+  ) {}
 
   async create(createProductDto: CreateProductDto) {
+    const currentUser = this.sessionService.getCurrentUser();
+
     const existingProduct = await this.matchProductByData(
       createProductDto.code,
       createProductDto.description,
@@ -26,8 +32,15 @@ export class ProductsService {
       );
     }
 
-    const createdProduct =
-      await this.productsRepository.create(createProductDto);
+    const createProduct = {
+      ...createProductDto,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
+    };
+
+    const createdProduct = await this.productsRepository.create(createProduct);
 
     return this.formatProductDate(createdProduct);
   }
@@ -89,6 +102,7 @@ export class ProductsService {
   }
 
   async reactivateProduct(id: number) {
+    const currentUser = this.sessionService.getCurrentUser();
     const product = await this.productsRepository.findById(id);
 
     if (!product) {
@@ -101,7 +115,8 @@ export class ProductsService {
 
     const reactivatedProduct = await this.productsRepository.update(id, {
       active: true,
-      updated_at: new Date()
+      updated_at: new Date(),
+      updated_by: currentUser
     });
 
     return this.formatProductDate(reactivatedProduct);
@@ -117,6 +132,7 @@ export class ProductsService {
     return matchedProduct.map(product => this.formatProductDate(product));
   }
   async update(id: number, updateProductDto: UpdateProductDto) {
+    const currentUser = this.sessionService.getCurrentUser();
     const product = await this.isValid(id);
 
     if (!product) {
@@ -125,7 +141,8 @@ export class ProductsService {
     const updatedProductDto = {
       ...updateProductDto,
       updated_at: new Date(),
-      active: product.active
+      active: product.active,
+      updated_by: currentUser
     };
 
     const updatedPorduct = await this.productsRepository.update(
@@ -137,7 +154,8 @@ export class ProductsService {
   }
 
   async remove(id: number) {
+    const currentUser = this.sessionService.getCurrentUser();
     await this.isValid(id);
-    await this.productsRepository.delete(id);
+    await this.productsRepository.delete(id, currentUser);
   }
 }

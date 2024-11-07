@@ -3,26 +3,31 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreatePersonsDto } from './dto/create-persons.dto';
-import { UpdatePersonsDto } from './dto/update-persons.dto';
+import { CreatePersonsDto } from './dto/create.persons.dto';
+import { UpdatePersonsDto } from './dto/update.persons.dto';
 import { PersonsRepository } from './persons.repository';
 import { persons } from '@prisma/client';
 import { format } from 'date-fns';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class PersonsService {
-  constructor(private readonly personsRepository: PersonsRepository) {}
+  constructor(
+    private readonly sessionService: SessionService,
+    private readonly personsRepository: PersonsRepository
+  ) {}
 
   async create(createPersonsDto: CreatePersonsDto) {
-    const existingPerson = await this.matchPersonByData(createPersonsDto.name);
+    const currentUser = this.sessionService.getCurrentUser();
 
-    if (existingPerson.length > 0) {
-      throw new Error(
-        `Person already exists: ${JSON.stringify(existingPerson[0])}`
-      );
-    }
-
-    const createdPerson = await this.personsRepository.create(createPersonsDto);
+    const createPerson = {
+      ...createPersonsDto,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
+    };
+    const createdPerson = await this.personsRepository.create(createPerson);
 
     return this.formatPersonDate(createdPerson);
   }
@@ -68,6 +73,7 @@ export class PersonsService {
   }
 
   async reactivatePerson(id: number) {
+    const currentUser = this.sessionService.getCurrentUser();
     const person = await this.personsRepository.findById(id);
 
     if (!person) {
@@ -77,7 +83,7 @@ export class PersonsService {
     if (person.active) {
       throw new BadRequestException(`Person with ID ${id} is already active`);
     }
-    return this.personsRepository.reactivate(id);
+    return this.personsRepository.reactivate(id, currentUser);
   }
 
   async matchPersonByData(name: string) {
@@ -87,6 +93,7 @@ export class PersonsService {
   }
 
   async update(id: number, updatePersonDto: UpdatePersonsDto) {
+    const currentUser = this.sessionService.getCurrentUser();
     const person = await this.isValid(id);
 
     if (!person) {
@@ -95,7 +102,8 @@ export class PersonsService {
     const updatedPersonsDto = {
       ...updatePersonDto,
       updated_at: new Date(),
-      active: person.active
+      active: person.active,
+      updated_by: currentUser
     };
 
     const updatedPerson = await this.personsRepository.update(
@@ -107,6 +115,7 @@ export class PersonsService {
   }
 
   remove(id: number) {
-    return this.personsRepository.delete(id);
+    const currentUser = this.sessionService.getCurrentUser();
+    return this.personsRepository.delete(id, currentUser);
   }
 }

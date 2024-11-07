@@ -12,14 +12,15 @@ export class CreateProductionDto {
 }
 
 export class CreateProductionItemsDto {
+  readonly id: number;
   readonly production_order_id: number;
   readonly sequence: number;
   readonly final_product_id: number;
   readonly production_quantity_estimated: number;
   readonly production_quantity_real: number;
   readonly production_quantity_loss: number;
-  readonly lote: string;
-  readonly lote_expiration: string;
+  readonly batch: string;
+  readonly batch_expiration: string;
   readonly created_at: Date;
   readonly updated_at: Date;
   readonly created_by: string;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma/prisma.service'; // Adjust the import path as necessary
-import { Prisma, stock_location } from '@prisma/client'; // Import types from Prisma client
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { Prisma, stock_location } from '@prisma/client';
 
 @Injectable()
 export class StockLocationsRepository {

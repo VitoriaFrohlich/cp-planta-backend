@@ -2,8 +2,8 @@ export class StockLocation {
   id: number;
   description: string;
   active: boolean;
-  created_at: boolean;
-  updated_at: boolean;
-  created_by: number;
-  updated_by: number;
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+  updated_by: string;
 }

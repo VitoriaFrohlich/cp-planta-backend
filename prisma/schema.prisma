@@ -97,7 +97,7 @@ model products {
   description               String                      @db.VarChar(255)
   code                      String                      @unique @db.VarChar(255)
   sku                       String                      @unique @db.VarChar(255)
-  unit_measure              Unit_Measure                @default(UN)
+  unit_measure              Unit_Measure                @default(KG)
   category_id               Int                         @default(1)
   group_id                  Int                         @default(1)
   supplier_id               Int?
@@ -204,8 +204,8 @@ model stock_items {
   quantity          Float
   unit_price        Float
   total_price       Float
-  lote              String?
-  expiration        DateTime?
+  batch             String?
+  batch_expiration  DateTime?
   images            Int[]
   supplier          Int?
   costumer          Int?
@@ -251,8 +251,8 @@ model production_orders_items {
   production_quantity_estimated Float
   production_quantity_real      Float
   production_quantity_loss      Float
-  lote                          String?           @db.VarChar(255)
-  lote_expiration               DateTime?
+  batch                          String?           @db.VarChar(255)
+  batch_expiration               DateTime?
   created_at                    DateTime          @default(now()) @db.Timestamp(6)
   updated_at                    DateTime          @default(now()) @db.Timestamp(6)
   created_by                    String?
@@ -399,8 +399,8 @@ model groups {
   active       Boolean    @default(true)
   created_at   DateTime   @default(now()) @db.Timestamp(6)
   updated_at   DateTime   @default(now()) @db.Timestamp(6)
-  created_by   Int?
-  updated_by   Int?
+  created_by   String?
+  updated_by   String?
   groups       groups?    @relation("groupsTogroups", fields: [father_id], references: [id])
   other_groups groups[]   @relation("groupsTogroups")
   products     products[] @relation("groups")

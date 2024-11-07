@@ -3,6 +3,6 @@ export class Occurrence {
   description: string;
   created_at: Date;
   updated_at: Date;
-  created_by: number;
-  updated_by: number;
+  created_by: string;
+  updated_by: string;
 }

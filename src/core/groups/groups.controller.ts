@@ -11,11 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
-import { CreateGroupsDto } from './dto/create-groups.dto';
-import { UpdateGroupsDto } from './dto/update-groups.dto';
-import { CreateGroupSchema, UpdateGroupSchema } from './dto/group.schema';
-import { ZodError } from 'zod';
-import { ResponseGroupsDto } from './dto/groups-response.dto';
+import { CreateGroupsDto } from './dto/create.groups.dto';
+import { UpdateGroupsDto } from './dto/update.groups.dto';
+import { ResponseGroupsDto } from './dto/response.groups.dto';
 
 @Controller('groups')
 export class GroupsController {
@@ -25,22 +23,6 @@ export class GroupsController {
   async create(
     @Body() createGroupDto: CreateGroupsDto
   ): Promise<ResponseGroupsDto> {
-    const errors = [];
-
-    const descriptionValidation = CreateGroupSchema.shape.description.safeParse(
-      createGroupDto.description
-    );
-    if (!descriptionValidation.success) {
-      errors.push({
-        field: 'description',
-        message: descriptionValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
     const matchedGroups = await this.groupsService.matchGroupByData(
       createGroupDto.description
     );
@@ -114,8 +96,7 @@ export class GroupsController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateGroupsDto: UpdateGroupsDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateGroupsDto: UpdateGroupsDto
   ): Promise<ResponseGroupsDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -132,50 +113,9 @@ export class GroupsController {
       throw new BadRequestException(`Group ID ${id} is not active`);
     }
 
-    const allowedFields = Object.keys(UpdateGroupSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateGroupsDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['category_id', 'group_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdateGroupSchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updatedGroup = await this.groupsService.update(
       idNumber,
-      updateData as UpdateGroupsDto
+      updateGroupsDto
     );
     return {
       id: updatedGroup.id,

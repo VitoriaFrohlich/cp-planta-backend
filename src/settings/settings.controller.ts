@@ -12,9 +12,7 @@ import {
 } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { ResponseSettingsDto } from './dto/settings.response.dto';
-import { ZodError } from 'zod';
 import { UpdateSettingsDto } from './dto/update.settings.dto';
-import { UpdateSettingsSchema } from './dto/schema.settings';
 
 @Controller('settings')
 export class SettingsController {
@@ -64,8 +62,7 @@ export class SettingsController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateSettingsDto: UpdateSettingsDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateSettingsDto: UpdateSettingsDto
   ): Promise<ResponseSettingsDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -80,36 +77,9 @@ export class SettingsController {
       throw new BadRequestException(`Settings ID ${id} is not active`);
     }
 
-    const allowedFields = Object.keys(UpdateSettingsSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateSettingsDto> = {};
-    for (const field of fieldsToUpdate) {
-      if (allowedFields.includes(field)) {
-        updateData[field] = queryParams[field];
-      } else {
-        throw new BadRequestException(
-          `Field ${field} is not allowed for update`
-        );
-      }
-    }
-
-    const validation = UpdateSettingsSchema.safeParse(updateData);
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updated = await this.settingsService.update(
       idNumber,
-      updateData as UpdateSettingsDto
+      updateSettingsDto
     );
 
     return {

@@ -13,10 +13,6 @@ import { CompositionsService } from './compositions.service';
 import { CreateCompositionsDto } from './dto/create.compositions.dto';
 import { UpdateCompositionsDto } from './dto/update.compositions.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import {
-  CreateCompositionsSchema,
-  UpdateCompositionsSchema
-} from './dto/compositions.schema';
 import { ResponseCompositionsDto } from './dto/response.compositions.dto';
 
 @Controller('compositions')
@@ -31,21 +27,6 @@ export class CompositionsController {
       throw new BadRequestException('Items must be an array');
     }
 
-    const validationResult = CreateCompositionsSchema.safeParse(
-      createCompositionsDto
-    );
-
-    if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
-        field: err.path.join('.'),
-        message: err.message
-      }));
-
-      throw new BadRequestException({
-        message: 'Validation errors',
-        errors
-      });
-    }
     const created = await this.compositionsService.create(
       createCompositionsDto
     );
@@ -159,22 +140,6 @@ export class CompositionsController {
       throw new BadRequestException('Items must be an array');
     }
 
-    const validationResult = UpdateCompositionsSchema.safeParse(
-      updateCompositionsDto
-    );
-
-    if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
-        field: err.path.join('.'),
-        message: err.message
-      }));
-
-      throw new BadRequestException({
-        message: 'Validation errors',
-        errors
-      });
-    }
-
     const updated = await this.compositionsService.update(
       idNumber,
       updateCompositionsDto
@@ -209,5 +174,14 @@ export class CompositionsController {
     return {
       message: `Compositions ID ${idNumber} permanently removed successfully`
     };
+  }
+
+  @Get('steps-by-product/:id')
+  async getByProduct(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return await this.compositionsService.getByProduct(idNumber);
   }
 }

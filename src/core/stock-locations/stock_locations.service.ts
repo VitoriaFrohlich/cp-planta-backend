@@ -4,31 +4,31 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { StockLocationsRepository } from './stock-locations.repository';
-import { CreateStockLocationDto } from './dto/create-stock-locations.dto';
+import { CreateStockLocationDto } from './dto/create.stock-locations.dto';
 import { stock_location } from '@prisma/client';
 import { format } from 'date-fns';
-import { UpdateStockLocationDto } from './dto/update-stock-locations.dto';
+import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class StockLocationsService {
   constructor(
+    private readonly sessionService: SessionService,
     private readonly stockLocationRepository: StockLocationsRepository
   ) {}
 
   async create(createStockLocationDto: CreateStockLocationDto) {
-    const existingStockLocation = await this.matchStockLocationByData(
-      createStockLocationDto.description
-    );
+    const currentUser = this.sessionService.getCurrentUser();
 
-    if (existingStockLocation.length > 0) {
-      throw new Error(
-        `Stock location already exists: ${JSON.stringify(existingStockLocation[0])}`
-      );
-    }
-
-    const createdStockLocation = await this.stockLocationRepository.create(
-      createStockLocationDto
-    );
+    const createStockLocation = {
+      ...createStockLocationDto,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
+    };
+    const createdStockLocation =
+      await this.stockLocationRepository.create(createStockLocation);
 
     return this.formatStockLocationDate(createdStockLocation);
   }
@@ -108,10 +108,7 @@ export class StockLocationsService {
   }
 
   async update(id: number, updateStockLocationDto: UpdateStockLocationDto) {
-    const stockLocation = await this.isValid(id);
-    if (!stockLocation) {
-      throw new Error(`Stock location not found: ${id}`);
-    }
+    const currentUser = this.sessionService.getCurrentUser();
     if (updateStockLocationDto.description) {
       const existingStockLocation = await this.matchStockLocationByData(
         updateStockLocationDto.description
@@ -128,7 +125,8 @@ export class StockLocationsService {
     const updatedStockLocationDto = {
       ...updateStockLocationDto,
       updated_at: new Date(),
-      active: stockLocation.active
+      active: updateStockLocationDto.active,
+      updated_by: currentUser
     };
 
     const updatedStockLocation = await this.stockLocationRepository.update(

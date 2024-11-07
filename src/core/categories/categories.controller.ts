@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Controller,
   Get,
@@ -11,14 +12,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
-import { CreateCategoriesDto } from './dto/create-categories.dto';
-import { UpdateCategoriesDto } from './dto/update-categories.dto';
-import {
-  CreateCategorySchema,
-  UpdateCategorySchema
-} from './dto/category.schema';
-import { ZodError } from 'zod';
-import { ResponseCategoriesDto } from './dto/response-categories.dto';
+import { ResponseCategoriesDto } from './dto/response.categories.dto';
+import { CreateCategoriesDto } from './dto/create.categories.dto';
+import { UpdateCategoriesDto } from './dto/update.categories.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -28,23 +24,6 @@ export class CategoriesController {
   async create(
     @Body() createCategoriesDto: CreateCategoriesDto
   ): Promise<ResponseCategoriesDto> {
-    const errors = [];
-
-    const descriptionValidation =
-      CreateCategorySchema.shape.description.safeParse(
-        createCategoriesDto.description
-      );
-    if (!descriptionValidation.success) {
-      errors.push({
-        field: 'description',
-        message: descriptionValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
     const matchedCategories = await this.categoriesService.matchCategoryByData(
       createCategoriesDto.description
     );
@@ -64,7 +43,6 @@ export class CategoriesController {
         'Category already exists. Try update it instead'
       );
     }
-
     const createdCategory =
       await this.categoriesService.create(createCategoriesDto);
     return {
@@ -119,8 +97,7 @@ export class CategoriesController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateCategoriesDto: UpdateCategoriesDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateCategoriesDto: UpdateCategoriesDto
   ): Promise<ResponseCategoriesDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -136,50 +113,9 @@ export class CategoriesController {
       throw new BadRequestException(`Category ID ${id} is not active`);
     }
 
-    const allowedFields = Object.keys(UpdateCategorySchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateCategoriesDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['category_id', 'group_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdateCategorySchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updatedCategory = await this.categoriesService.update(
       idNumber,
-      updateData as UpdateCategoriesDto
+      updateCategoriesDto
     );
 
     return {
