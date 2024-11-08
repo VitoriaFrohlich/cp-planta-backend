@@ -392,15 +392,16 @@ VALUES
     (5, 'Incidente de Segurança', 'Ocorreu um incidente de segurança no armazém.', 5);
 
 -- Insert into compositions
-INSERT INTO "compositions" ("final_product", "description")
+
+INSERT INTO "compositions" ("final_product", "description", "production_steps", "created_by", "updated_by")
 VALUES 
-(8,'batata frita'),
-(9,'cenoura cubinhos'),
-(10,'aipim descascado'),
-(11,'mirtilos selecionados'),
-(12,'laranja fatiada'),
-(13,'mix de verduras'),
-(14,'suco natural de uva');	
+(8, 'batata frita', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(9,'cenoura cubinhos', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(10,'aipim descascado', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(11,'mirtilos selecionados', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(12,'laranja fatiada', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(13,'mix de verduras', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(14,'suco natural de uva', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root');	
 
 -- Insert into compositions_items
 INSERT INTO "composition_items" ("composition_id", "sequence", "raw_product", "quantity")

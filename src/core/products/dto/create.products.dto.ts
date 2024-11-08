@@ -1,8 +1,5 @@
 import { Origin, Unit_Measure } from '../../common/enums';
 import { ApiProperty } from '@nestjs/swagger';
-// import { categories } from 'src/core/categories/entities/categories.entity';
-// import { groups } from 'src/core/groups/entities/groups.entity';
-// import { persons } from 'src/core/persons/persons.entity';
 
 export class CreateProductDto {
   @ApiProperty({

@@ -13,7 +13,7 @@ import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import { Stock_Moviment } from '../common/enums';
+import { Origin, Stock_Moviment } from '../common/enums';
 import { ResponseBatchDto } from './dto/response.stock.dto';
 
 @Controller('stock')
@@ -68,6 +68,28 @@ export class StockController {
     @Query('origin') origin?: 'RAW_MATERIAL' | 'MADE'
   ) {
     const result = await this.stockService.getAllProductLots(orderBy, origin);
+    return result;
+  }
+
+  @Get('batchs-cat-raw')
+  async getAllProductLotsByCategoryRaw(
+    @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc'
+  ) {
+    const result = await this.stockService.getAllProductLotsByCategory(
+      orderBy,
+      Origin.RAW_MATERIAL
+    );
+    return result;
+  }
+
+  @Get('batchs-cat-made')
+  async getAllProductLotsByCategoryMade(
+    @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc'
+  ) {
+    const result = await this.stockService.getAllProductLotsByCategory(
+      orderBy,
+      Origin.MADE
+    );
     return result;
   }
 

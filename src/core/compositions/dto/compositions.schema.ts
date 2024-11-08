@@ -1,46 +1,37 @@
 import * as z from 'zod';
+const CompositionItemSchema = z.object({
+  raw_product: z.number().int().positive('Product is required'),
+  quantity: z.number().int().positive('Quantity is required')
+});
+
+export const StepSchema = z.object({
+  description: z.string().min(3, 'Description is required')
+});
 
 export const CreateCompositionsSchema = z.object({
   final_product: z
     .number()
     .int()
     .positive('Final Product is required')
-    .describe('Produto final incluido na composição.'),
-  description: z.string().min(3, 'Description is required').optional(),
-  created_at: z.date().optional().describe('Date of Creation'),
-  updated_at: z.date().optional(),
-  created_by: z.string().min(3, 'Created by is required').optional(),
-  updated_by: z.string().min(3, 'Updated by is required').optional(),
-  production_steps: z.object({}),
-  composition_items: z.array(
-    z.object({
-      composition_id: z
-        .number()
-        .int()
-        .positive('Composition is required')
-        .optional(),
-      sequence: z.number().int().positive('Sequence is required').optional(),
-      raw_product: z.number().int().positive('Product is required'),
-      quantity: z.number().int().positive('Quantity is required'),
-      created_at: z.date().optional(),
-      updated_at: z.date().optional(),
-      created_by: z.string().min(3, 'Created by is required').optional(),
-      updated_by: z.string().min(3, 'Updated by is required').optional()
-    })
-  )
+    .describe('Produto final incluído na composição.'),
+  production_steps: z
+    .record(StepSchema)
+    .describe('Passos de produção da composição.'),
+  composition_items: z.array(CompositionItemSchema)
+});
+
+const UpdateCompositionItemSchema = z.object({
+  quantity: z.number().int().positive('Quantity is required')
 });
 
 export const UpdateCompositionsSchema = z.object({
-  description: z.string().min(3, 'Description is required'),
-  updated_at: z.date().optional(),
-  updated_by: z.string().min(3, 'Updated by is required').optional(),
-  production_steps: z.object({}),
+  description: z.string().min(3, 'Description is required').optional(),
+  production_steps: z
+    .record(StepSchema)
+    .describe('Passos de produção da composição.'),
   composition_items: z.array(
-    z.object({
-      id: z.number().int().positive('Quantity is required').optional(),
-      quantity: z.number().int().positive('Quantity is required'),
-      updated_at: z.date().optional(),
-      updated_by: z.string().min(3, 'Updated by is required').optional()
+    UpdateCompositionItemSchema.extend({
+      id: z.number().int().positive('Id is required').optional()
     })
   )
 });

@@ -13,6 +13,7 @@ import { stock } from '@prisma/client';
 import { Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
+import { ResponseStockDto } from './dto/response.stock.dto';
 
 @Injectable()
 export class StockService {
@@ -161,33 +162,29 @@ export class StockService {
         }
       };
     } catch (error) {
-      console.error('Error during item insertion:', (error as Error).message); // Log do erro capturado
-
       if (stockDocument?.id) {
         try {
           await this.stockRepository.deleteStock(stockDocument.id);
         } catch (deleteError) {
-          console.error(
-            'Error removing stock document:',
-            (deleteError as Error).message
-          );
+          return {
+            status: 'error',
+            message: `Error removing stock document: ${(deleteError as Error).message}`
+          };
         }
       }
-
       return {
-        success: false,
-        message:
-          'Erro ao criar itens do documento de estoque. Documento foi removido.'
+        status: 'error',
+        message: `Error during item insertion: ${(error as Error).message}`
       };
     }
   }
 
-  async getLote(stockMoviment: Stock_Moviment): Promise<[string, Date]> {
+  async getLote(stockMoviment: Stock_Moviment): Promise<[string, string]> {
     const batchGenerated = await this.batchService.generateBatch(
       stockMoviment === Stock_Moviment.INPUT ? 'INPUT' : 'OUTPUT'
     );
     const [batch, batch_expiration] = batchGenerated.split('-');
-    return [batch, new Date(batch_expiration)];
+    return [batch, formatDate(new Date(batch_expiration))];
   }
 
   private async validateStock(
@@ -210,33 +207,77 @@ export class StockService {
     return estoque || 0;
   }
 
-  async findAll(orderBy: string): Promise<
-    (Omit<stock, 'created_at' | 'updated_at'> & {
-      created_at: string;
-      updated_at: string;
-    })[]
-  > {
-    const findedStock = await this.stockRepository.findAllStockItems(orderBy);
-    return findedStock.map(stock => this.formatDate(stock));
+  async findAll(orderBy: string): Promise<ResponseStockDto[]> {
+    const stock = await this.stockRepository.findAllStockItems(orderBy);
+
+    return stock.map(stock => ({
+      id: stock.id,
+      document_date: formatDate(stock.document_date),
+      document_number: stock.document_number,
+      stock_moviment: stock.stock_moviment as Stock_Moviment,
+      created_at: formatDate(stock.created_at),
+      updated_at: formatDate(stock.updated_at),
+      stock_items: (stock['stock_items'] || []).map(item => ({
+        id: item.id,
+        sequence: item.sequence,
+        product_id: item.product_id,
+        description: item.products?.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price,
+        batch: item.batch,
+        batch_expiration: formatDate(item.batch_expiration),
+        observation: item.observation,
+        supplier: item.supplier,
+        costumer: item.costumer,
+        stock_location_id: item.stock_location_id,
+        stock_location: item.stock_locations?.description,
+        created_at: formatDate(item.created_at),
+        updated_at: formatDate(item.updated_at)
+      }))
+    }));
   }
 
-  async findOne(id: number): Promise<
-    Omit<stock, 'created_at' | 'updated_at'> & {
-      created_at: string;
-      updated_at: string;
-    }
-  > {
-    const order = await this.stockRepository.findById(id);
+  async findOne(id: number): Promise<ResponseStockDto> {
+    const stock = await this.stockRepository.findById(id);
 
-    if (!order) {
+    if (!stock) {
       throw new NotFoundException(`Stock with ID ${id} not found`);
     }
-
-    return this.formatDate(order);
+    return {
+      id: stock.id,
+      document_date: formatDate(stock.document_date),
+      document_number: stock.document_number,
+      stock_moviment: stock.stock_moviment as Stock_Moviment,
+      created_at: formatDate(stock.created_at),
+      updated_at: formatDate(stock.updated_at),
+      stock_items: (stock['stock_items'] || []).map(item => ({
+        id: item.id,
+        sequence: item.sequence,
+        product_id: item.product_id,
+        description: item.products?.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price,
+        batch: item.batch,
+        batch_expiration: formatDate(item.batch_expiration),
+        observation: item.observation,
+        supplier: item.supplier,
+        costumer: item.costumer,
+        stock_location_id: item.stock_location_id,
+        stock_location: item.stock_locations?.description,
+        created_at: formatDate(item.created_at),
+        updated_at: formatDate(item.updated_at)
+      }))
+    };
   }
 
   async getAllProductLots(orderBy, origin) {
     return this.stockRepository.getAllProductBatchs(orderBy, origin);
+  }
+
+  async getAllProductLotsByCategory(orderBy, origin) {
+    return this.stockRepository.getAllProductBatchsByCategory(orderBy, origin);
   }
 
   async update(id: number, updateStockDto: UpdateStockDto) {

@@ -288,7 +288,7 @@ CREATE TABLE "compositions" (
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
     "updated_by" TEXT,
-    "production_steps" JSON,
+    "production_steps" JSONB,
 
     CONSTRAINT "compositions_pkey" PRIMARY KEY ("id")
 );

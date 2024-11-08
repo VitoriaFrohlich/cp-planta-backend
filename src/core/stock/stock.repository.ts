@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { ProductBatch } from './dto/response.stock.dto';
+import { ProductBatch, ProductBatchByCategory } from './dto/response.stock.dto';
+import { formatDate } from '../common/utils';
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -156,9 +157,7 @@ export class StockRepository {
     });
 
     const totalTransit = transit._sum.quantity || 0;
-    // total
     const totalUndisponible = totalOutput + totalReserved + totalTransit;
-
     const totalQuantity =
       totalInput - totalUndisponible > 0 ? totalInput - totalUndisponible : 0;
 
@@ -187,11 +186,28 @@ export class StockRepository {
         stock_items: {
           select: {
             id: true,
-            product_id: true,
-            batch: true,
-            quantity: true,
-            stock_id: true,
             sequence: true,
+            product_id: true,
+            products: {
+              select: {
+                description: true
+              }
+            },
+            batch: true,
+            batch_expiration: true,
+            quantity: true,
+            unit_price: true,
+            total_price: true,
+            suppliers: {
+              select: {
+                name: true
+              }
+            },
+            stock_location: {
+              select: {
+                description: true
+              }
+            },
             created_at: true,
             updated_at: true
           },
@@ -366,7 +382,7 @@ export class StockRepository {
       productBatchSummary[productId].batchs.push({
         batch: batch,
         totalQuantity: 0,
-        batch_expiration: batch_expiration
+        batch_expiration: formatDate(batch_expiration)
       });
     }
 
@@ -400,7 +416,7 @@ export class StockRepository {
       const batch = myBatch.batch;
 
       if (typeof productId !== 'number') {
-        console.error(`Product ID ${productId} tem um formato inválido!`);
+        throw new Error(`Product ID ${productId} tem um formato inválido!`);
       }
       if (!productBatchSummary[productId]) {
         const description = await this.prisma.products.findUnique({
@@ -419,10 +435,79 @@ export class StockRepository {
       productBatchSummary[productId].batchs.push({
         batch: batch,
         totalQuantity: availableStock,
-        batch_expiration: myBatch.batch_expiration
+        batch_expiration: formatDate(myBatch.batch_expiration)
       });
     }
 
     return Object.values(productBatchSummary);
+  }
+
+  async getAllProductBatchsByCategory(
+    orderBy: 'asc' | 'desc' = 'asc',
+    origin?: 'RAW_MATERIAL' | 'MADE'
+  ): Promise<ProductBatchByCategory[]> {
+    const productFilter = origin ? { origin } : {};
+
+    const batches = await this.prisma.stock_items.findMany({
+      distinct: ['product_id', 'batch'],
+      where: {
+        products: productFilter
+      },
+      select: {
+        product_id: true,
+        batch: true,
+        batch_expiration: true,
+        quantity: true
+      },
+      orderBy: { product_id: orderBy }
+    });
+
+    const productIds = [...new Set(batches.map(batch => batch.product_id))];
+
+    const products = await this.prisma.products.findMany({
+      where: {
+        id: { in: productIds }
+      },
+      select: {
+        id: true,
+        description: true,
+        category_id: true,
+        categories: {
+          select: {
+            description: true
+          }
+        }
+      }
+    });
+
+    const productBatchByCategory: Record<string, ProductBatchByCategory> = {};
+
+    for (const batch of batches) {
+      const productId = batch.product_id;
+      const category =
+        products.find(product => product.id === productId)?.categories
+          ?.description || '';
+      const description =
+        products.find(product => product.id === productId)?.description || '';
+
+      if (!productBatchByCategory[category]) {
+        productBatchByCategory[category] = {
+          category_name: category,
+          product_id: productId,
+          description,
+          batchs: []
+        };
+      }
+
+      const availableStock = await this.checkStock(productId, batch.batch);
+
+      productBatchByCategory[category].batchs.push({
+        batch: batch.batch,
+        batch_expiration: formatDate(batch.batch_expiration),
+        totalQuantity: availableStock
+      });
+    }
+
+    return Object.values(productBatchByCategory);
   }
 }
