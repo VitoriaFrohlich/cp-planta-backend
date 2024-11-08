@@ -7,9 +7,9 @@ import { CreateCompositionsDto } from './dto/create.compositions.dto';
 import { ResponseCompositionsDto } from './dto/response.compositions.dto';
 import { UpdateCompositionsDto } from './dto/update.compositions.dto';
 import { CompositionsRepository } from './compositions.repository';
-import { format, isValid } from 'date-fns';
 import { Origin } from '../common/enums';
 import { SessionService } from '../common/sessionService';
+import { formatDate } from '../common/utils';
 
 @Injectable()
 export class CompositionsService {
@@ -19,69 +19,58 @@ export class CompositionsService {
   ) {}
 
   async create(createCompositionsDto: CreateCompositionsDto) {
-    const errorMessages = [];
+    const { final_product, composition_items } = createCompositionsDto;
+    const currentUser = this.sessionService.getCurrentUser();
 
-    if (!Array.isArray(createCompositionsDto.composition_items)) {
-      throw new BadRequestException('Items must be an array');
-    }
-
-    const finalProduct = await this.compositionsRepository.findFinalProductById(
-      createCompositionsDto.final_product
-    );
-
-    if (finalProduct.origin !== Origin.MADE) {
+    const finalProduct =
+      await this.compositionsRepository.findFinalProductById(final_product);
+    if (!finalProduct || finalProduct.origin !== Origin.MADE) {
       throw new BadRequestException(
-        `Product ${createCompositionsDto.final_product} is not a final product`
+        `Product ${final_product} is not a final product`
       );
     }
 
     const existingCompositions =
-      await this.compositionsRepository.findByProductMade(
-        createCompositionsDto.final_product
-      );
+      await this.compositionsRepository.findByProductMade(final_product);
     if (existingCompositions) {
       throw new BadRequestException(
-        `Composition to product ${createCompositionsDto.final_product} already exists`
+        `Composition to product ${final_product} already exists`
       );
     }
 
-    for (const item of createCompositionsDto.composition_items) {
+    const errorMessages = [];
+    const uniqueRawProductIds = new Set<number>();
+    for (const item of composition_items) {
+      if (uniqueRawProductIds.has(item.raw_product)) {
+        errorMessages.push(`Duplicate raw product ID: ${item.raw_product}`);
+        continue;
+      }
+      uniqueRawProductIds.add(item.raw_product);
+
       const rawProduct = await this.compositionsRepository.findFinalProductById(
         item.raw_product
       );
-
       if (!rawProduct) {
         errorMessages.push(`Product ${item.raw_product} not found`);
-        break;
+        continue;
       }
-
-      if (rawProduct.origin == Origin.MADE) {
+      if (rawProduct.origin !== Origin.RAW_MATERIAL) {
         errorMessages.push(`Product ${item.raw_product} is not a raw product`);
-        break;
       }
     }
 
     if (errorMessages.length > 0) {
-      return {
+      throw new BadRequestException({
         success: false,
         errors: errorMessages,
-        message: 'Não foi possível processar todos os itens do documento.'
-      };
+        message: errorMessages.join(', ')
+      });
     }
 
-    const descriptionProduct = finalProduct?.description;
+    const description = `Composição ${finalProduct.description}`;
 
-    if (!descriptionProduct) {
-      throw new Error('Produto não encontrado');
-    }
-
-    const description = `Composição ${descriptionProduct}`;
-    const currentUser = this.sessionService.getCurrentUser();
-
-    let compositionsDocument;
-    const createdItems = [];
     try {
-      compositionsDocument =
+      const compositionsDocument =
         await this.compositionsRepository.createCompositions({
           product_made: {
             connect: { id: Number(createCompositionsDto.final_product) }
@@ -98,33 +87,41 @@ export class CompositionsService {
 
       let sequencia = 1;
 
-      // Inserção dos itens
       for (const item of createCompositionsDto.composition_items) {
-        const createdItem =
-          await this.compositionsRepository.createCompositionsItems({
-            compositions: { connect: { id: compositionsDocument.id } },
-            sequence: sequencia,
-            product_raw: { connect: { id: item.raw_product } },
-            quantity: item.quantity,
-            created_at: new Date(),
-            updated_at: new Date(),
-            created_by: currentUser,
-            updated_by: currentUser
-          });
+        await this.compositionsRepository.createCompositionsItems({
+          compositions: { connect: { id: compositionsDocument.id } },
+          sequence: sequencia,
+          product_raw: { connect: { id: item.raw_product } },
+          quantity: item.quantity,
+          created_at: new Date(),
+          updated_at: new Date(),
+          created_by: currentUser,
+          updated_by: currentUser
+        });
         sequencia++;
-        createdItems.push(createdItem);
       }
 
+      const allItems = await this.compositionsRepository.getCompositionsItems(
+        compositionsDocument.id
+      );
+
+      const createdItems = allItems.map(item => ({
+        id: item.id,
+        compositions_id: item.composition_id,
+        sequence: item.sequence,
+        raw_product: item.raw_product,
+        quantity: item.quantity,
+        created_at: formatDate(item.created_at)
+      }));
+
       return {
-        compositionsDocument: {
-          id: compositionsDocument.id,
-          product_id: compositionsDocument.product_id,
-          description: compositionsDocument.description,
-          created_at: compositionsDocument.created_at,
-          production_steps: compositionsDocument.production_steps,
-          items: createdItems
-        }
-      };
+        id: compositionsDocument.id,
+        final_product: compositionsDocument.final_product,
+        description: compositionsDocument.description,
+        created_at: formatDate(compositionsDocument.created_at),
+        production_steps: compositionsDocument.production_steps,
+        composition_items: createdItems
+      } as ResponseCompositionsDto;
     } catch (error) {
       throw new Error(
         `Error during item insertion: ${(error as Error).message}`
@@ -140,23 +137,20 @@ export class CompositionsService {
       id: composition.id,
       final_product: composition.final_product,
       description: composition.description,
-      production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
-      created_at: this.formatDate(composition.created_at),
-      updated_at: this.formatDate(composition.updated_at),
-      created_by: composition.created_by,
-      updated_by: composition.updated_by,
+      production_steps:
+        typeof composition.production_steps === 'string'
+          ? JSON.parse(composition.production_steps)
+          : composition.production_steps,
+      created_at: formatDate(composition.created_at),
+      updated_at: formatDate(composition.updated_at),
       composition_items: (composition['composition_items'] || []).map(item => ({
         id: item.id,
         compositions_id: item.compositions_id,
         sequence: item.sequence,
         raw_product: item.raw_product,
         quantity: item.quantity,
-        created_at: this.formatDate(item.created_at),
-        updated_at: this.formatDate(item.updated_at),
-        created_by: item.created_by,
-        updated_by: item.updated_by
+        created_at: formatDate(composition.created_at),
+        updated_at: formatDate(composition.updated_at)
       }))
     }));
   }
@@ -172,23 +166,20 @@ export class CompositionsService {
       id: composition.id,
       final_product: composition.final_product,
       description: composition.description,
-      production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
-      created_at: this.formatDate(composition.created_at),
-      updated_at: this.formatDate(composition.updated_at),
-      created_by: composition.created_by,
-      updated_by: composition.updated_by,
+      production_steps:
+        typeof composition.production_steps === 'string'
+          ? JSON.parse(composition.production_steps)
+          : composition.production_steps,
+      created_at: formatDate(composition.created_at),
+      updated_at: formatDate(composition.updated_at),
       composition_items: (composition['composition_items'] || []).map(item => ({
         id: item.id,
         compositions_id: item.compositions_id,
         sequence: item.sequence,
         raw_product: item.raw_product,
         quantity: item.quantity,
-        created_at: this.formatDate(item.created_at),
-        updated_at: this.formatDate(item.updated_at),
-        created_by: item.created_by,
-        updated_by: item.updated_by
+        created_at: formatDate(item.created_at),
+        updated_at: formatDate(item.updated_at)
       }))
     };
   }
@@ -211,6 +202,25 @@ export class CompositionsService {
       throw new Error(`Composition with ID ${id} not found`);
     }
 
+    const existingItems =
+      await this.compositionsRepository.getCompositionsItems(id);
+
+    if (!existingItems || existingItems.length === 0) {
+      throw new Error(`Composition items not found for composition ID ${id}`);
+    }
+
+    for (const item of updateCompositionsDto.composition_items) {
+      const itemExists = existingItems.find(
+        existingItem => existingItem.id === item.id
+      );
+
+      if (!itemExists) {
+        throw new Error(
+          `Composition item with ID ${item.id} not found for composition ID ${id}`
+        );
+      }
+    }
+
     const updatedComposition =
       await this.compositionsRepository.updateCompositions(id, {
         description: updateCompositionsDto.description,
@@ -218,11 +228,6 @@ export class CompositionsService {
         updated_at: new Date(),
         updated_by: currentUser
       });
-
-    const existingItems =
-      await this.compositionsRepository.getCompositionsItems(id);
-
-    const updatedItems = [];
 
     for (const item of updateCompositionsDto.composition_items) {
       const existingItem = existingItems.find(i => i.id === item.id);
@@ -244,17 +249,27 @@ export class CompositionsService {
             updated_at: new Date(),
             updated_by: currentUser
           });
-          updatedItems.push({ ...existingItem, ...fieldsToUpdate });
         }
       }
     }
+
+    const allItems = await this.compositionsRepository.getCompositionsItems(id);
+    const updatedItems = allItems.map(item => ({
+      id: item.id,
+      compositions_id: item.composition_id,
+      sequence: item.sequence,
+      raw_product: item.raw_product,
+      quantity: item.quantity,
+      created_at: formatDate(item.created_at),
+      updated_at: formatDate(item.updated_at)
+    }));
 
     return {
       compositionsDocument: {
         id: updatedComposition.id,
         product_id: updatedComposition.final_product,
         description: updatedComposition.description,
-        updated_at: format(updatedComposition.updated_at, 'dd/MM/yyyy'),
+        updated_at: formatDate(updatedComposition.updated_at),
         production_steps: updatedComposition.production_steps,
         items: updatedItems
       }
@@ -262,13 +277,10 @@ export class CompositionsService {
   }
 
   async delete(id: number) {
-    return this.compositionsRepository.delete(id);
-  }
-
-  private formatDate(date: Date | null | undefined): string | null {
-    if (date && isValid(date)) {
-      return format(date, 'dd/MM/yyyy');
+    const composition = await this.compositionsRepository.findById(id);
+    if (!composition) {
+      throw new NotFoundException(`Composição com ID ${id} não encontrada`);
     }
-    return null;
+    return this.compositionsRepository.delete(id);
   }
 }
