@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { ProductionProgressService } from './production-progress.service';
 
-@Controller('production-steps')
+@Controller('progress')
 export class ProductionProgressController {
   constructor(
     private readonly productionProgressService: ProductionProgressService

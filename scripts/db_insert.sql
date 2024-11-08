@@ -15,12 +15,13 @@ VALUES
 ('enableNegativeStock', 'true', 'Serve para habilitar ou desabilitar o controle de estoque negativo','root','root'),
 ('defaultStockLocation', '1', 'Serve para definir o local de estoque padrão','root','root'),
 ('defaultRoleForNewUser', 'DEFAULT', 'Serve para definir o papel padrão para novos usuários','root','root'),
-('defaultLoteInputMask', 'P', 'Define o padrão de máscara para lote de entrada','root','root'),
-('defaultLoteOutputMask', 'PD', 'Define o padrão de máscara para lote de saída','root','root'),
-('lastDocumentNumber', '3000', 'Serve para guardar o último número de documento criado para incrementar a partir dele','root','root'),
-('lastLoteNumber', '1000', 'Serve para guardar o último número de lote criado para incrementar a partir dele','root','root'),
-('loteNumberLength', '5', 'Define o tamanho do número do lote para preenchimento com zeros à esquerda (ex: 00001)','root','root');
-
+('defaultBatchInputMask', 'P', 'Define o padrão de máscara para batch de entrada','root','root'),
+('defaultBatchOutputMask', 'PD', 'Define o padrão de máscara para batch de saída','root','root'),
+('lastInputDocumentNumber', '3000', 'Serve para guardar o último número de documento de entrada criado para incrementar a partir dele','root','root'),
+('lastBatchNumber', '1000', 'Serve para guardar o último número de batch criado para incrementar a partir dele','root','root'),
+('batchNumberLength', '5', 'Define o tamanho do número do batch para preenchimento com zeros à esquerda (ex: 00001)','root','root'),
+('lastOrderNumber','113', 'Serve para guardar o último número de ordem de produção criado para incrementar a partir dele','root','root'),
+('lastOutputDocumentNumber', '1000', 'Serve para guardar o último número de documento de saída criado para incrementar a partir dele','root','root');
 -- Insert into persons
 INSERT INTO "persons" ("name")
 VALUES 
@@ -289,7 +290,7 @@ VALUES
 
 
 -- Insert into stock_items
-INSERT INTO "stock_items" ("stock_id", "sequence", "product_id", "quantity", "unit_price", "total_price", "lote", "expiration", "stock_location_id")
+INSERT INTO "stock_items" ("stock_id", "sequence", "product_id", "quantity", "unit_price", "total_price", "batch", "batch_expiration", "stock_location_id")
 VALUES 
 	(1, 1, 1, 100.0, 10.0, 1000.0, 'LoteA123', '2024-12-31 23:59:59', 1),
     (1, 2, 2, 100.0, 10.0, 1000.0, 'LoteC123', '2024-12-31 23:59:59', 1),
@@ -332,7 +333,7 @@ VALUES
     (5,'Production E','2024-12-31 23:59:59', 'OPEN');
 
 -- Insert into production_orders_items
-INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "lote", "lote_expiration")
+INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "batch", "batch_expiration")
 VALUES
 	(1, 1, 10, 1000.0, 950.0, 50.0, 'LoteTY123', '2024-12-31 23:59:59'),
     (2, 2, 11, 2000.0, 1900.0, 100.0, 'LoteER56', '2024-12-15 23:59:59'),
@@ -386,20 +387,21 @@ INSERT INTO "occurrences_of_production_stages" ("occurrence_id", "description", 
 VALUES 
     (1, 'Problema na Linha de Produção', 'Houve um problema na linha de produção que causou um atraso.',  1),
     (2, 'Manutenção Necessária', 'Manutenção programada é necessária para o equipamento.', 2),
-    (3, 'Falha na Verificação de Qualidade', 'A verificação de qualidade falhou para o lote #123.', 3),
+    (3, 'Falha na Verificação de Qualidade', 'A verificação de qualidade falhou para o batch #123.', 3),
     (4, 'Novo Equipamento Instalado', 'Novo equipamento foi instalado na linha de produção.', 4),
     (5, 'Incidente de Segurança', 'Ocorreu um incidente de segurança no armazém.', 5);
 
 -- Insert into compositions
-INSERT INTO "compositions" ("final_product", "description")
+
+INSERT INTO "compositions" ("final_product", "description", "production_steps", "created_by", "updated_by")
 VALUES 
-(8,'batata frita'),
-(9,'cenoura cubinhos'),
-(10,'aipim descascado'),
-(11,'mirtilos selecionados'),
-(12,'laranja fatiada'),
-(13,'mix de verduras'),
-(14,'suco natural de uva');	
+(8, 'batata frita', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(9,'cenoura cubinhos', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(10,'aipim descascado', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(11,'mirtilos selecionados', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(12,'laranja fatiada', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(13,'mix de verduras', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root'),
+(14,'suco natural de uva', '{"1":{"description":"Corte"},"2":{"description":"Descascamento"},"3":{"description":"Seleção"},"4":{"description":"Desfolhamento"}}', 'root', 'root');	
 
 -- Insert into compositions_items
 INSERT INTO "composition_items" ("composition_id", "sequence", "raw_product", "quantity")

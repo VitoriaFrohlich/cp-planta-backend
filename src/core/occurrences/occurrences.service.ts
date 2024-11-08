@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OccurrenceRepository } from './occurrence.repository';
+import { OccurrenceRepository } from './occurrences.repository';
 
 @Injectable()
 export class OccurrenceService {

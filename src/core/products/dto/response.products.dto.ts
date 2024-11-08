@@ -22,3 +22,8 @@ export class ResponseProductsDto {
   //     groups: Group;
   //     persons: Person;
 }
+
+export class ShortResponseProductsDto {
+  id: number;
+  description: string;
+}

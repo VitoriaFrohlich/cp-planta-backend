@@ -3,29 +3,33 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreateCategoriesDto } from './dto/create-categories.dto';
-import { UpdateCategoriesDto } from './dto/update-categories.dto';
+import { CreateCategoriesDto } from './dto/create.categories.dto';
+import { UpdateCategoriesDto } from './dto/update.categories.dto';
 import { CategoriesRepository } from './categories.repository';
 import { categories } from '@prisma/client';
 import { format } from 'date-fns';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly categoriesRepository: CategoriesRepository) {}
+  constructor(
+    private readonly sessionService: SessionService,
+    private readonly categoriesRepository: CategoriesRepository
+  ) {}
 
   async create(createCategorysDto: CreateCategoriesDto) {
-    const existingCategory = await this.matchCategoryByData(
-      createCategorysDto.description
-    );
+    const currentUser = this.sessionService.getCurrentUser();
 
-    if (existingCategory.length > 0) {
-      throw new Error(
-        `Category already exists: ${JSON.stringify(existingCategory[0])}`
-      );
-    }
+    const createCategory = {
+      ...createCategorysDto,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
+    };
 
     const createdCategory =
-      await this.categoriesRepository.create(createCategorysDto);
+      await this.categoriesRepository.create(createCategory);
 
     return this.formatCategoryDate(createdCategory);
   }
@@ -71,6 +75,7 @@ export class CategoriesService {
   }
 
   async reactivateCategory(id: number) {
+    const currentUser = this.sessionService.getCurrentUser();
     const category = await this.categoriesRepository.findById(id);
 
     if (!category) {
@@ -80,7 +85,7 @@ export class CategoriesService {
     if (category.active) {
       throw new BadRequestException(`Category with ID ${id} is already active`);
     }
-    return this.categoriesRepository.reactivate(id);
+    return this.categoriesRepository.reactivate(id, currentUser);
   }
 
   async matchCategoryByData(description: string) {
@@ -91,6 +96,7 @@ export class CategoriesService {
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoriesDto) {
+    const currentUser = this.sessionService.getCurrentUser();
     const category = await this.isValid(id);
 
     if (!category) {
@@ -99,7 +105,8 @@ export class CategoriesService {
     const updatedCategorysDto = {
       ...updateCategoryDto,
       updated_at: new Date(),
-      active: category.active
+      active: category.active,
+      updated_by: currentUser
     };
 
     const updatedCategory = await this.categoriesRepository.update(
@@ -111,6 +118,7 @@ export class CategoriesService {
   }
 
   remove(id: number) {
-    return this.categoriesRepository.delete(id);
+    const currentUser = this.sessionService.getCurrentUser();
+    return this.categoriesRepository.delete(id, currentUser);
   }
 }

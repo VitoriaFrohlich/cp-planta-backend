@@ -3,28 +3,32 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { CreateGroupsDto } from './dto/create-groups.dto';
-import { UpdateGroupsDto } from './dto/update-groups.dto';
+import { CreateGroupsDto } from './dto/create.groups.dto';
+import { UpdateGroupsDto } from './dto/update.groups.dto';
 import { GroupsRepository } from './groups.repository';
 import { groups } from '@prisma/client';
 import { format } from 'date-fns';
+import { SessionService } from '../common/sessionService';
 
 @Injectable()
 export class GroupsService {
-  constructor(private readonly groupsRepository: GroupsRepository) {}
+  constructor(
+    private readonly sessionService: SessionService,
+    private readonly groupsRepository: GroupsRepository
+  ) {}
 
   async create(createGroupsDto: CreateGroupsDto) {
-    const existingGroup = await this.matchGroupByData(
-      createGroupsDto.description
-    );
+    const currentUser = this.sessionService.getCurrentUser();
 
-    if (existingGroup.length > 0) {
-      throw new Error(
-        `Group already exists: ${JSON.stringify(existingGroup[0])}`
-      );
-    }
+    const createGroup = {
+      ...createGroupsDto,
+      created_at: new Date(),
+      updated_at: new Date(),
+      created_by: currentUser,
+      updated_by: currentUser
+    };
 
-    const createdGroup = await this.groupsRepository.create(createGroupsDto);
+    const createdGroup = await this.groupsRepository.create(createGroup);
 
     return this.formatGroupDate(createdGroup);
   }
@@ -70,6 +74,7 @@ export class GroupsService {
   }
 
   async reactivateGroup(id: number) {
+    const currentUser = this.sessionService.getCurrentUser();
     const group = await this.groupsRepository.findById(id);
 
     if (!group) {
@@ -79,7 +84,7 @@ export class GroupsService {
     if (group.active) {
       throw new BadRequestException(`Group with ID ${id} is already active`);
     }
-    return this.groupsRepository.reactivate(id);
+    return this.groupsRepository.reactivate(id, currentUser);
   }
 
   async matchGroupByData(description: string) {
@@ -90,6 +95,7 @@ export class GroupsService {
   }
 
   async update(id: number, updateGroupsDto: UpdateGroupsDto) {
+    const currentUser = this.sessionService.getCurrentUser();
     const group = await this.isValid(id);
 
     if (!group) {
@@ -98,7 +104,8 @@ export class GroupsService {
     const updatedGroupsDto = {
       ...updateGroupsDto,
       updated_at: new Date(),
-      active: group.active
+      active: group.active,
+      updated_by: currentUser
     };
 
     const updatedGroup = await this.groupsRepository.update(
@@ -110,6 +117,7 @@ export class GroupsService {
   }
 
   remove(id: number) {
-    return this.groupsRepository.delete(id);
+    const currentUser = this.sessionService.getCurrentUser();
+    return this.groupsRepository.delete(id, currentUser);
   }
 }

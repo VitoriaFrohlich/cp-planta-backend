@@ -11,11 +11,9 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserSchema, UpdateUserSchema } from './dto/user.schema';
-import { ZodError } from 'zod';
-import { ResponseUsersDto } from './dto/user-response..dto';
+import { CreateUserDto } from './dto/create.users.dto';
+import { UpdateUserDto } from './dto/update.users.dto';
+import { ResponseUsersDto } from './dto/response.users.dto';
 import { Role, Gender } from '../common/enums';
 import * as bcrypt from 'bcrypt';
 import { ApiQuery } from '@nestjs/swagger';
@@ -28,33 +26,6 @@ export class UsersController {
   async create(
     @Body() createUserDto: CreateUserDto
   ): Promise<ResponseUsersDto> {
-    const errors = [];
-
-    const emailValidation = CreateUserSchema.shape.email.safeParse(
-      createUserDto.email
-    );
-    if (!emailValidation.success) {
-      errors.push({
-        field: 'email',
-        message: emailValidation.error.errors[0].message
-      });
-    }
-
-    const passwordValidation = CreateUserSchema.shape.password.safeParse(
-      createUserDto.password
-    );
-    if (!passwordValidation.success) {
-      errors.push({
-        field: 'password',
-        message: passwordValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
-    // Hash the password using bcrypt
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const newUserDto = {
       ...createUserDto,
@@ -175,8 +146,7 @@ export class UsersController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateUserDto: UpdateUserDto
   ): Promise<ResponseUsersDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -192,51 +162,7 @@ export class UsersController {
       throw new BadRequestException(`User ID ${idNumber} is not active`);
     }
 
-    const allowedFields = Object.keys(UpdateUserSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateUserDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['category_id', 'group_id', 'supplier_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdateUserSchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
-    const updatedUser = await this.usersService.update(
-      idNumber,
-      updateData as UpdateUserDto
-    );
+    const updatedUser = await this.usersService.update(idNumber, updateUserDto);
 
     return {
       id: updatedUser.id,

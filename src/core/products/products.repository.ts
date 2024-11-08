@@ -119,12 +119,13 @@ export class ProductsRepository {
     return productResponse;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number, updated_by: string): Promise<void> {
     await this.prisma.products.update({
       where: { id },
       data: {
         active: false,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }

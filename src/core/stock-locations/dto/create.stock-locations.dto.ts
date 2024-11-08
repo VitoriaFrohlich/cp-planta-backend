@@ -7,4 +7,9 @@ export class CreateStockLocationDto {
     example: 'Freezer'
   })
   readonly description: string;
+  readonly active?: boolean;
+  readonly created_at?: Date;
+  readonly updated_at?: Date;
+  readonly created_by?: string;
+  readonly updated_by?: string;
 }

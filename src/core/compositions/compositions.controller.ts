@@ -13,10 +13,6 @@ import { CompositionsService } from './compositions.service';
 import { CreateCompositionsDto } from './dto/create.compositions.dto';
 import { UpdateCompositionsDto } from './dto/update.compositions.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import {
-  CreateCompositionsSchema,
-  UpdateCompositionsSchema
-} from './dto/compositions.schema';
 import { ResponseCompositionsDto } from './dto/response.compositions.dto';
 
 @Controller('compositions')
@@ -31,41 +27,7 @@ export class CompositionsController {
       throw new BadRequestException('Items must be an array');
     }
 
-    const validationResult = CreateCompositionsSchema.safeParse(
-      createCompositionsDto
-    );
-
-    if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
-        field: err.path.join('.'),
-        message: err.message
-      }));
-
-      throw new BadRequestException({
-        message: 'Validation errors',
-        errors
-      });
-    }
-    const created = await this.compositionsService.create(
-      createCompositionsDto
-    );
-
-    return {
-      id: created.compositionsDocument.id,
-      final_product: created.compositionsDocument.product_id,
-      description: created.compositionsDocument.description,
-      production_steps: created.compositionsDocument.production_steps,
-      created_at: created.compositionsDocument.created_at,
-      composition_items: created.compositionsDocument.items.map(item => ({
-        id: item.id,
-        sequence: item.sequence,
-        raw_product: item.raw_product,
-        quantity: item.quantity,
-        created_at: item.created_at,
-        compositions_id: item.compositions_id,
-        created_by: item.created_by
-      }))
-    };
+    return await this.compositionsService.create(createCompositionsDto);
   }
 
   @Get()
@@ -85,31 +47,7 @@ export class CompositionsController {
       throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
 
-    const compositions = await this.compositionsService.findAll(orderBy);
-
-    return compositions.map(composition => ({
-      id: composition.id,
-      final_product: composition.final_product,
-      description: composition.description,
-      production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
-      created_at: composition.created_at,
-      updated_at: composition.updated_at,
-      created_by: composition.created_by,
-      updated_by: composition.updated_by,
-      composition_items: (composition.composition_items || []).map(item => ({
-        id: item.id,
-        compositions_id: item.compositions_id,
-        sequence: item.sequence,
-        raw_product: item.raw_product,
-        quantity: item.quantity,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        created_by: item.created_by,
-        updated_by: item.updated_by
-      }))
-    }));
+    return await this.compositionsService.findAll(orderBy);
   }
 
   @Get(':id')
@@ -118,31 +56,7 @@ export class CompositionsController {
     if (isNaN(idNumber)) {
       throw new BadRequestException('Invalid ID format');
     }
-    const composition = await this.compositionsService.findOne(idNumber);
-
-    return {
-      id: composition.id,
-      final_product: composition.final_product,
-      description: composition.description,
-      production_steps: Array.isArray(composition.production_steps)
-        ? composition.production_steps.map(step => String(step))
-        : [],
-      created_at: composition.created_at,
-      updated_at: composition.updated_at,
-      created_by: composition.created_by,
-      updated_by: composition.updated_by,
-      composition_items: (composition.composition_items || []).map(item => ({
-        id: item.id,
-        compositions_id: item.compositions_id,
-        sequence: item.sequence,
-        raw_product: item.raw_product,
-        quantity: item.quantity,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        created_by: item.created_by,
-        updated_by: item.updated_by
-      }))
-    };
+    return await this.compositionsService.findOne(idNumber);
   }
 
   @Patch(':id')
@@ -159,43 +73,10 @@ export class CompositionsController {
       throw new BadRequestException('Items must be an array');
     }
 
-    const validationResult = UpdateCompositionsSchema.safeParse(
-      updateCompositionsDto
-    );
-
-    if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
-        field: err.path.join('.'),
-        message: err.message
-      }));
-
-      throw new BadRequestException({
-        message: 'Validation errors',
-        errors
-      });
-    }
-
-    const updated = await this.compositionsService.update(
+    return await this.compositionsService.update(
       idNumber,
       updateCompositionsDto
     );
-
-    return {
-      id: updated.compositionsDocument.id,
-      final_product: updated.compositionsDocument.product_id,
-      description: updated.compositionsDocument.description,
-      production_steps: updated.compositionsDocument.production_steps,
-      updated_at: updated.compositionsDocument.updated_at,
-      composition_items: updated.compositionsDocument.items.map(item => ({
-        id: item.id,
-        sequence: item.sequence,
-        raw_product: item.raw_product,
-        quantity: item.quantity,
-        created_at: item.created_at,
-        compositions_id: item.compositions_id,
-        created_by: item.created_by
-      }))
-    };
   }
 
   @Delete(':id')
@@ -209,5 +90,14 @@ export class CompositionsController {
     return {
       message: `Compositions ID ${idNumber} permanently removed successfully`
     };
+  }
+
+  @Get('steps-by-product/:id')
+  async getByProduct(@Param('id') id: string) {
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return await this.compositionsService.getByProduct(idNumber);
   }
 }

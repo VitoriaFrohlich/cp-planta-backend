@@ -13,7 +13,7 @@ import { StockService } from './stock.service';
 import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import { Stock_Moviment } from '../common/enums';
+import { Origin, Stock_Moviment } from '../common/enums';
 import { ResponseBatchDto } from './dto/response.stock.dto';
 
 @Controller('stock')
@@ -30,11 +30,11 @@ export class StockController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, product_id, lote, quantity, stock_id, sequence, created_at, updated_at',
+      'Field to order by. Valid fields: id, product_id, batch, quantity, stock_id, sequence, created_at, updated_at',
     enum: [
       'id',
       'product_id',
-      'lote',
+      'batch',
       'quantity',
       'stock_id',
       'sequence',
@@ -46,7 +46,7 @@ export class StockController {
     const validOrderFields = [
       'id',
       'product_id',
-      'lote',
+      'batch',
       'quantity',
       'stock_id',
       'sequence',
@@ -71,6 +71,28 @@ export class StockController {
     return result;
   }
 
+  @Get('batchs-cat-raw')
+  async getAllProductLotsByCategoryRaw(
+    @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc'
+  ) {
+    const result = await this.stockService.getAllProductLotsByCategory(
+      orderBy,
+      Origin.RAW_MATERIAL
+    );
+    return result;
+  }
+
+  @Get('batchs-cat-made')
+  async getAllProductLotsByCategoryMade(
+    @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc'
+  ) {
+    const result = await this.stockService.getAllProductLotsByCategory(
+      orderBy,
+      Origin.MADE
+    );
+    return result;
+  }
+
   @Get('gen-batchs')
   async generateBatchs(
     @Query('moviment') moviment: string
@@ -88,8 +110,8 @@ export class StockController {
     const batch = await this.stockService.getLote(stockMoviment);
 
     return {
-      lote: batch[0],
-      expiration: batch[1]
+      batch: batch[0],
+      batch_expiration: batch[1]
     } as ResponseBatchDto;
   }
 

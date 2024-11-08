@@ -2,7 +2,7 @@ export class ResponseCompositionsDto {
   id: number;
   final_product: number;
   description: string;
-  production_steps: string[];
+  production_steps: object;
   created_at?: string;
   updated_at?: string;
   created_by?: string;

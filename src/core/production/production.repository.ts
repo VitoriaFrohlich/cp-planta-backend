@@ -40,7 +40,7 @@ export class ProductionRepository {
       orderBy: { sequence: 'asc' }
     });
   }
-  //Precisa da order no bd
+
   async findAll(orderBy: string): Promise<production_orders[]> {
     const order = [
       'id',
@@ -88,8 +88,8 @@ export class ProductionRepository {
             production_quantity_estimated: true,
             production_quantity_real: true,
             production_quantity_loss: true,
-            lote: true,
-            lote_expiration: true,
+            batch: true,
+            batch_expiration: true,
             created_at: true,
             updated_at: true,
             created_by: true,
@@ -121,8 +121,8 @@ export class ProductionRepository {
             production_quantity_estimated: true,
             production_quantity_real: true,
             production_quantity_loss: true,
-            lote: true,
-            lote_expiration: true,
+            batch: true,
+            batch_expiration: true,
             created_at: true,
             updated_at: true,
             created_by: true,
@@ -152,30 +152,32 @@ export class ProductionRepository {
     id: number,
     data: Prisma.production_ordersUpdateInput
   ): Promise<production_orders> {
-    const product = this.prisma.production_orders.update({
+    return this.prisma.production_orders.update({
       where: { id },
       data
     });
-
-    const productionResponse = {
-      ...product
-    };
-    return productionResponse;
   }
 
   async updateOrderItem(
     id: number,
-    data: Prisma.production_orders_itemsUncheckedUpdateInput
+    data: Prisma.production_orders_itemsUpdateInput
   ): Promise<production_orders_items> {
-    const product = this.prisma.production_orders_items.update({
+    return this.prisma.production_orders_items.update({
       where: { id },
-      data
+      data: {
+        production_order: {
+          connect: { id: Number(data.production_order?.connect?.id) }
+        },
+        final_product_made: {
+          connect: { id: Number(data.final_product_made?.connect?.id) }
+        },
+        production_quantity_estimated: data.production_quantity_estimated,
+        production_quantity_real: data.production_quantity_real,
+        production_quantity_loss: data.production_quantity_loss,
+        updated_at: data.updated_at,
+        updated_by: data.updated_by
+      }
     });
-
-    const productionResponse = {
-      ...product
-    };
-    return productionResponse;
   }
 
   async delete(id: number): Promise<void> {

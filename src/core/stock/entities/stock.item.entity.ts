@@ -8,14 +8,16 @@ export class StockItem {
   quantity: number;
   unit_price: number;
   total_price: number;
-  lote: string;
-  expiration: Date;
+  batch: string;
+  batch_expiration: Date;
   persons: number;
   costumers: number;
   stock_location_id: number;
   observation: string;
   created_at: Date;
   updated_at: Date;
+  created_by: string;
+  updated_by: string;
   customers: number;
   products: number;
   stock: Stock;

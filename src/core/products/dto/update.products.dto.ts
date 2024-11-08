@@ -1,44 +1,14 @@
-import { Origin, Unit_Measure } from '../../common/enums';
+import { PartialType } from '@nestjs/swagger';
+import { CreateProductDto } from './create.products.dto';
 import { ApiProperty } from '@nestjs/swagger';
-// import { categories } from 'src/core/categories/entities/categories.entity';
-// import { groups } from 'src/core/groups/entities/groups.entity';
-// import { persons } from 'src/core/persons/persons.entity';
 
-export class CreateProductDto {
+export class UpdateProductDto extends PartialType(CreateProductDto) {
   @ApiProperty({
     description: 'Product description',
     minLength: 3,
     example: 'Batata Branca'
   })
   readonly description: string;
-
-  @ApiProperty({
-    description: 'Product code',
-    minLength: 3,
-    example: 'ABC123'
-  })
-  readonly code: string;
-
-  @ApiProperty({
-    description: 'Product SKU',
-    minLength: 3,
-    example: 'CC-LAT-350'
-  })
-  readonly sku: string;
-
-  @ApiProperty({
-    description: 'Product origin',
-    default: 'RAW_MATERIAL',
-    examples: ['RAW_MATERIAL', 'MADE']
-  })
-  readonly origin: Origin;
-
-  @ApiProperty({
-    description: 'Product unit measure',
-    default: 'UN',
-    examples: ['UN', 'KG', 'L', 'GR', 'ML', 'PC']
-  })
-  readonly unit_measure: Unit_Measure;
 
   @ApiProperty({
     description: 'Product category id',
@@ -64,6 +34,12 @@ export class CreateProductDto {
     description: 'Product nutritional info'
   })
   readonly nutritional_info: string;
+
+  @ApiProperty({
+    description: 'Product status',
+    default: true
+  })
+  readonly status: boolean;
 
   //quantidade e preço vão ser tratados por outro serviço
   @ApiProperty({

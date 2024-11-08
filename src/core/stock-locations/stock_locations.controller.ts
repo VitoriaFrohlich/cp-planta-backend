@@ -10,15 +10,10 @@ import {
   Post,
   Query
 } from '@nestjs/common';
-import { CreateStockLocationDto } from './dto/create-stock-locations.dto';
-import {
-  CreateStockLocationSchema,
-  UpdateStockLocationSchema
-} from './dto/stock-location.schema';
+import { CreateStockLocationDto } from './dto/create.stock-locations.dto';
 import { StockLocationsService } from './stock_locations.service';
-import { UpdateStockLocationDto } from './dto/update-stock-locations.dto';
-import { ZodError } from 'zod';
-import { ResponseStockLocationDto } from './dto/response-stock-locations';
+import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
+import { ResponseStockLocationDto } from './dto/response.stock-locations';
 
 @Controller('stock-locations')
 export class StockLocationsController {
@@ -28,23 +23,6 @@ export class StockLocationsController {
   async create(
     @Body() createStockLocationDto: CreateStockLocationDto
   ): Promise<ResponseStockLocationDto> {
-    const errors = [];
-
-    const descriptionValidation =
-      CreateStockLocationSchema.shape.description.safeParse(
-        createStockLocationDto.description
-      );
-    if (!descriptionValidation.success) {
-      errors.push({
-        field: 'description',
-        message: descriptionValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
     const matchedStockLocations =
       await this.stockLocationService.matchStockLocationByData(
         createStockLocationDto.description
@@ -118,8 +96,7 @@ export class StockLocationsController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() UpdateStockLocationDto: UpdateStockLocationDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateStockLocationDto: UpdateStockLocationDto
   ): Promise<ResponseStockLocationDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -140,50 +117,9 @@ export class StockLocationsController {
       );
     }
 
-    const allowedFields = Object.keys(UpdateStockLocationSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateStockLocationDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field to update: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['id', 'otherField_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdateStockLocationSchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updatedStockLocation = await this.stockLocationService.update(
       idNumber,
-      updateData as UpdateStockLocationDto
+      updateStockLocationDto
     );
 
     return {

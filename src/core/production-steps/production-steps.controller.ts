@@ -13,11 +13,6 @@ import {
 import { ProductionStepsService } from './production-steps.service';
 import { CreateProductionStepsDto } from './dto/create.production-steps.dto';
 import { UpdateProductionStepsDto } from './dto/update.production-steps.dto';
-import {
-  CreateProductionStepSchema,
-  UpdateProductionStepSchema
-} from './dto/production-steps.schema';
-import { ZodError } from 'zod';
 import { ResponseProductionStepsDto } from './dto/response.production-steps.dto';
 
 @Controller('steps')
@@ -28,23 +23,6 @@ export class ProductionStepsController {
   async create(
     @Body() createProductionStepsDto: CreateProductionStepsDto
   ): Promise<ResponseProductionStepsDto> {
-    const errors = [];
-
-    const descriptionValidation =
-      CreateProductionStepSchema.shape.description.safeParse(
-        createProductionStepsDto.description
-      );
-    if (!descriptionValidation.success) {
-      errors.push({
-        field: 'description',
-        message: descriptionValidation.error.errors[0].message
-      });
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
     const matchedProductionSteps = await this.categoriesService.matchByData(
       createProductionStepsDto.description
     );
@@ -120,8 +98,7 @@ export class ProductionStepsController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateProductionStepsDto: UpdateProductionStepsDto,
-    @Query() queryParams: Record<string, string>
+    @Body() updateProductionStepsDto: UpdateProductionStepsDto
   ): Promise<ResponseProductionStepsDto> {
     const idNumber = +id;
     if (isNaN(idNumber)) {
@@ -138,50 +115,9 @@ export class ProductionStepsController {
       throw new BadRequestException(`ProductionStep ID ${id} is not active`);
     }
 
-    const allowedFields = Object.keys(UpdateProductionStepSchema.shape);
-    const fieldsToUpdate = Object.keys(queryParams);
-
-    if (fieldsToUpdate.length === 0) {
-      throw new BadRequestException('No fields provided to update');
-    }
-
-    const updateData: Partial<UpdateProductionStepsDto> = {};
-
-    for (const field of fieldsToUpdate) {
-      if (!allowedFields.includes(field)) {
-        throw new BadRequestException(`Invalid field: ${field}`);
-      }
-
-      const value = queryParams[field];
-
-      if (['category_id', 'group_id'].includes(field)) {
-        const numericValue = parseInt(value, 10);
-        if (isNaN(numericValue)) {
-          throw new BadRequestException(
-            `Invalid number format for field: ${field}`
-          );
-        }
-        updateData[field] = numericValue;
-      } else {
-        if (value !== undefined) {
-          updateData[field] = value;
-        }
-      }
-    }
-
-    const validation = UpdateProductionStepSchema.safeParse(updateData);
-
-    if (!validation.success) {
-      const zodError = validation.error as ZodError;
-      const firstError = zodError.errors[0];
-      throw new BadRequestException(
-        `${firstError.path[0]} is invalid: ${firstError.message}`
-      );
-    }
-
     const updatedProductionStep = await this.categoriesService.update(
       idNumber,
-      updateData as UpdateProductionStepsDto
+      updateProductionStepsDto
     );
 
     return {

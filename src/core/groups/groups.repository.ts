@@ -7,14 +7,9 @@ export class GroupsRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.groupsCreateInput): Promise<groups> {
-    const group = await this.prisma.groups.create({
+    return await this.prisma.groups.create({
       data
     });
-
-    const groupResponse = {
-      ...group
-    };
-    return groupResponse;
   }
 
   async findAll(orderBy: string): Promise<groups[]> {
@@ -63,51 +58,30 @@ export class GroupsRepository {
   }
 
   async update(id: number, data: Prisma.groupsUpdateInput): Promise<groups> {
-    const group = this.prisma.groups.update({
+    return this.prisma.groups.update({
       where: { id },
       data
     });
-
-    const groupResponse = {
-      ...group,
-      created_by: undefined,
-      updated_by: undefined
-    };
-    return groupResponse;
   }
 
-  async delete(id: number): Promise<void> {
-    if (!id) {
-      throw new Error('ID not found');
-    }
-    const existingGroup = await this.findById(id);
-    if (!existingGroup) {
-      throw new Error('Group not found');
-    }
-
+  async delete(id: number, updated_by: string): Promise<void> {
     await this.prisma.groups.update({
       where: { id },
       data: {
         active: false,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }
 
-  async reactivate(id: number): Promise<void> {
-    if (!id) {
-      throw new Error('ID not found');
-    }
-    const existingGroup = await this.findById(id);
-    if (!existingGroup) {
-      throw new Error('Group not found');
-    }
-
+  async reactivate(id: number, updated_by: string): Promise<void> {
     await this.prisma.groups.update({
       where: { id },
       data: {
         active: true,
-        updated_at: new Date()
+        updated_at: new Date(),
+        updated_by: updated_by
       }
     });
   }

@@ -3,11 +3,12 @@ import { ImagesService } from './images.service';
 import { ImagesController } from './images.controller';
 import { ImagesRepository } from './images.repository';
 import { PrismaModule } from 'src/database/prisma/prisma.module';
+import { SessionService } from '../common/sessionService';
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [PrismaModule, MulterModule.register({ dest: './uploads' })],
   controllers: [ImagesController],
-  providers: [ImagesService, ImagesRepository]
+  providers: [ImagesService, ImagesRepository, SessionService]
 })
 export class ImagesModule {}
