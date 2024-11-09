@@ -435,7 +435,7 @@ enum Owner {
 model composition_orders {
   id                Int                        @id @default(autoincrement())
   order             Int
-filling            Filling                    @default(VOID)
+  filling           Filling                    @default(VOID)
   created_at        DateTime                   @default(now()) @db.Timestamp(6)
   updated_at        DateTime                   @default(now()) @db.Timestamp(6)
   created_by        String?
@@ -449,9 +449,9 @@ model composition_orders_items {
   composition_order_id Int
   sequence             Int
   raw_product_id       Int
-  necessary_quantity  Float  
+  necessary_quantity   Float
   quantity_received    Float
-  diference            Float 
+  diference            Float
   used_batchs          Json
   created_at           DateTime           @default(now()) @db.Timestamp(6)
   updated_at           DateTime           @default(now()) @db.Timestamp(6)
