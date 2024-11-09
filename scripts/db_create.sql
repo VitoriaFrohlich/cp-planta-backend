@@ -20,10 +20,13 @@ CREATE TYPE "Price_Type" AS ENUM ('COST', 'SALE');
 CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 'BALANCE', 'ADJUST', 'INVENTORY');
 
 -- CreateEnum
-CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
+CREATE TYPE "Production_Status" AS ENUM ('PENDING', 'CREATED', 'SCHEDULED', 'IN_PROGRESS', 'STOPPED', 'CANCELED', 'FINISHED');
 
 -- CreateEnum
 CREATE TYPE "Owner" AS ENUM ('PRODUCT', 'PRODUCTION_STEP', 'STOCK_ITEM', 'OCURRENCE');
+
+-- CreateEnum
+CREATE TYPE "Filling" AS ENUM ('VOID', 'HALF', 'FULL');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -168,7 +171,7 @@ CREATE TABLE "production_orders" (
     "description" VARCHAR(255),
     "production_date" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "production_line" VARCHAR(255),
-    "Production_Status" "Production_Status" NOT NULL DEFAULT 'CREATED',
+    "Production_Status" "Production_Status" NOT NULL DEFAULT 'PENDING',
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -344,6 +347,37 @@ CREATE TABLE "images" (
     CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "composition_orders" (
+    "id" SERIAL NOT NULL,
+    "order" INTEGER NOT NULL,
+    "filling" "Filling" NOT NULL DEFAULT 'VOID',
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_by" TEXT,
+    "updated_by" TEXT,
+
+    CONSTRAINT "composition_orders_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "composition_orders_items" (
+    "id" SERIAL NOT NULL,
+    "composition_order_id" INTEGER NOT NULL,
+    "sequence" INTEGER NOT NULL,
+    "raw_product_id" INTEGER NOT NULL,
+    "necessary_quantity" DOUBLE PRECISION NOT NULL,
+    "quantity_received" DOUBLE PRECISION NOT NULL,
+    "diference" DOUBLE PRECISION NOT NULL,
+    "used_batchs" JSONB NOT NULL,
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_by" TEXT,
+    "updated_by" TEXT,
+
+    CONSTRAINT "composition_orders_items_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -427,3 +461,9 @@ ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_raw_product_fk
 
 -- AddForeignKey
 ALTER TABLE "groups" ADD CONSTRAINT "groups_father_id_fkey" FOREIGN KEY ("father_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "composition_orders" ADD CONSTRAINT "composition_orders_order_fkey" FOREIGN KEY ("order") REFERENCES "production_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "composition_orders_items" ADD CONSTRAINT "composition_orders_items_composition_order_id_fkey" FOREIGN KEY ("composition_order_id") REFERENCES "composition_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

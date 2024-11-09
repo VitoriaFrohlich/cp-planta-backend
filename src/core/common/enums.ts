@@ -30,13 +30,13 @@ export enum Price_Type {
 }
 
 export enum Production_Status {
+  PENDING = 'PENDING',
   CREATED = 'CREATED',
   SCHEDULED = 'SCHEDULED',
-  OPEN = 'OPEN',
   IN_PROGRESS = 'IN_PROGRESS',
-  FINISHED = 'FINISHED',
   STOPPED = 'STOPPED',
-  CANCELED = 'CANCELED'
+  CANCELED = 'CANCELED',
+  FINISHED = 'FINISHED'
 }
 
 export enum Stock_Moviment {
@@ -69,4 +69,10 @@ export enum Owner {
   PRODUCTION_STEP = 'PRODUCTION_STEP',
   STOCK_ITEM = 'STOCK_ITEM',
   OCURRENCE = 'OCURRENCE'
+}
+
+export enum Filling {
+  VOID = 'VOID',
+  HALF = 'HALF',
+  FULL = 'FULL'
 }

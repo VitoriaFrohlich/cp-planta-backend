@@ -31,7 +31,7 @@ export class ProductionService {
     const numberString = await this.settingsService.get('lastOrderNumber');
     const number = Number(numberString) + 1;
     const description = `Ordem ${descriptionProduct} - ${number}`;
-    const status = Production_Status.CREATED;
+    const status = Production_Status.PENDING;
 
     const production = await this.productionRepository.createOrder({
       number: number,

@@ -330,7 +330,7 @@ VALUES
     (2,'Production B','2024-12-15 23:59:59','SCHEDULED'),
     (3,'Production C','2024-12-31 23:59:59', 'IN_PROGRESS'),
     (4,'Production D','2024-12-15 23:59:59','SCHEDULED'),
-    (5,'Production E','2024-12-31 23:59:59', 'OPEN');
+    (5,'Production E','2024-12-31 23:59:59', 'PENDING');
 
 -- Insert into production_orders_items
 INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "batch", "batch_expiration")
