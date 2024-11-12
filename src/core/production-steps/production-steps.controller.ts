@@ -49,7 +49,6 @@ export class ProductionStepsController {
     return {
       id: createdProductionStep.id,
       description: createdProductionStep.description,
-      active: createdProductionStep.active,
       created_at: createdProductionStep.created_at,
       updated_at: createdProductionStep.updated_at
     };
@@ -69,7 +68,6 @@ export class ProductionStepsController {
     return categories.map(category => ({
       id: category.id,
       description: category.description,
-      active: category.active,
       created_at: category.created_at,
       updated_at: category.updated_at
     }));
@@ -87,7 +85,6 @@ export class ProductionStepsController {
     const response: ResponseProductionStepsDto = {
       id: category.id,
       description: category.description,
-      active: category.active,
       created_at: category.created_at,
       updated_at: category.updated_at
     };
@@ -123,7 +120,7 @@ export class ProductionStepsController {
     return {
       id: updatedProductionStep.id,
       description: updatedProductionStep.description,
-      active: updatedProductionStep.active,
+
       created_at: updatedProductionStep.created_at,
       updated_at: updatedProductionStep.updated_at
     };

@@ -23,7 +23,7 @@ CREATE TYPE "Stock_Moviment" AS ENUM ('INPUT', 'TRANSIT', 'OUTPUT', 'RESERVED', 
 CREATE TYPE "Production_Status" AS ENUM ('CREATED', 'SCHEDULED', 'OPEN', 'IN_PROGRESS', 'FINISHED', 'STOPPED', 'CANCELED');
 
 -- CreateEnum
-CREATE TYPE "Batch_Status" AS ENUM ('PENDING', 'USED', 'CANCELED');
+CREATE TYPE "Owner" AS ENUM ('PRODUCT', 'PRODUCTION_STEP', 'STOCK_ITEM', 'OCURRENCE');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -31,7 +31,7 @@ CREATE TABLE "users" (
     "email" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'DEFAULT',
-    "username" VARCHAR(255),
+    "username" VARCHAR(255) NOT NULL,
     "first_name" VARCHAR(255),
     "last_name" VARCHAR(255),
     "gender" "Gender" DEFAULT 'OTHER',
@@ -63,20 +63,18 @@ CREATE TABLE "products" (
     "id" SERIAL NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "code" VARCHAR(255) NOT NULL,
-    "sku" VARCHAR(255) NOT NULL,
-    "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'UN',
+    "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'KG',
     "category_id" INTEGER NOT NULL DEFAULT 1,
     "group_id" INTEGER NOT NULL DEFAULT 1,
     "supplier_id" INTEGER,
     "nutritional_info" JSONB,
-    "photo" BYTEA[],
+    "images" INTEGER[],
     "active" BOOLEAN NOT NULL DEFAULT true,
     "origin" "Origin" NOT NULL DEFAULT 'RAW_MATERIAL',
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
     "updated_by" TEXT,
-    "groupsId" INTEGER,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
@@ -147,12 +145,12 @@ CREATE TABLE "stock_items" (
     "quantity" DOUBLE PRECISION NOT NULL,
     "unit_price" DOUBLE PRECISION NOT NULL,
     "total_price" DOUBLE PRECISION NOT NULL,
-    "lote" TEXT,
-    "expiration" TIMESTAMP(3),
-    "photo" BYTEA[],
+    "batch" TEXT,
+    "batch_expiration" TIMESTAMP(3),
+    "sku" VARCHAR(255) NOT NULL,
+    "images" INTEGER[],
     "supplier" INTEGER,
     "costumer" INTEGER,
-    "batchsid" INTEGER,
     "stock_location_id" INTEGER NOT NULL,
     "observation" TEXT,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -188,8 +186,8 @@ CREATE TABLE "production_orders_items" (
     "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
     "production_quantity_real" DOUBLE PRECISION NOT NULL,
     "production_quantity_loss" DOUBLE PRECISION NOT NULL,
-    "lote" VARCHAR(255),
-    "lote_expiration" TIMESTAMP(3),
+    "batch" VARCHAR(255),
+    "batch_expiration" TIMESTAMP(3),
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -226,10 +224,10 @@ CREATE TABLE "production_steps_progress" (
     "quantity_loss" DOUBLE PRECISION,
     "machine" TEXT,
     "production_line" TEXT,
-    "photo" BYTEA[],
+    "images" INTEGER[],
     "observation" TEXT,
-    "operator_id" INTEGER,
-    "ocurrences" JSON,
+    "operator" TEXT,
+    "occurrences" JSON,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -239,23 +237,23 @@ CREATE TABLE "production_steps_progress" (
 );
 
 -- CreateTable
-CREATE TABLE "ocurrences_of_production_stages" (
+CREATE TABLE "occurrences_of_production_stages" (
     "id" SERIAL NOT NULL,
-    "ocurrence_id" INTEGER NOT NULL,
+    "occurrence_id" INTEGER NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "observation" TEXT,
-    "photo" BYTEA[],
-    "stage_ocurred_id" INTEGER NOT NULL,
+    "images" INTEGER[],
+    "stage_occurred_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
     "updated_by" TEXT,
 
-    CONSTRAINT "ocurrences_of_production_stages_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "occurrences_of_production_stages_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "ocurrences" (
+CREATE TABLE "occurrences" (
     "id" SERIAL NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -263,7 +261,7 @@ CREATE TABLE "ocurrences" (
     "created_by" TEXT,
     "updated_by" TEXT,
 
-    CONSTRAINT "ocurrences_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "occurrences_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -282,28 +280,15 @@ CREATE TABLE "settings" (
 );
 
 -- CreateTable
-CREATE TABLE "batchs" (
+CREATE TABLE "compositions" (
     "id" SERIAL NOT NULL,
-    "batch" VARCHAR(255) NOT NULL,
-    "status" "Batch_Status" NOT NULL DEFAULT 'PENDING',
+    "final_product" INTEGER NOT NULL,
+    "description" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
     "updated_by" TEXT,
-
-    CONSTRAINT "batchs_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "compositions" (
-    "id" SERIAL NOT NULL,
-    "product_id" INTEGER NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" INTEGER,
-    "updated_by" INTEGER,
-    "production_steps" JSON,
+    "production_steps" JSONB,
 
     CONSTRAINT "compositions_pkey" PRIMARY KEY ("id")
 );
@@ -313,7 +298,7 @@ CREATE TABLE "composition_items" (
     "id" SERIAL NOT NULL,
     "composition_id" INTEGER NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "raw_product" INTEGER NOT NULL,
     "quantity" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -331,10 +316,32 @@ CREATE TABLE "groups" (
     "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_by" INTEGER,
-    "updated_by" INTEGER,
+    "created_by" TEXT,
+    "updated_by" TEXT,
 
     CONSTRAINT "groups_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "images" (
+    "id" SERIAL NOT NULL,
+    "hash" TEXT NOT NULL,
+    "path" TEXT NOT NULL,
+    "mime_type" TEXT NOT NULL,
+    "file_name" TEXT NOT NULL,
+    "original_name" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "width" INTEGER NOT NULL,
+    "height" INTEGER NOT NULL,
+    "metadata" JSONB,
+    "owner" "Owner" NOT NULL,
+    "owner_id" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_by" TEXT,
+    "updated_by" TEXT,
+
+    CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -347,13 +354,13 @@ CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 CREATE UNIQUE INDEX "products_code_key" ON "products"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "products_sku_key" ON "products"("sku");
-
--- CreateIndex
 CREATE UNIQUE INDEX "categories_description_key" ON "categories"("description");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "stock_document_number_key" ON "stock"("document_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stock_items_sku_key" ON "stock_items"("sku");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "production_orders_number_key" ON "production_orders"("number");
@@ -368,7 +375,7 @@ ALTER TABLE "products" ADD CONSTRAINT "products_category_id_fkey" FOREIGN KEY ("
 ALTER TABLE "products" ADD CONSTRAINT "products_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_groupsId_fkey" FOREIGN KEY ("groupsId") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "products" ADD CONSTRAINT "products_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "prices" ADD CONSTRAINT "prices_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -395,9 +402,6 @@ ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIG
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_operator_id_fkey" FOREIGN KEY ("operator_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_production_id_fkey" FOREIGN KEY ("production_id") REFERENCES "production_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -407,25 +411,19 @@ ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progres
 ALTER TABLE "production_steps_progress" ADD CONSTRAINT "production_steps_progress_step_id_fkey" FOREIGN KEY ("step_id") REFERENCES "production_order_steps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ocurrences_of_production_stages" ADD CONSTRAINT "ocurrences_of_production_stages_ocurrence_id_fkey" FOREIGN KEY ("ocurrence_id") REFERENCES "ocurrences"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_occurrence_id_fkey" FOREIGN KEY ("occurrence_id") REFERENCES "occurrences"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ocurrences_of_production_stages" ADD CONSTRAINT "ocurrences_of_production_stages_stage_ocurred_id_fkey" FOREIGN KEY ("stage_ocurred_id") REFERENCES "production_steps_progress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "occurrences_of_production_stages" ADD CONSTRAINT "occurrences_of_production_stages_stage_occurred_id_fkey" FOREIGN KEY ("stage_occurred_id") REFERENCES "production_steps_progress"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "settings" ADD CONSTRAINT "settings_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("username") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "settings" ADD CONSTRAINT "settings_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "users"("username") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "compositions" ADD CONSTRAINT "compositions_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "compositions" ADD CONSTRAINT "compositions_final_product_fkey" FOREIGN KEY ("final_product") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_composition_id_fkey" FOREIGN KEY ("composition_id") REFERENCES "compositions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "composition_items" ADD CONSTRAINT "composition_items_raw_product_fkey" FOREIGN KEY ("raw_product") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "groups" ADD CONSTRAINT "groups_father_id_fkey" FOREIGN KEY ("father_id") REFERENCES "groups"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -5,7 +5,6 @@ export const CreateStockSchema = z.object({
   stock_moviment: z.nativeEnum(Stock_Moviment),
   stock_items: z.array(
     z.object({
-      id: z.number().int().positive('Invalid stock item id'),
       product_id: z.number().int().positive('Product is required'),
       quantity: z.number().int().positive('Quantity is required'),
       unit_price: z
@@ -20,6 +19,7 @@ export const CreateStockSchema = z.object({
         .refine(date => !isNaN(date.getTime()), {
           message: 'Invalid expiration date format'
         }),
+      sku: z.string().min(3, 'SKU is required'),
       supplier: z.number().int().positive('Supplier is required').optional(),
       costumer: z.number().int().positive('Costumer is required').optional(),
       stock_location_id: z

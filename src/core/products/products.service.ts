@@ -22,8 +22,7 @@ export class ProductsService {
 
     const existingProduct = await this.matchProductByData(
       createProductDto.code,
-      createProductDto.description,
-      createProductDto.sku
+      createProductDto.description
     );
 
     if (existingProduct.length > 0) {
@@ -122,11 +121,10 @@ export class ProductsService {
     return this.formatProductDate(reactivatedProduct);
   }
 
-  async matchProductByData(code: string, description: string, sku: string) {
+  async matchProductByData(code: string, description: string) {
     const matchedProduct = await this.productsRepository.matchProductByData(
       code,
-      description,
-      sku
+      description
     );
 
     return matchedProduct.map(product => this.formatProductDate(product));

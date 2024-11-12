@@ -63,7 +63,6 @@ CREATE TABLE "products" (
     "id" SERIAL NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "code" VARCHAR(255) NOT NULL,
-    "sku" VARCHAR(255) NOT NULL,
     "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'KG',
     "category_id" INTEGER NOT NULL DEFAULT 1,
     "group_id" INTEGER NOT NULL DEFAULT 1,
@@ -148,6 +147,7 @@ CREATE TABLE "stock_items" (
     "total_price" DOUBLE PRECISION NOT NULL,
     "batch" TEXT,
     "batch_expiration" TIMESTAMP(3),
+    "sku" VARCHAR(255) NOT NULL,
     "images" INTEGER[],
     "supplier" INTEGER,
     "costumer" INTEGER,
@@ -354,13 +354,13 @@ CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 CREATE UNIQUE INDEX "products_code_key" ON "products"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "products_sku_key" ON "products"("sku");
-
--- CreateIndex
 CREATE UNIQUE INDEX "categories_description_key" ON "categories"("description");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "stock_document_number_key" ON "stock"("document_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stock_items_sku_key" ON "stock_items"("sku");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "production_orders_number_key" ON "production_orders"("number");

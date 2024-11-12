@@ -21,6 +21,8 @@ export class ResponseStockItems {
   total_price?: number;
   batch: string;
   batch_expiration: string;
+  unit_measure: string;
+  sku: string;
   observation?: string;
   supplier?: string;
   costumer?: string;
@@ -54,4 +56,11 @@ export class ProductBatchByCategory {
     batch_expiration: string | null;
     totalQuantity: number;
   }[];
+}
+
+export class ResponseProductsWithBatches {
+  id: number;
+  description: string;
+  category: string;
+  batch_quantity: number;
 }

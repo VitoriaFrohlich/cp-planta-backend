@@ -14,6 +14,7 @@ import { ProductionService } from './production.service';
 import { CreateProductionDto } from './dto/create.production.dto';
 import { UpdateProductionDto } from './dto/update.production.dto';
 import { ApiQuery } from '@nestjs/swagger';
+import { ShortResponseProductionDto } from './dto/response.production.dto';
 
 @Controller('orders')
 export class ProductionController {
@@ -56,6 +57,19 @@ export class ProductionController {
       throw new BadRequestException(`Invalid order field: ${orderBy}`);
     }
     return this.productionService.findAll(orderBy);
+  }
+  @Get('short-list')
+  async shortFindAll(): Promise<ShortResponseProductionDto[]> {
+    const orderBy = 'id';
+    const orders = await this.productionService.findAll(orderBy);
+
+    return orders.map(order => {
+      return {
+        id: order.id,
+        description: order.description,
+        Production_Status: order.Production_Status as string
+      };
+    });
   }
 
   @Get(':id')

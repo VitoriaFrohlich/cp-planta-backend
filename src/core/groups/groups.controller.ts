@@ -47,7 +47,6 @@ export class GroupsController {
     return {
       id: createdGroup.id,
       description: createdGroup.description,
-      active: createdGroup.active,
       created_at: createdGroup.created_at,
       updated_at: createdGroup.updated_at
     };
@@ -68,7 +67,6 @@ export class GroupsController {
     return groups.map(group => ({
       id: group.id,
       description: group.description,
-      active: group.active,
       created_at: group.created_at,
       updated_at: group.updated_at
     }));
@@ -86,7 +84,6 @@ export class GroupsController {
     const response: ResponseGroupsDto = {
       id: group.id,
       description: group.description,
-      active: group.active,
       created_at: group.created_at,
       updated_at: group.updated_at
     };
@@ -120,7 +117,6 @@ export class GroupsController {
     return {
       id: updatedGroup.id,
       description: updatedGroup.description,
-      active: updatedGroup.active,
       created_at: updatedGroup.created_at,
       updated_at: updatedGroup.updated_at
     };

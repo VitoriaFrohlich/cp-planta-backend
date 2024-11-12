@@ -47,7 +47,6 @@ export class PersonsController {
     return {
       id: createdPerson.id,
       name: createdPerson.name,
-      active: createdPerson.active,
       created_at: createdPerson.created_at,
       updated_at: createdPerson.updated_at
     };
@@ -67,7 +66,6 @@ export class PersonsController {
     return persons.map(person => ({
       id: person.id,
       name: person.name,
-      active: person.active,
       created_at: person.created_at,
       updated_at: person.updated_at
     }));
@@ -85,7 +83,6 @@ export class PersonsController {
     const response: ResponsePersonsDto = {
       id: person.id,
       name: person.name,
-      active: person.active,
       created_at: person.created_at,
       updated_at: person.updated_at
     };
@@ -120,7 +117,6 @@ export class PersonsController {
     return {
       id: updatedPerson.id,
       name: updatedPerson.name,
-      active: updatedPerson.active,
       created_at: updatedPerson.created_at,
       updated_at: updatedPerson.updated_at
     };
