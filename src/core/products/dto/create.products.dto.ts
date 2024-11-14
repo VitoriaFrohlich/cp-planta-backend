@@ -21,7 +21,7 @@ export class CreateProductDto {
     default: 'RAW_MATERIAL',
     examples: ['RAW_MATERIAL', 'MADE']
   })
-  readonly origin: Origin;
+  origin: Origin;
 
   @ApiProperty({
     description: 'Product unit measure',

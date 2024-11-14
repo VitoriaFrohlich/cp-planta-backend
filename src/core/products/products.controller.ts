@@ -24,10 +24,26 @@ import { ApiQuery } from '@nestjs/swagger';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
-  async create(
+  @Post('made')
+  async createMade(
     @Body() createProductDto: CreateProductDto
   ): Promise<ResponseProductsDto> {
+    return this.create(createProductDto, Origin.MADE);
+  }
+
+  @Post('raw')
+  async createRaw(
+    @Body() createProductDto: CreateProductDto
+  ): Promise<ResponseProductsDto> {
+    return this.create(createProductDto, Origin.RAW_MATERIAL);
+  }
+
+  async create(
+    createProductDto: CreateProductDto,
+    origin: Origin
+  ): Promise<ResponseProductsDto> {
+    createProductDto.origin = origin;
+
     const matchedProducts = await this.productsService.matchProductByData(
       createProductDto.code,
       createProductDto.description
