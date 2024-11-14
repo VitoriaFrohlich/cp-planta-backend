@@ -34,6 +34,11 @@ export class CreateProductDto {
   readonly origin: Origin;
 
   @ApiProperty({
+    description: 'Image'
+  })
+  readonly image: string;
+
+  @ApiProperty({
     description: 'Product unit measure',
     default: 'UN',
     examples: ['UN', 'KG', 'L', 'GR', 'ML', 'PC']
@@ -78,3 +83,30 @@ export class CreateProductDto {
   })
   readonly quantity: number;
 }
+// export class CreateProductDto{
+//   @ApiProperty({
+//         description: 'Product description',
+//         minLength: 3,
+//         example: 'Batata Branca'
+//       })
+//       readonly description: string;
+//       @ApiProperty({
+//             description: 'Product category id',
+//             default: 1,
+//             example: 'search for the category id in the database'
+//           })
+//           readonly category_id: string;
+
+//    @ApiProperty({
+//          description:'Image'
+//       })
+//       readonly image: string;
+
+//       @ApiProperty({
+//             description: 'Product origin',
+//             default: 'RAW_MATERIAL',
+//             examples: ['RAW_MATERIAL', 'MADE']
+//           })
+//           readonly origin: Origin;
+
+// }
