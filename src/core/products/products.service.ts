@@ -15,9 +15,8 @@ export class ProductsService {
 
   async create(createProductDto: CreateProductDto) {
     const existingProduct = await this.matchProductByData(
-      createProductDto.code,
       createProductDto.description,
-      createProductDto.sku
+      createProductDto.category_id
     );
 
     if (existingProduct.length > 0) {
@@ -26,10 +25,10 @@ export class ProductsService {
       );
     }
 
-    const createdProduct =
-      await this.productsRepository.create(createProductDto);
+    // const createdProduct =
+    await this.productsRepository.create(createProductDto);
 
-    return this.formatProductDate(createdProduct);
+    //  return this.formatProductDate(createdProduct);
   }
 
   async findAll(orderBy: string): Promise<
@@ -107,11 +106,10 @@ export class ProductsService {
     return this.formatProductDate(reactivatedProduct);
   }
 
-  async matchProductByData(code: string, description: string, sku: string) {
+  async matchProductByData(description: string, category_id: number) {
     const matchedProduct = await this.productsRepository.matchProductByData(
-      code,
       description,
-      sku
+      category_id
     );
 
     return matchedProduct.map(product => this.formatProductDate(product));
