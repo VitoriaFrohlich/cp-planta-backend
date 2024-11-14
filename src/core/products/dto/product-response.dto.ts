@@ -6,6 +6,7 @@ export class ResponseProductsDto {
   code: string;
   sku: string;
   origin: Origin;
+  image?: string;
   unit_measure: Unit_Measure;
   category_id: number;
   group_id: number;
@@ -21,4 +22,14 @@ export class ResponseProductsDto {
   //     categories: Category;
   //     groups: Group;
   //     persons: Person;
+}
+export class ResponseProductsRawDto {
+  description: string;
+  category_id: string;
+  image?: string;
+}
+export class ResponseProductsMadeDto {
+  description: string;
+  category_id: number;
+  image?: string;
 }
