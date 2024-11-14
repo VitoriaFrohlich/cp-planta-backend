@@ -13,7 +13,7 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { CreateProductSchema, UpdateProductSchema } from './dto/product.schema';
+import { UpdateProductSchema } from './dto/product.schema';
 import { ZodError } from 'zod';
 import { ResponseProductsDto } from './dto/product-response.dto';
 import { Origin, Unit_Measure } from '../common/enums';
@@ -26,150 +26,340 @@ export class ProductsController {
   @Post()
   async create(
     @Body() createProductDto: CreateProductDto
-  ): Promise<ResponseProductsDto> {
+  ): Promise<{ return: boolean; message: string }> {
     const errors = [];
 
-    const descriptionValidation =
-      CreateProductSchema.shape.description.safeParse(
-        createProductDto.description
-      );
-    if (!descriptionValidation.success) {
-      errors.push({
-        field: 'description',
-        message: descriptionValidation.error.errors[0].message
-      });
+    // Validação manual de campos
+    if (!createProductDto.description) {
+      errors.push({ field: 'description', message: 'Description is required' });
     }
 
-    const codeValidation = CreateProductSchema.shape.code.safeParse(
-      createProductDto.code
-    );
-    if (!codeValidation.success) {
-      errors.push({
-        field: 'code',
-        message: codeValidation.error.errors[0].message
-      });
+    if (!createProductDto.category_id) {
+      errors.push({ field: 'category_id', message: 'Category ID is required' });
     }
 
-    const skuValidation = CreateProductSchema.shape.sku.safeParse(
-      createProductDto.sku
-    );
-    if (!skuValidation.success) {
-      errors.push({
-        field: 'sku',
-        message: skuValidation.error.errors[0].message
-      });
+    if (!createProductDto.origin) {
+      errors.push({ field: 'origin', message: 'Origin is required' });
     }
 
-    const originValidation = CreateProductSchema.shape.origin.safeParse(
-      createProductDto.origin
-    );
-    if (!originValidation.success) {
+    // Verificando se a origem é válida
+    if (
+      createProductDto.origin !== Origin.RAW_MATERIAL &&
+      createProductDto.origin !== Origin.MADE
+    ) {
       errors.push({
         field: 'origin',
-        message: originValidation.error.errors[0].message
+        message: 'Invalid origin. Must be RAW_MATERIAL or MADE'
       });
     }
 
-    const unitMeasureValidation =
-      CreateProductSchema.shape.unit_measure.safeParse(
-        createProductDto.unit_measure
-      );
-    if (!unitMeasureValidation.success) {
-      errors.push({
-        field: 'unit_measure',
-        message: unitMeasureValidation.error.errors[0].message
-      });
-    }
-
-    const categoryIdValidation =
-      CreateProductSchema.shape.category_id.safeParse(
-        createProductDto.category_id
-      );
-    if (!categoryIdValidation.success) {
-      errors.push({
-        field: 'category_id',
-        message: categoryIdValidation.error.errors[0].message
-      });
-    }
-
-    const groupIdValidation = CreateProductSchema.shape.group_id.safeParse(
-      createProductDto.group_id
-    );
-    if (!groupIdValidation.success) {
-      errors.push({
-        field: 'group_id',
-        message: groupIdValidation.error.errors[0].message
-      });
-    }
-
-    const supplierIdValidation =
-      CreateProductSchema.shape.supplier_id.safeParse(
-        createProductDto.supplier_id
-      );
-    if (!supplierIdValidation.success) {
-      errors.push({
-        field: 'supplier_id',
-        message: supplierIdValidation.error.errors[0].message
-      });
-    }
-
-    const nutritionalInfoValidation =
-      CreateProductSchema.shape.nutritional_info.safeParse(
-        createProductDto.nutritional_info
-      );
-    if (!nutritionalInfoValidation.success) {
-      errors.push({
-        field: 'nutritional_info',
-        message: nutritionalInfoValidation.error.errors[0].message
-      });
-    }
-
+    // Se houver erros, retorne com a mensagem de erro
     if (errors.length > 0) {
-      throw new BadRequestException(errors);
+      return { return: false, message: JSON.stringify(errors) };
     }
 
-    const matchedProducts = await this.productsService.matchProductByData(
-      createProductDto.code,
-      createProductDto.description,
-      createProductDto.sku
-    );
+    // Se a origem for RAW_MATERIAL ou MADE, chama a função correspondente
+    if (createProductDto.origin === Origin.RAW_MATERIAL) {
+      return this.createRaw(createProductDto);
+    }
 
-    if ((await matchedProducts).length > 0) {
-      const existingProduct = matchedProducts[0];
+    if (createProductDto.origin === Origin.MADE) {
+      return this.createMade(createProductDto);
+    }
 
-      if (!existingProduct.active) {
-        throw new BadRequestException(
-          `Product already exists but is not active. Activate and update it: ${JSON.stringify(
-            existingProduct
-          )}`
-        );
+    return { return: false, message: 'Unexpected error: Invalid origin' };
+  }
+  // async create(
+  //   @Body() createProductDto: CreateProductDto
+  // ): Promise<ResponseProductsDto> {
+  //   const errors = [];
+  //   // Validando a origem
+  //   if (!createProductDto.origin) {
+  //     errors.push('Origin is required');
+  //   }
+
+  //   if (createProductDto.origin !== Origin.RAW_MATERIAL && createProductDto.origin !== Origin.MADE) {
+  //     errors.push('Invalid origin');
+  //   }
+
+  //   // Se a origem for RAW_MATERIAL ou MADE, chama a função correspondente
+  //   if (createProductDto.origin === Origin.RAW_MATERIAL) {
+  //     return this.createRaw(createProductDto);
+  //   }
+  //   // else {
+  //   //   return this.createMade(createProductDto);
+  //   // }
+
+  //   const descriptionValidation =
+  //     CreateProductSchema.shape.description.safeParse(
+  //       createProductDto.description
+  //     );
+  //   if (!descriptionValidation.success) {
+  //     errors.push({
+  //       field: 'description',
+  //       message: descriptionValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const codeValidation = CreateProductSchema.shape.code.safeParse(
+  //     createProductDto.code
+  //   );
+  //   if (!codeValidation.success) {
+  //     errors.push({
+  //       field: 'code',
+  //       message: codeValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const skuValidation = CreateProductSchema.shape.sku.safeParse(
+  //     createProductDto.sku
+  //   );
+  //   if (!skuValidation.success) {
+  //     errors.push({
+  //       field: 'sku',
+  //       message: skuValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const originValidation = CreateProductSchema.shape.origin.safeParse(
+  //     createProductDto.origin
+  //   );
+  //   if (!originValidation.success) {
+  //     errors.push({
+  //       field: 'origin',
+  //       message: originValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const unitMeasureValidation =
+  //     CreateProductSchema.shape.unit_measure.safeParse(
+  //       createProductDto.unit_measure
+  //     );
+  //   if (!unitMeasureValidation.success) {
+  //     errors.push({
+  //       field: 'unit_measure',
+  //       message: unitMeasureValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const categoryIdValidation =
+  //     CreateProductSchema.shape.category_id.safeParse(
+  //       createProductDto.category_id
+  //     );
+  //   if (!categoryIdValidation.success) {
+  //     errors.push({
+  //       field: 'category_id',
+  //       message: categoryIdValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const groupIdValidation = CreateProductSchema.shape.group_id.safeParse(
+  //     createProductDto.group_id
+  //   );
+  //   if (!groupIdValidation.success) {
+  //     errors.push({
+  //       field: 'group_id',
+  //       message: groupIdValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const supplierIdValidation =
+  //     CreateProductSchema.shape.supplier_id.safeParse(
+  //       createProductDto.supplier_id
+  //     );
+  //   if (!supplierIdValidation.success) {
+  //     errors.push({
+  //       field: 'supplier_id',
+  //       message: supplierIdValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   const nutritionalInfoValidation =
+  //     CreateProductSchema.shape.nutritional_info.safeParse(
+  //       createProductDto.nutritional_info
+  //     );
+  //   if (!nutritionalInfoValidation.success) {
+  //     errors.push({
+  //       field: 'nutritional_info',
+  //       message: nutritionalInfoValidation.error.errors[0].message
+  //     });
+  //   }
+
+  //   if (errors.length > 0) {
+  //     throw new BadRequestException(errors);
+  //   }
+
+  //   const matchedProducts = await this.productsService.matchProductByData(
+  //     createProductDto.code,
+  //     createProductDto.description,
+  //     createProductDto.sku
+  //   );
+
+  //   if ((await matchedProducts).length > 0) {
+  //     const existingProduct = matchedProducts[0];
+
+  //     if (!existingProduct.active) {
+  //       throw new BadRequestException(
+  //         `Product already exists but is not active. Activate and update it: ${JSON.stringify(
+  //           existingProduct
+  //         )}`
+  //       );
+  //     }
+
+  //     throw new BadRequestException(
+  //       'Product already exists. Try update it instead'
+  //     );
+  //   }
+
+  //   const createdProduct = await this.productsService.create(createProductDto);
+  //   return {
+  //     id: createdProduct.id,
+  //     description: createdProduct.description,
+  //     code: createdProduct.code,
+  //     sku: createdProduct.sku,
+  //     origin: createdProduct.origin as Origin,
+  //     unit_measure: createdProduct.unit_measure as Unit_Measure,
+  //     category_id: createdProduct.category_id,
+  //     group_id: createdProduct.group_id,
+  //     supplier_id: createdProduct.supplier_id,
+  //     nutritional_info:
+  //       typeof createdProduct.nutritional_info === 'string'
+  //         ? JSON.parse(createdProduct.nutritional_info)
+  //         : createdProduct.nutritional_info,
+  //     active: createdProduct.active,
+  //     created_at: createdProduct.created_at,
+  //     updated_at: createdProduct.updated_at
+  //   };
+  // }
+
+  @Post('raw')
+  async createRaw(
+    @Body() createProductDto: CreateProductDto
+  ): Promise<{ return: boolean; message: string }> {
+    try {
+      const errors = [];
+      // const result=await this.productsService.createRawMaterial(createProductDto);
+
+      // Validação manual de campos
+      if (!createProductDto.description) {
+        errors.push({
+          field: 'description',
+          message: 'Description is required'
+        });
       }
 
-      throw new BadRequestException(
-        'Product already exists. Try update it instead'
-      );
-    }
+      if (!createProductDto.category_id) {
+        errors.push({
+          field: 'category_id',
+          message: 'Category ID is required'
+        });
+      }
 
-    const createdProduct = await this.productsService.create(createProductDto);
-    return {
-      id: createdProduct.id,
-      description: createdProduct.description,
-      code: createdProduct.code,
-      sku: createdProduct.sku,
-      origin: createdProduct.origin as Origin,
-      unit_measure: createdProduct.unit_measure as Unit_Measure,
-      category_id: createdProduct.category_id,
-      group_id: createdProduct.group_id,
-      supplier_id: createdProduct.supplier_id,
-      nutritional_info:
-        typeof createdProduct.nutritional_info === 'string'
-          ? JSON.parse(createdProduct.nutritional_info)
-          : createdProduct.nutritional_info,
-      active: createdProduct.active,
-      created_at: createdProduct.created_at,
-      updated_at: createdProduct.updated_at
-    };
+      // Se houver erros, retorne com a mensagem de erro
+      if (errors.length > 0) {
+        return { return: false, message: JSON.stringify(errors) };
+      }
+
+      // Cria uma nova instância de DTO com a origem modificada
+      const newProductDto = {
+        ...createProductDto,
+        origin: Origin.RAW_MATERIAL
+      };
+
+      // Chama o serviço de criação de produto
+      await this.productsService.create(newProductDto);
+
+      return { return: true, message: 'Raw material created successfully' };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message.split('\n')[1] // Retorna apenas a primeira linha do erro
+          : 'Unknown error';
+
+      return {
+        return: false,
+        message: `Error creating raw material product: ${errorMessage}`
+      };
+    }
   }
+  // async createRaw(
+  //   @Body() createProductDto: CreateProductDto
+  // ): Promise<{ return: boolean; message: string }> {
+  //   try {
+  //     // Cria uma nova instância de DTO com a origem modificada
+  //     const newProductDto = { ...createProductDto, origin: Origin.RAW_MATERIAL };
+
+  //     // Chama o serviço de criação de produto com os dados de produto final
+  //     await this.productsService.create(newProductDto);
+
+  //     return { return: true, message: 'Raw material created successfully' };
+  //   } catch (error) {
+  //     return { return: false, message: 'Error creating raw material product: unknown error' };
+  //   }
+  // }
+
+  @Post('made')
+  async createMade(
+    @Body() createProductDto: CreateProductDto
+  ): Promise<{ return: boolean; message: string }> {
+    try {
+      const errors = [];
+      // const result=await this.productsService.createMade(createProductDto);
+
+      // Validação manual de campos
+      if (!createProductDto.description) {
+        errors.push({
+          field: 'description',
+          message: 'Description is required'
+        });
+      }
+
+      if (!createProductDto.category_id) {
+        errors.push({
+          field: 'category_id',
+          message: 'Category ID is required'
+        });
+      }
+
+      // Se houver erros, retorne com a mensagem de erro
+      if (errors.length > 0) {
+        return { return: false, message: JSON.stringify(errors) };
+      }
+
+      // Cria uma nova instância de DTO com a origem modificada
+      const newProductDto = { ...createProductDto, origin: Origin.MADE };
+
+      // Chama o serviço de criação de produto
+      await this.productsService.create(newProductDto);
+
+      return { return: true, message: 'Made product created successfully' };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message.split('\n')[1] // Retorna apenas a primeira linha do erro
+          : 'Unknown error';
+
+      return {
+        return: false,
+        message: `Error creating made product: ${errorMessage}`
+      };
+    }
+  }
+  // async createMade(
+  //   @Body() createProductDto: CreateProductDto
+  // ): Promise<{ return: boolean; message: string }> {
+  //   try {
+  //     // Cria uma nova instância de DTO com a origem modificada
+  //     const newProductDto = { ...createProductDto, origin: Origin.MADE };
+
+  //     // Chama o serviço de criação de produto com os dados de produto final
+  //     await this.productsService.create(newProductDto);
+
+  //     return { return: true, message: 'Made product created successfully' };
+  //   } catch (error) {
+  //     return { return: false, message: 'Error creating made product: unknown error'};
+  //   }
+  // }
 
   @Get()
   @ApiQuery({
