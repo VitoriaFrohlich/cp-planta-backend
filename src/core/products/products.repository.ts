@@ -1,18 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { products, Prisma, Origin } from '@prisma/client';
+//import { Product } from './entities/product.entity';
+//import { CreateProductDto } from './dto/create-product.dto';
+import {
+  //ResponseProductsDto,
+  ResponseProductsMadeDto
+} from './dto/product-response.dto';
 
 @Injectable()
 export class ProductsRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: Prisma.productsCreateInput): Promise<products> {
+  async create(
+    data: Prisma.productsCreateInput
+  ): Promise<ResponseProductsMadeDto> {
     const product = await this.prisma.products.create({
       data
     });
 
     const productResponse = {
-      ...product
+      description: product.description,
+      category_id: product.category_id
+      //image:product.photo
     };
     return productResponse;
   }
@@ -92,16 +102,14 @@ export class ProductsRepository {
   }
 
   async matchProductByData(
-    code: string,
     description: string,
-    sku: string
+    category_id: number
   ): Promise<products[]> {
     return this.prisma.products.findMany({
       where: {
         OR: [
-          { code: { equals: code } },
           { description: { equals: description } },
-          { sku: { equals: sku } }
+          { category_id: { equals: category_id } }
         ]
       }
     });
