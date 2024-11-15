@@ -9,6 +9,7 @@ import { stock_location } from '@prisma/client';
 import { format } from 'date-fns';
 import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
 import { SessionService } from '../common/sessionService';
+import { ResponseLocationBatchsDto } from './dto/response.stock-locations';
 
 @Injectable()
 export class StockLocationsService {
@@ -140,5 +141,11 @@ export class StockLocationsService {
   async remove(id: number) {
     await this.isValid(id);
     return this.stockLocationRepository.delete(id);
+  }
+
+  async getAllLocationsWithBatchQuantity(): Promise<
+    ResponseLocationBatchsDto[]
+  > {
+    return await this.stockLocationRepository.getLocationsWithBatchQuantity();
   }
 }

@@ -477,4 +477,29 @@ export class StockService {
       batch_quantity: category.batch_quantity
     }));
   }
+
+  async getAllBatchsByLocations(): Promise<ResponseProductsWithLocations[]> {
+    const stockLocations = await this.stockRepository.getStockWithLocations();
+
+    const locationMap = new Map<string, ResponseProductsWithLocations>();
+
+    for (const location of stockLocations) {
+      const availableBatches =
+        await this.stockRepository.countDistinctBatchesWithStock(location.id);
+
+      if (locationMap.has(location.description)) {
+        const existingLocation = locationMap.get(location.description);
+        if (existingLocation) {
+          existingLocation.batch_quantity += availableBatches;
+        }
+      } else {
+        locationMap.set(location.description, {
+          id: location.stock_location_id,
+          description: location.description,
+          batch_quantity: availableBatches
+        });
+      }
+    }
+    return Array.from(locationMap.values());
+  }
 }

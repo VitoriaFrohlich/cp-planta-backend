@@ -730,4 +730,27 @@ export class StockRepository {
 
     return result;
   }
+
+  async getStockWithLocations(): Promise<
+    { id: number; stock_location_id: number; description: string }[]
+  > {
+    const stock = await this.prisma.stock_items.findMany({
+      where: {},
+      select: {
+        id: true,
+        stock_location_id: true,
+        stock_location: {
+          select: {
+            description: true
+          }
+        }
+      }
+    });
+
+    return stock.map(item => ({
+      id: item.id,
+      stock_location_id: item.stock_location_id,
+      description: item.stock_location.description
+    }));
+  }
 }

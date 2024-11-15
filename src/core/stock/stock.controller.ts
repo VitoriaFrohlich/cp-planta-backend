@@ -99,6 +99,11 @@ export class StockController {
     return result;
   }
 
+  @Get('locations-batchs')
+  async getAllBatchsByLocations() {
+    return await this.stockService.getAllBatchsByLocations();
+  }
+
   @Get('raw-material-short-list')
   async getRawMaterialShortList() {
     const result = await this.stockService.getShortList(Origin.RAW_MATERIAL);

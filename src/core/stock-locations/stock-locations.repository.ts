@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { Prisma, stock_location } from '@prisma/client';
+import { ResponseLocationBatchsDto } from './dto/response.stock-locations';
 
 @Injectable()
 export class StockLocationsRepository {
@@ -94,5 +95,47 @@ export class StockLocationsRepository {
         updated_at: new Date()
       }
     });
+  }
+
+  private async checkStock(stockLocationId: number): Promise<number> {
+    const batchMaterialsCount = await this.prisma.batch.count({
+      where: {
+        stock_location_id: stockLocationId,
+        balance: { gt: 0 }
+      }
+    });
+
+    const batchProductsCount = await this.prisma.batch.count({
+      where: {
+        stock_location_id: stockLocationId,
+        balance: { gt: 0 }
+      }
+    });
+
+    return batchMaterialsCount + batchProductsCount;
+  }
+
+  async getLocationsWithBatchQuantity(): Promise<ResponseLocationBatchsDto[]> {
+    const stockLocations = await this.prisma.stock_location.findMany({
+      where: { active: true },
+      distinct: ['id'],
+      select: {
+        id: true,
+        description: true
+      }
+    });
+    const locationsWithBatchQuantity = await Promise.all(
+      stockLocations.map(async location => {
+        const batchQuantity = await this.checkStock(location.id);
+
+        return {
+          id: location.id,
+          description: location.description,
+          batch_quantity: batchQuantity
+        };
+      })
+    );
+
+    return locationsWithBatchQuantity;
   }
 }
