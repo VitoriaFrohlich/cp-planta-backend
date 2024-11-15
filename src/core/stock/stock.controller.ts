@@ -14,6 +14,7 @@ import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
 import { Origin, Stock_Moviment } from '../common/enums';
+import { ResponseCategoriesBatchsDto } from './dto/response.categories.batchs.dto';
 import {
   ResponseBatchDto,
   ResponseBatchsByProductDto,
@@ -130,6 +131,11 @@ export class StockController {
       batch: batch[0],
       batch_expiration: batch[1]
     } as ResponseBatchDto;
+  }
+
+  @Get('categories-batchs')
+  async getCategoriesWithBatchCount(): Promise<ResponseCategoriesBatchsDto[]> {
+    return this.stockService.getCategoriesWithBatchCount();
   }
 
   @Get('batchs/:id')

@@ -677,4 +677,57 @@ export class StockRepository {
         }))
       );
   }
+
+  async getCategoriesWithBatchCount(): Promise<
+    { id: number; description: string; batch_quantity: number }[]
+  > {
+    const categories = await this.prisma.categories.findMany({
+      select: {
+        id: true,
+        description: true
+      }
+    });
+
+    const result = [];
+
+    for (const category of categories) {
+      const products = await this.prisma.products.findMany({
+        where: {
+          category_id: category.id
+        },
+        select: {
+          id: true
+        }
+      });
+
+      let batchCount = 0;
+
+      for (const product of products) {
+        const batches = await this.prisma.stock_items.findMany({
+          where: {
+            product_id: product.id
+          },
+          select: {
+            batch: true
+          },
+          distinct: ['batch']
+        });
+
+        for (const batch of batches) {
+          const stockBalance = await this.checkStock(product.id, batch.batch);
+          if (stockBalance > 0) {
+            batchCount++;
+          }
+        }
+      }
+
+      result.push({
+        id: category.id,
+        description: category.description,
+        batch_quantity: batchCount
+      });
+    }
+
+    return result;
+  }
 }

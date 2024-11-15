@@ -21,6 +21,7 @@ import {
   ResponseRawBatchsByIdDto,
   ResponseProductsWithBatches
 } from './dto/response.stock.dto';
+import { ResponseCategoriesBatchsDto } from './dto/response.categories.batchs.dto';
 
 @Injectable()
 export class StockService {
@@ -466,5 +467,14 @@ export class StockService {
     }
 
     return batchResponses;
+  }
+
+  async getCategoriesWithBatchCount(): Promise<ResponseCategoriesBatchsDto[]> {
+    const categories = await this.stockRepository.getCategoriesWithBatchCount();
+    return categories.map(category => ({
+      id: category.id.toString(),
+      description: category.description,
+      batch_quantity: category.batch_quantity
+    }));
   }
 }
