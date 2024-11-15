@@ -4,7 +4,6 @@ import * as z from 'zod';
 export const CreateProductSchema = z.object({
   description: z.string().min(3, 'Description is required'),
   code: z.string().min(3, 'Code is required'),
-  sku: z.string().min(3, 'SKU is required'),
   origin: z.string().default('RAW_MATERIAL'),
   unit_measure: z.nativeEnum(Unit_Measure).default(Unit_Measure.KG).optional(),
   category_id: z.number().int().positive('Category is required').default(1),

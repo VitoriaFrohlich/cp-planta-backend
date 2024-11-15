@@ -10,6 +10,7 @@ export class StockItem {
   total_price: number;
   batch: string;
   batch_expiration: Date;
+  sku: string;
   persons: number;
   costumers: number;
   stock_location_id: number;

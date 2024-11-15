@@ -1,23 +1,28 @@
 import { Production_Status } from '../../common/enums';
-//import { ApiProperty } from '@nestjs/swagger';
+
 export class UpdateProductionDto {
-  readonly description: string;
   readonly production_date: string;
+  readonly production_quantity_estimated?: number;
+  readonly production_quantity_real?: number;
+  readonly production_quantity_loss?: number;
   readonly updated_at: Date;
   readonly updated_by: string;
   readonly Production_Status: Production_Status;
-  readonly production_items: UpdateProductionItemsDto[];
+  readonly production_items: UpdateProductionItemDto[];
 }
 
-export class UpdateProductionItemsDto {
-  readonly production_quantity_estimated: number;
-  readonly production_quantity_real: number;
-  readonly production_quantity_loss: number;
+export class UpdateProductionItemDto {
+  readonly id: number;
+  readonly raw_product_id?: number;
+  readonly raw_product_initial_quantity?: number;
+  readonly raw_product_used_quantity: number;
   readonly updated_at: Date;
   readonly updated_by: string;
-  production_order_id?: number;
-  final_product_id?: number;
-  id?: number;
-  batch?: string;
-  batch_expiration?: string;
+  readonly used_batchs: UpdateProductionBatchDto[];
+}
+
+export class UpdateProductionBatchDto {
+  readonly stock_item_id: number;
+  readonly batch: string;
+  readonly quantity: number;
 }

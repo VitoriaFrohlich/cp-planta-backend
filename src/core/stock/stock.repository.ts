@@ -3,6 +3,7 @@ import { Prisma, stock, stock_items, Stock_Moviment } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { ProductBatch, ProductBatchByCategory } from './dto/response.stock.dto';
 import { formatDate } from '../common/utils';
+import { Origin } from '../common/enums';
 @Injectable()
 export class StockRepository {
   constructor(private prisma: PrismaService) {}
@@ -22,6 +23,7 @@ export class StockRepository {
         total_price: data.total_price,
         batch: data.batch,
         batch_expiration: data.batch_expiration,
+        sku: data.sku,
         products: { connect: { id: data.product_id } },
         stock: { connect: { id: data.stock_id } },
         stock_location: data.stock_location_id
@@ -35,6 +37,13 @@ export class StockRepository {
           costumers: { connect: { id: data.costumer } }
         }) ||
           {})
+      },
+      include: {
+        products: {
+          select: {
+            unit_measure: true
+          }
+        }
       }
     });
   }
@@ -70,6 +79,13 @@ export class StockRepository {
         ...(data.costumer
           ? { costumers: { connect: { id: data.costumer } } }
           : {})
+      },
+      include: {
+        products: {
+          select: {
+            unit_measure: true
+          }
+        }
       }
     });
 
@@ -90,10 +106,19 @@ export class StockRepository {
     });
   }
 
-  async getStockItems(stockId: number): Promise<stock_items[]> {
+  async getStockItems(
+    stockId: number
+  ): Promise<(stock_items & { products: { unit_measure: string } })[]> {
     return await this.prisma.stock_items.findMany({
       where: { stock_id: stockId },
-      orderBy: { sequence: 'asc' }
+      orderBy: { sequence: 'asc' },
+      include: {
+        products: {
+          select: {
+            unit_measure: true
+          }
+        }
+      }
     });
   }
 
@@ -190,7 +215,8 @@ export class StockRepository {
             product_id: true,
             products: {
               select: {
-                description: true
+                description: true,
+                unit_measure: true
               }
             },
             batch: true,
@@ -221,6 +247,13 @@ export class StockRepository {
   async findItemsByStockId(stock_id: number): Promise<stock_items[]> {
     return await this.prisma.stock_items.findMany({
       where: { stock_id },
+      orderBy: { sequence: 'asc' }
+    });
+  }
+
+  async findBySku(sku: string): Promise<stock_items[]> {
+    return await this.prisma.stock_items.findMany({
+      where: { sku },
       orderBy: { sequence: 'asc' }
     });
   }
@@ -271,7 +304,7 @@ export class StockRepository {
                 id: true,
                 description: true,
                 code: true,
-                sku: true
+                unit_measure: true
               }
             },
             batch: true,
@@ -509,5 +542,215 @@ export class StockRepository {
     }
 
     return Object.values(productBatchByCategory);
+  }
+
+  async countDistinctBatchesWithStock(product_id: number): Promise<number> {
+    const batches = await this.prisma.stock_items.findMany({
+      where: {
+        product_id
+      },
+      select: {
+        batch: true
+      },
+      distinct: ['batch']
+    });
+
+    let count = 0;
+
+    for (const batch of batches) {
+      const stockBalance = await this.checkStock(product_id, batch.batch);
+
+      if (stockBalance > 0) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  async getProducts(
+    origin: Origin
+  ): Promise<{ id: number; description: string; category: string }[]> {
+    const products = await this.prisma.products.findMany({
+      where: {
+        origin: origin,
+        active: true
+      },
+      select: {
+        id: true,
+        description: true,
+        categories: {
+          select: {
+            description: true
+          }
+        }
+      }
+    });
+
+    return products.map(product => ({
+      id: product.id,
+      description: product.description,
+      category: product.categories.description
+    }));
+  }
+  async findBatchesByProductId(productId: number) {
+    return this.prisma.stock_items
+      .findMany({
+        where: {
+          product_id: productId,
+          products: {
+            origin: 'RAW_MATERIAL'
+          }
+        },
+        select: {
+          id: true,
+          quantity: true,
+          products: {
+            select: {
+              description: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          id: item.id,
+          description:
+            item.products?.description || 'Description not available',
+          current_quantity: item.quantity
+        }))
+      );
+  }
+  async getRawMaterialsByOrigin(origin: Origin) {
+    return this.prisma.products
+      .findMany({
+        where: {
+          origin
+        },
+        select: {
+          id: true, // Supondo que o campo ID é o identificador único de cada produto
+          description: true, // Descrição do produto
+          unit_measure: true, // Unidade de medida
+          stock_items: {
+            // Join with stock_items table
+            select: {
+              sku: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          product_id: item.id, // Ajuste para retornar o campo id como product_id
+          raw_material_description: item.description,
+          measure_unit: item.unit_measure,
+          sku: item.stock_items[0].sku
+        }))
+      );
+  }
+  async findRawBatchesByProductId(productId: number) {
+    return this.prisma.stock_items
+      .findMany({
+        where: {
+          product_id: productId,
+          products: {
+            origin: 'RAW_MATERIAL'
+          }
+        },
+        select: {
+          id: true,
+          quantity: true,
+          sku: true,
+          products: {
+            select: {
+              unit_measure: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          product_id: item.id, // Ajuste para retornar o campo id como product_id
+          measure_unit: item.products.unit_measure,
+          sku: item.sku,
+          quantity: item.quantity
+        }))
+      );
+  }
+
+  async getCategoriesWithBatchCount(): Promise<
+    { id: number; description: string; batch_quantity: number }[]
+  > {
+    const categories = await this.prisma.categories.findMany({
+      select: {
+        id: true,
+        description: true
+      }
+    });
+
+    const result = [];
+
+    for (const category of categories) {
+      const products = await this.prisma.products.findMany({
+        where: {
+          category_id: category.id
+        },
+        select: {
+          id: true
+        }
+      });
+
+      let batchCount = 0;
+
+      for (const product of products) {
+        const batches = await this.prisma.stock_items.findMany({
+          where: {
+            product_id: product.id
+          },
+          select: {
+            batch: true
+          },
+          distinct: ['batch']
+        });
+
+        for (const batch of batches) {
+          const stockBalance = await this.checkStock(product.id, batch.batch);
+          if (stockBalance > 0) {
+            batchCount++;
+          }
+        }
+      }
+
+      result.push({
+        id: category.id,
+        description: category.description,
+        batch_quantity: batchCount
+      });
+    }
+
+    return result;
+  }
+
+  async getStockWithLocations(): Promise<
+    { id: number; stock_location_id: number; description: string }[]
+  > {
+    const stock = await this.prisma.stock_items.findMany({
+      where: {},
+      select: {
+        id: true,
+        stock_location_id: true,
+        stock_location: {
+          select: {
+            description: true
+          }
+        }
+      }
+    });
+
+    return stock.map(item => ({
+      id: item.id,
+      stock_location_id: item.stock_location_id,
+      description: item.stock_location.description
+    }));
   }
 }

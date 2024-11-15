@@ -9,7 +9,6 @@ import { stock_location } from '@prisma/client';
 import { format } from 'date-fns';
 import { UpdateStockLocationDto } from './dto/update.stock-locations.dto';
 import { SessionService } from '../common/sessionService';
-
 @Injectable()
 export class StockLocationsService {
   constructor(

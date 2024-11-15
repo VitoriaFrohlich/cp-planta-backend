@@ -63,7 +63,6 @@ CREATE TABLE "products" (
     "id" SERIAL NOT NULL,
     "description" VARCHAR(255) NOT NULL,
     "code" VARCHAR(255) NOT NULL,
-    "sku" VARCHAR(255) NOT NULL,
     "unit_measure" "Unit_Measure" NOT NULL DEFAULT 'KG',
     "category_id" INTEGER NOT NULL DEFAULT 1,
     "group_id" INTEGER NOT NULL DEFAULT 1,
@@ -148,6 +147,7 @@ CREATE TABLE "stock_items" (
     "total_price" DOUBLE PRECISION NOT NULL,
     "batch" TEXT,
     "batch_expiration" TIMESTAMP(3),
+    "sku" VARCHAR(255) NOT NULL,
     "images" INTEGER[],
     "supplier" INTEGER,
     "costumer" INTEGER,
@@ -169,6 +169,10 @@ CREATE TABLE "production_orders" (
     "production_date" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "production_line" VARCHAR(255),
     "Production_Status" "Production_Status" NOT NULL DEFAULT 'CREATED',
+    "final_product_id" INTEGER NOT NULL,
+    "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
+    "production_quantity_real" DOUBLE PRECISION NOT NULL,
+    "production_quantity_loss" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -182,12 +186,10 @@ CREATE TABLE "production_orders_items" (
     "id" SERIAL NOT NULL,
     "production_order_id" INTEGER NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "final_product_id" INTEGER NOT NULL,
-    "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
-    "production_quantity_real" DOUBLE PRECISION NOT NULL,
-    "production_quantity_loss" DOUBLE PRECISION NOT NULL,
-    "batch" VARCHAR(255),
-    "batch_expiration" TIMESTAMP(3),
+    "raw_product_id" INTEGER NOT NULL,
+    "raw_product_initial_quantity" DOUBLE PRECISION NOT NULL,
+    "raw_product_used_quantity" DOUBLE PRECISION NOT NULL,
+    "used_batchs" JSONB NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -354,13 +356,13 @@ CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 CREATE UNIQUE INDEX "products_code_key" ON "products"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "products_sku_key" ON "products"("sku");
-
--- CreateIndex
 CREATE UNIQUE INDEX "categories_description_key" ON "categories"("description");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "stock_document_number_key" ON "stock"("document_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stock_items_sku_key" ON "stock_items"("sku");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "production_orders_number_key" ON "production_orders"("number");
@@ -396,7 +398,7 @@ ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_supplier_fkey" FOREIGN KEY
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_costumer_fkey" FOREIGN KEY ("costumer") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("final_product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("raw_product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;

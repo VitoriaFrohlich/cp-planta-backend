@@ -22,7 +22,6 @@ export class ProductsRepository {
       'id',
       'code',
       'description',
-      'sku',
       'origin',
       'unit_measure',
       'category_id',
@@ -46,7 +45,6 @@ export class ProductsRepository {
       'id',
       'code',
       'description',
-      'sku',
       'unit_measure',
       'category_id',
       'group_id'
@@ -93,15 +91,13 @@ export class ProductsRepository {
 
   async matchProductByData(
     code: string,
-    description: string,
-    sku: string
+    description: string
   ): Promise<products[]> {
     return this.prisma.products.findMany({
       where: {
         OR: [
           { code: { equals: code } },
-          { description: { equals: description } },
-          { sku: { equals: sku } }
+          { description: { equals: description } }
         ]
       }
     });

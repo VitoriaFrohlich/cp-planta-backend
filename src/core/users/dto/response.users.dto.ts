@@ -8,7 +8,7 @@ export class ResponseUsersDto {
   first_name: string;
   last_name: string;
   gender: Gender;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

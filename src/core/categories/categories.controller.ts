@@ -48,7 +48,6 @@ export class CategoriesController {
     return {
       id: createdCategory.id,
       description: createdCategory.description,
-      active: createdCategory.active,
       created_at: createdCategory.created_at,
       updated_at: createdCategory.updated_at
     };
@@ -68,7 +67,6 @@ export class CategoriesController {
     return categories.map(category => ({
       id: category.id,
       description: category.description,
-      active: category.active,
       created_at: category.created_at,
       updated_at: category.updated_at
     }));
@@ -86,7 +84,6 @@ export class CategoriesController {
     const response: ResponseCategoriesDto = {
       id: category.id,
       description: category.description,
-      active: category.active,
       created_at: category.created_at,
       updated_at: category.updated_at
     };
@@ -121,7 +118,6 @@ export class CategoriesController {
     return {
       id: updatedCategory.id,
       description: updatedCategory.description,
-      active: updatedCategory.active,
       created_at: updatedCategory.created_at,
       updated_at: updatedCategory.updated_at
     };

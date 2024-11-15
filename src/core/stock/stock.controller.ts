@@ -14,7 +14,13 @@ import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
 import { Origin, Stock_Moviment } from '../common/enums';
-import { ResponseBatchDto } from './dto/response.stock.dto';
+import { ResponseCategoriesBatchsDto } from './dto/response.stock.dto';
+import {
+  ResponseBatchDto,
+  ResponseBatchsByProductDto,
+  ResponseBatchsByRawDto,
+  ResponseRawBatchsByIdDto
+} from './dto/response.stock.dto';
 
 @Controller('stock')
 export class StockController {
@@ -93,6 +99,23 @@ export class StockController {
     return result;
   }
 
+  @Get('locations-batchs')
+  async getAllBatchsByLocations() {
+    return await this.stockService.getAllBatchsByLocations();
+  }
+
+  @Get('raw-material-short-list')
+  async getRawMaterialShortList() {
+    const result = await this.stockService.getShortList(Origin.RAW_MATERIAL);
+    return result;
+  }
+
+  @Get('made-short-list')
+  async getMadeShortList() {
+    const result = await this.stockService.getShortList(Origin.MADE);
+    return result;
+  }
+
   @Get('gen-batchs')
   async generateBatchs(
     @Query('moviment') moviment: string
@@ -113,6 +136,39 @@ export class StockController {
       batch: batch[0],
       batch_expiration: batch[1]
     } as ResponseBatchDto;
+  }
+
+  @Get('categories-batchs')
+  async getCategoriesWithBatchCount(): Promise<ResponseCategoriesBatchsDto[]> {
+    return this.stockService.getCategoriesWithBatchCount();
+  }
+
+  @Get('batchs/:id')
+  async getBatchesByProductId(
+    @Param('id') productId: string
+  ): Promise<ResponseBatchsByProductDto[]> {
+    if (isNaN(+productId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.stockService.getBatchesByProductId(+productId);
+    return result;
+  }
+
+  @Get('batchs-raw')
+  async getBatchesByCategoryRaw(): Promise<ResponseBatchsByRawDto[]> {
+    const result = await this.stockService.getBatchesRaw();
+    return result;
+  }
+
+  @Get('raw-batchs/:id')
+  async getRawBatchesByProductId(
+    @Param('id') productId: string
+  ): Promise<ResponseRawBatchsByIdDto[]> {
+    if (isNaN(+productId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.stockService.getRawBatchesByProductId(+productId);
+    return result;
   }
 
   @Get(':id')

@@ -24,14 +24,29 @@ import { ApiQuery } from '@nestjs/swagger';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
-  async create(
+  @Post('made')
+  async createMade(
     @Body() createProductDto: CreateProductDto
   ): Promise<ResponseProductsDto> {
+    return this.create(createProductDto, Origin.MADE);
+  }
+
+  @Post('raw')
+  async createRaw(
+    @Body() createProductDto: CreateProductDto
+  ): Promise<ResponseProductsDto> {
+    return this.create(createProductDto, Origin.RAW_MATERIAL);
+  }
+
+  async create(
+    createProductDto: CreateProductDto,
+    origin: Origin
+  ): Promise<ResponseProductsDto> {
+    createProductDto.origin = origin;
+
     const matchedProducts = await this.productsService.matchProductByData(
       createProductDto.code,
-      createProductDto.description,
-      createProductDto.sku
+      createProductDto.description
     );
 
     if ((await matchedProducts).length > 0) {
@@ -55,7 +70,6 @@ export class ProductsController {
       id: createdProduct.id,
       description: createdProduct.description,
       code: createdProduct.code,
-      sku: createdProduct.sku,
       origin: createdProduct.origin as Origin,
       unit_measure: createdProduct.unit_measure as Unit_Measure,
       category_id: createdProduct.category_id,
@@ -65,7 +79,6 @@ export class ProductsController {
         typeof createdProduct.nutritional_info === 'string'
           ? JSON.parse(createdProduct.nutritional_info)
           : createdProduct.nutritional_info,
-      active: createdProduct.active,
       created_at: createdProduct.created_at,
       updated_at: createdProduct.updated_at
     };
@@ -76,12 +89,11 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, code, sku, origin, category_id, group_id, supplier_id',
+      'Field to order by. Valid fields: id, description, code, origin, category_id, group_id, supplier_id',
     enum: [
       'id',
       'description',
       'code',
-      'sku',
       'origin',
       'category_id',
       'supplier_id',
@@ -95,7 +107,6 @@ export class ProductsController {
       'id',
       'description',
       'code',
-      'sku',
       'origin',
       'category_id',
       'group_id',
@@ -111,7 +122,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -121,7 +131,6 @@ export class ProductsController {
         typeof product.nutritional_info === 'string'
           ? JSON.parse(product.nutritional_info)
           : product.nutritional_info,
-      active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
     }));
@@ -132,12 +141,11 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
+      'Field to order by. Valid fields: id, description, code, category_id, group_id, supplier_id',
     enum: [
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -150,7 +158,6 @@ export class ProductsController {
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -165,7 +172,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -209,12 +215,11 @@ export class ProductsController {
     name: 'orderBy',
     required: false,
     description:
-      'Field to order by. Valid fields: id, description, code, sku, category_id, group_id, supplier_id',
+      'Field to order by. Valid fields: id, description, code, category_id, group_id, supplier_id',
     enum: [
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -227,7 +232,6 @@ export class ProductsController {
       'id',
       'description',
       'code',
-      'sku',
       'category_id',
       'group_id',
       'supplier_id'
@@ -242,7 +246,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -252,7 +255,6 @@ export class ProductsController {
         typeof product.nutritional_info === 'string'
           ? JSON.parse(product.nutritional_info)
           : product.nutritional_info,
-      active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
     }));
@@ -294,7 +296,6 @@ export class ProductsController {
       id: product.id,
       description: product.description,
       code: product.code,
-      sku: product.sku,
       origin: product.origin as Origin,
       unit_measure: product.unit_measure as Unit_Measure,
       category_id: product.category_id,
@@ -304,7 +305,6 @@ export class ProductsController {
         typeof product.nutritional_info === 'string'
           ? JSON.parse(product.nutritional_info)
           : product.nutritional_info,
-      active: product.active,
       created_at: product.created_at,
       updated_at: product.updated_at
     }));
@@ -338,7 +338,6 @@ export class ProductsController {
       id: updatedProduct.id,
       description: updatedProduct.description,
       code: updatedProduct.code,
-      sku: updatedProduct.sku,
       origin: updatedProduct.origin as Origin,
       unit_measure: updatedProduct.unit_measure as Unit_Measure,
       category_id: updatedProduct.category_id,
@@ -348,7 +347,6 @@ export class ProductsController {
         typeof updatedProduct.nutritional_info === 'string'
           ? JSON.parse(updatedProduct.nutritional_info)
           : updatedProduct.nutritional_info,
-      active: updatedProduct.active,
       created_at: updatedProduct.created_at,
       updated_at: updatedProduct.updated_at
     };

@@ -7,14 +7,9 @@ export class PersonsRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.personsCreateInput): Promise<persons> {
-    const person = await this.prisma.persons.create({
+    return await this.prisma.persons.create({
       data
     });
-
-    const personResponse = {
-      ...person
-    };
-    return personResponse;
   }
 
   async findAll(orderBy: string): Promise<persons[]> {
@@ -33,17 +28,9 @@ export class PersonsRepository {
   }
 
   async findById(id: number): Promise<persons | null> {
-    const person = this.prisma.persons.findUnique({
+    return await this.prisma.persons.findUnique({
       where: { id }
     });
-
-    const personWithoutSensitiveFields = {
-      ...person,
-      created_at: undefined,
-      updated_at: undefined
-    };
-
-    return personWithoutSensitiveFields;
   }
 
   async findManyByIds(ids: number[]): Promise<persons[]> {
@@ -63,18 +50,10 @@ export class PersonsRepository {
   }
 
   async update(id: number, data: Prisma.personsUpdateInput): Promise<persons> {
-    const person = this.prisma.persons.update({
+    return await this.prisma.persons.update({
       where: { id },
       data
     });
-
-    const personResponse = {
-      ...person,
-      created_by: undefined,
-      updated_by: undefined
-    };
-
-    return personResponse;
   }
 
   async delete(id: number, updated_by: string): Promise<void> {
