@@ -8,7 +8,8 @@ import {
   Delete,
   Query,
   BadRequestException,
-  NotFoundException
+  NotFoundException,
+  HttpStatus
 } from '@nestjs/common';
 import { ProductionService } from './production.service';
 import { CreateProductionDto } from './dto/create.production.dto';
@@ -86,18 +87,29 @@ export class ProductionController {
     @Param('id') id: string,
     @Body() updateProductionDto: UpdateProductionDto
   ) {
-    const idNumber = +id;
-    if (isNaN(idNumber)) {
-      throw new BadRequestException('Invalid ID format');
+    const maintenanceMode = true;
+
+    if (maintenanceMode) {
+      return {
+        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+        success: false,
+        message:
+          'Este endpoint está em manutenção no momento. Por favor, tente novamente mais tarde.',
+        data: null
+      };
     }
 
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Formato de ID inválido');
+    }
     const existingProduction = await this.productionService.findOne(idNumber);
     if (!existingProduction) {
       throw new NotFoundException(
-        `Production order with ID ${idNumber} not found`
+        `Ordem de produção com ID ${idNumber} não encontrada`
       );
     }
-    return this.productionService.update(+idNumber, updateProductionDto);
+    return this.productionService.update(idNumber, updateProductionDto);
   }
 
   @Delete(':id')

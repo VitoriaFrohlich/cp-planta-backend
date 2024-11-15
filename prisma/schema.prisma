@@ -109,7 +109,7 @@ model products {
   updated_at                DateTime                    @default(now()) @db.Timestamp(6)
   created_by                String?
   updated_by                String?
-  final_product_made        production_orders_items[]   @relation("final_product_made")
+  raw_product               production_orders_items[]   @relation("raw_products")
   production_steps_progress production_steps_progress[] @relation("steps_progress")
   categories                categories                  @relation("categories", fields: [category_id], references: [id])
   supplier                  persons?                    @relation("suppliers", fields: [supplier_id], references: [id])
@@ -228,37 +228,39 @@ model stock_items {
 
 // ordem de produção do produto final
 model production_orders {
-  id                        Int                         @id @default(autoincrement())
-  number                    Int                         @unique
-  description               String?                     @db.VarChar(255)
-  production_date           DateTime                    @default(now()) @db.Timestamp(6)
-  production_line           String?                     @db.VarChar(255)
-  Production_Status         Production_Status           @default(CREATED)
-  created_at                DateTime                    @default(now()) @db.Timestamp(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
-  created_by                String?
-  updated_by                String?
-  production_item           production_orders_items[]   @relation("production_order")
-  production_steps_progress production_steps_progress[] @relation("production_orders")
-}
-
-// // produto final atrelado na ordem de produção
-model production_orders_items {
-  id                            Int               @id @default(autoincrement())
-  production_order_id           Int
-  sequence                      Int
+  id                            Int                         @id @default(autoincrement())
+  number                        Int                         @unique
+  description                   String?                     @db.VarChar(255)
+  production_date               DateTime                    @default(now()) @db.Timestamp(6)
+  production_line               String?                     @db.VarChar(255)
+  Production_Status             Production_Status           @default(CREATED)
   final_product_id              Int
   production_quantity_estimated Float
   production_quantity_real      Float
   production_quantity_loss      Float
-  batch                         String?           @db.VarChar(255)
-  batch_expiration              DateTime?
-  created_at                    DateTime          @default(now()) @db.Timestamp(6)
-  updated_at                    DateTime          @default(now()) @db.Timestamp(6)
+  created_at                    DateTime                    @default(now()) @db.Timestamp(6)
+  updated_at                    DateTime                    @default(now()) @db.Timestamp(6)
   created_by                    String?
   updated_by                    String?
-  final_product_made            products          @relation("final_product_made", fields: [final_product_id], references: [id], onDelete: Cascade, map: "final_product_fkey")
-  production_order              production_orders @relation("production_order", fields: [production_order_id], references: [id], onDelete: Cascade)
+  production_item               production_orders_items[]   @relation("production_order")
+  production_steps_progress     production_steps_progress[] @relation("production_orders")
+}
+
+// // produto final atrelado na ordem de produção
+model production_orders_items {
+  id                           Int               @id @default(autoincrement())
+  production_order_id          Int
+  sequence                     Int
+  raw_product_id               Int
+  raw_product_initial_quantity Float
+  raw_product_used_quantity    Float
+  used_batchs                  Json
+  created_at                   DateTime          @default(now()) @db.Timestamp(6)
+  updated_at                   DateTime          @default(now()) @db.Timestamp(6)
+  created_by                   String?
+  updated_by                   String?
+  raw_product                  products          @relation("raw_products", fields: [raw_product_id], references: [id], onDelete: Cascade, map: "final_product_fkey")
+  production_order             production_orders @relation("production_order", fields: [production_order_id], references: [id], onDelete: Cascade)
 }
 
 // Status da ordem de produção - CRIADO, AGENDADO, ABERTO, EM ANDAMENTO, FINALIZADO, PARADO, CANCELADO

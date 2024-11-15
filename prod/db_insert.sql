@@ -325,23 +325,49 @@ VALUES
     (5, 5, 13, 10.0, 10.0, 1000.0, 'LOTE-TESTE', '2024-12-31 23:59:59', 1, 'SKU1031'),
     (5, 6, 14, 20.0, 20.0, 4000.0, 'LOTE-TESTE', '2024-12-15 23:59:59', 3, 'SKU1032');
 	
+
 -- Insert into production_orders
-INSERT INTO "production_orders" ("number","description", "production_date","Production_Status")
+
+
+-- Insert into production_orders
+INSERT INTO "production_orders" (
+  "number",
+  "description",
+  "production_date", 
+  "Production_Status", 
+  "production_line", 
+  "final_product_id", 
+  "production_quantity_estimated", 
+  "production_quantity_real", 
+  "production_quantity_loss", 
+  "created_by", 
+  "updated_by")
 VALUES 
-    (1,'Production A','2024-12-31 23:59:59', 'CREATED'),
-    (2,'Production B','2024-12-15 23:59:59','SCHEDULED'),
-    (3,'Production C','2024-12-31 23:59:59', 'IN_PROGRESS'),
-    (4,'Production D','2024-12-15 23:59:59','SCHEDULED'),
-    (5,'Production E','2024-12-31 23:59:59', 'OPEN');
+    (1,'Production A','2024-12-31 23:59:59', 'CREATED', 'esteira 1', 8, 1000.0, 950.0, 50.0, 'root', 'root'),
+    (2,'Production B','2024-12-15 23:59:59','SCHEDULED', 'esteira 2', 9, 2000.0, 1900.0, 100.0, 'root', 'root'),
+    (3,'Production C','2024-12-31 23:59:59', 'IN_PROGRESS', 'esteira 2', 10, 1000.0, 950.0, 50.0, 'root', 'root'),
+    (4,'Production D','2024-12-15 23:59:59','SCHEDULED', 'esteira 2', 11, 2000.0, 1900.0, 100.0, 'root', 'root'),
+    (5,'Production E','2024-12-31 23:59:59', 'OPEN', 'esteira 2', 12, 2000.0, 1900.0, 100.0, 'root', 'root');
 
 -- Insert into production_orders_items
-INSERT INTO "production_orders_items" ("production_order_id", "sequence", "final_product_id", "production_quantity_estimated", "production_quantity_real","production_quantity_loss", "batch", "batch_expiration")
+INSERT INTO "production_orders_items" (
+  "production_order_id", 
+  "sequence", 
+  "raw_product_id", 
+  "raw_product_initial_quantity", 
+  "raw_product_used_quantity", 
+  "created_by",
+  "updated_by", 
+  "used_batchs")
 VALUES
-	(1, 1, 10, 1000.0, 950.0, 50.0, 'LoteTY123', '2024-12-31 23:59:59'),
-    (2, 2, 11, 2000.0, 1900.0, 100.0, 'LoteER56', '2024-12-15 23:59:59'),
-    (3, 3, 12, 1000.0, 950.0, 50.0,'LoteOI123', '2024-12-31 23:59:59'),
-    (4, 4, 13, 2000.0, 1900.0, 100.0, 'LoteB456', '2024-12-15 23:59:59'),
-    (5, 5, 14, 2000.0, 1900.0, 100.0, 'LoteABC123', '2024-12-15 23:59:59');
+    (1, 1, 3, 1000.0, 950.0, 'root', 'root', '[{"stock_item_id": 1, "batch": "LoteA123", "quantity": 30}, {"stock_item_id": 2, "batch": "LoteA124", "quantity": 50}, {"stock_item_id": 3, "batch": "LoteA125", "quantity": 20}]'),
+    (1, 2, 4, 1000.0, 950.0, 'root', 'root', '[{"stock_item_id": 4, "batch": "LoteA126", "quantity": 30}, {"stock_item_id": 5, "batch": "LoteA127", "quantity": 50}, {"stock_item_id": 6, "batch": "LoteA128", "quantity": 20}]'),
+    (1, 3, 5, 1000.0, 950.0, 'root', 'root', '[{"stock_item_id": 7, "batch": "LoteA129", "quantity": 20}, {"stock_item_id": 8, "batch": "LoteA130", "quantity": 30}, {"stock_item_id": 9, "batch": "LoteA131", "quantity": 50}]'),
+    (2, 1, 1, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 10, "batch": "LoteA132", "quantity": 50}, {"stock_item_id": 11, "batch": "LoteA133", "quantity": 50}, {"stock_item_id": 12, "batch": "LoteA134", "quantity": 30}]'),
+    (3, 1, 2, 1000.0, 950.0, 'root', 'root', '[{"stock_item_id": 13, "batch": "LoteA135", "quantity": 50}, {"stock_item_id": 14, "batch": "LoteA136", "quantity": 20}, {"stock_item_id": 15, "batch": "LoteA137", "quantity": 30}]'),
+    (4, 1, 6, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 16, "batch": "LoteA138", "quantity": 25}, {"stock_item_id": 17, "batch": "LoteA139", "quantity": 25}]'),
+    (5, 1, 7, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 18, "batch": "LoteA140", "quantity": 30}, {"stock_item_id": 19, "batch": "LoteA141", "quantity": 20}]');
+
 
 -- INSERT INTO "production_steps_progress"
 INSERT INTO "production_steps_progress" (

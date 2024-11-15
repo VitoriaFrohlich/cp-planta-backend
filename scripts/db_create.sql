@@ -169,6 +169,10 @@ CREATE TABLE "production_orders" (
     "production_date" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "production_line" VARCHAR(255),
     "Production_Status" "Production_Status" NOT NULL DEFAULT 'CREATED',
+    "final_product_id" INTEGER NOT NULL,
+    "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
+    "production_quantity_real" DOUBLE PRECISION NOT NULL,
+    "production_quantity_loss" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -182,12 +186,10 @@ CREATE TABLE "production_orders_items" (
     "id" SERIAL NOT NULL,
     "production_order_id" INTEGER NOT NULL,
     "sequence" INTEGER NOT NULL,
-    "final_product_id" INTEGER NOT NULL,
-    "production_quantity_estimated" DOUBLE PRECISION NOT NULL,
-    "production_quantity_real" DOUBLE PRECISION NOT NULL,
-    "production_quantity_loss" DOUBLE PRECISION NOT NULL,
-    "batch" VARCHAR(255),
-    "batch_expiration" TIMESTAMP(3),
+    "raw_product_id" INTEGER NOT NULL,
+    "raw_product_initial_quantity" DOUBLE PRECISION NOT NULL,
+    "raw_product_used_quantity" DOUBLE PRECISION NOT NULL,
+    "used_batchs" JSONB NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by" TEXT,
@@ -396,7 +398,7 @@ ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_supplier_fkey" FOREIGN KEY
 ALTER TABLE "stock_items" ADD CONSTRAINT "stock_items_costumer_fkey" FOREIGN KEY ("costumer") REFERENCES "persons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("final_product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "production_orders_items" ADD CONSTRAINT "final_product_fkey" FOREIGN KEY ("raw_product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "production_orders_items" ADD CONSTRAINT "production_orders_items_production_order_id_fkey" FOREIGN KEY ("production_order_id") REFERENCES "production_orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
