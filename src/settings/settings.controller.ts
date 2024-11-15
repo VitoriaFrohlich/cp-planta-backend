@@ -33,7 +33,6 @@ export class SettingsController {
       id: config.id,
       key: config.key,
       value: config.value,
-      active: config.active,
       description: config.description,
       updated_at: config.updated_at,
       updated_by: config.updated_by
@@ -52,7 +51,6 @@ export class SettingsController {
       id: config.id,
       key: config.key,
       value: config.value,
-      active: config.active,
       description: config.description,
       updated_at: config.updated_at,
       updated_by: config.updated_by
@@ -86,7 +84,6 @@ export class SettingsController {
       id: updated.id,
       key: updated.key,
       value: updated.value,
-      active: updated.active,
       description: updated.description,
       updated_at: updated.updated_at,
       updated_by: updated.updated_by

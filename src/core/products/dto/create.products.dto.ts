@@ -17,18 +17,11 @@ export class CreateProductDto {
   readonly code: string;
 
   @ApiProperty({
-    description: 'Product SKU',
-    minLength: 3,
-    example: 'CC-LAT-350'
-  })
-  readonly sku: string;
-
-  @ApiProperty({
     description: 'Product origin',
     default: 'RAW_MATERIAL',
     examples: ['RAW_MATERIAL', 'MADE']
   })
-  readonly origin: Origin;
+  origin: Origin;
 
   @ApiProperty({
     description: 'Product unit measure',

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 LOG_FILE="/app/scripts/start-with-prisma.log"
 PRISMA_CMD="npx prisma generate"

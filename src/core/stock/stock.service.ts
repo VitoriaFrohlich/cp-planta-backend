@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException
 } from '@nestjs/common';
 import { CreateStockDto, CreateStockItemsDto } from './dto/create.stock.dto';
@@ -10,10 +11,18 @@ import { SettingsService } from 'src/settings/settings.service';
 import { BatchService } from '../common/batch.utils';
 import { format } from 'date-fns';
 import { stock } from '@prisma/client';
-import { Stock_Moviment } from '../common/enums';
+import { Origin, Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
 import { formatDate } from '../common/utils';
-import { ResponseStockDto } from './dto/response.stock.dto';
+import {
+  ResponseBatchsByProductDto,
+  ResponseBatchsByRawDto,
+  ResponseStockDto,
+  ResponseRawBatchsByIdDto,
+  ResponseProductsWithBatches,
+  ResponseProductsWithLocationsDto
+} from './dto/response.stock.dto';
+import { ResponseCategoriesBatchsDto } from './dto/response.stock.dto';
 
 @Injectable()
 export class StockService {
@@ -30,15 +39,47 @@ export class StockService {
     Stock_Moviment.ADJUST
   ]);
 
-  async create(createStockDto: CreateStockDto) {
+  async create(createStockDto: CreateStockDto): Promise<ResponseStockDto> {
+    const stock_items: CreateStockItemsDto[] = createStockDto.stock_items;
     const errorMessages = [];
-    if (!Array.isArray(createStockDto.stock_items)) {
-      throw new BadRequestException('Items must be an array');
-    }
 
     const currentUser = this.sessionService.getCurrentUser();
     let documentNumber = '';
     let isInput = false;
+
+    const uniqueSkuMap = new Map<string, number>();
+
+    for (const item of stock_items) {
+      if (
+        uniqueSkuMap.has(item.sku) &&
+        uniqueSkuMap.get(item.sku) !== item.product_id
+      ) {
+        errorMessages.push(
+          `Duplicate SKU ${item.sku} in request for product ID: ${item.product_id}`
+        );
+        continue;
+      }
+
+      uniqueSkuMap.set(item.sku, item.product_id);
+    }
+
+    for (const [sku, productId] of uniqueSkuMap.entries()) {
+      const itemsBySku = await this.stockRepository.findBySku(sku);
+      if (itemsBySku.length > 0) {
+        const existingIds = itemsBySku.map(item => item.id).join(', ');
+        errorMessages.push(
+          `SKU ${sku} of request ID: ${productId} already exists in stock with item IDs: ${existingIds}`
+        );
+      }
+    }
+
+    if (errorMessages.length > 0) {
+      throw new BadRequestException({
+        success: false,
+        errors: errorMessages,
+        message: errorMessages.join(', ')
+      });
+    }
 
     if (createStockDto.stock_moviment === Stock_Moviment.INPUT) {
       isInput = true;
@@ -74,12 +115,12 @@ export class StockService {
     }
 
     if (errorMessages.length > 0) {
-      return {
+      throw new BadRequestException({
         success: false,
         errors: errorMessages,
         message:
           'Não foi possível processar todos os itens devido a saldos insuficientes.'
-      };
+      });
     }
 
     let stockDocument;
@@ -123,6 +164,7 @@ export class StockService {
           total_price: item.unit_price * item.quantity,
           batch: batch,
           batch_expiration: batch_expiration.toISOString(),
+          sku: item.sku,
           observation: item.observation!,
           supplier: item.supplier!,
           costumer: item.costumer!,
@@ -144,38 +186,41 @@ export class StockService {
 
       createdItems.push(
         ...allItems.map(item => ({
-          ...item,
+          id: item.id,
+          sequence: item.sequence,
+          product_id: item.product_id,
+          unit_measure: item.products?.unit_measure,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.total_price,
+          batch: item.batch,
           batch_expiration: formatDate(item.batch_expiration),
-          created_at: formatDate(item.created_at),
-          updated_at: formatDate(item.updated_at)
+          sku: item.sku,
+          created_at: formatDate(item.created_at)
         }))
       );
 
       return {
-        stockDocument: {
-          id: stockDocument.id,
-          document_number: stockDocument.document_number,
-          document_date: formatDate(stockDocument.document_date),
-          stock_moviment: stockDocument.stock_moviment,
-          created_at: formatDate(stockDocument.created_at),
-          items: createdItems
-        }
+        id: stockDocument.id,
+        document_number: stockDocument.document_number,
+        document_date: formatDate(stockDocument.document_date),
+        stock_moviment: stockDocument.stock_moviment,
+        created_at: formatDate(stockDocument.created_at),
+        stock_items: createdItems
       };
     } catch (error) {
       if (stockDocument?.id) {
         try {
           await this.stockRepository.deleteStock(stockDocument.id);
         } catch (deleteError) {
-          return {
-            status: 'error',
-            message: `Error removing stock document: ${(deleteError as Error).message}`
-          };
+          throw new InternalServerErrorException(
+            `Error removing stock document: ${(deleteError as Error).message}`
+          );
         }
       }
-      return {
-        status: 'error',
-        message: `Error during item insertion: ${(error as Error).message}`
-      };
+      throw new InternalServerErrorException(
+        `Error during item insertion: ${(error as Error).message}`
+      );
     }
   }
 
@@ -222,11 +267,13 @@ export class StockService {
         sequence: item.sequence,
         product_id: item.product_id,
         description: item.products?.description,
+        unit_measure: item.products?.unit_measure,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price,
         batch: item.batch,
         batch_expiration: formatDate(item.batch_expiration),
+        sku: item.sku,
         observation: item.observation,
         supplier: item.supplier,
         costumer: item.costumer,
@@ -256,11 +303,13 @@ export class StockService {
         sequence: item.sequence,
         product_id: item.product_id,
         description: item.products?.description,
+        unit_measure: item.products?.unit_measure,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price,
         batch: item.batch,
         batch_expiration: formatDate(item.batch_expiration),
+        sku: item.sku,
         observation: item.observation,
         supplier: item.supplier,
         costumer: item.costumer,
@@ -354,5 +403,104 @@ export class StockService {
       created_at: format(stock.created_at, 'dd/MM/yyyy'),
       updated_at: format(stock.updated_at, 'dd/MM/yyyy')
     };
+  }
+
+  async getShortList(origin: Origin): Promise<ResponseProductsWithBatches[]> {
+    const products = await this.stockRepository.getProducts(origin);
+
+    const response: ResponseProductsWithBatches[] = [];
+
+    for (const product of products) {
+      const batchQuantity =
+        await this.stockRepository.countDistinctBatchesWithStock(product.id);
+
+      response.push({
+        id: product.id,
+        description: product.description,
+        category: product.category,
+        batch_quantity: batchQuantity
+      });
+    }
+
+    return response;
+  }
+  async getBatchesByProductId(
+    productId: number
+  ): Promise<ResponseBatchsByProductDto[]> {
+    const batches =
+      await this.stockRepository.findBatchesByProductId(productId);
+    return batches.map(batch => ({
+      id: batch.id.toString(),
+      description: batch.description,
+      current_quantity: batch.current_quantity
+    }));
+  }
+  async getRawBatchesByProductId(
+    productId: number
+  ): Promise<ResponseRawBatchsByIdDto[]> {
+    const batches =
+      await this.stockRepository.findRawBatchesByProductId(productId);
+    return batches.map(batch => ({
+      id: batch.product_id.toString(),
+      sku: batch.quantity,
+      measure_unit: batch.measure_unit,
+      quantity: batch.quantity
+    }));
+  }
+  async getBatchesRaw(): Promise<ResponseBatchsByRawDto[]> {
+    const rawMaterials = await this.stockRepository.getRawMaterialsByOrigin(
+      Origin.RAW_MATERIAL
+    );
+    const batchResponses: ResponseBatchsByRawDto[] = [];
+
+    for (const material of rawMaterials) {
+      const batches = await this.stockRepository.findBatchesByProductId(
+        material.product_id
+      );
+      for (const batch of batches) {
+        batchResponses.push({
+          raw_material_description: material.raw_material_description,
+          measure_unit: material.measure_unit,
+          quantity: batch.current_quantity,
+          sku: material.sku
+        });
+      }
+    }
+
+    return batchResponses;
+  }
+
+  async getCategoriesWithBatchCount(): Promise<ResponseCategoriesBatchsDto[]> {
+    const categories = await this.stockRepository.getCategoriesWithBatchCount();
+    return categories.map(category => ({
+      id: category.id.toString(),
+      description: category.description,
+      batch_quantity: category.batch_quantity
+    }));
+  }
+
+  async getAllBatchsByLocations(): Promise<ResponseProductsWithLocationsDto[]> {
+    const stockLocations = await this.stockRepository.getStockWithLocations();
+
+    const locationMap = new Map<string, ResponseProductsWithLocationsDto>();
+
+    for (const location of stockLocations) {
+      const availableBatches =
+        await this.stockRepository.countDistinctBatchesWithStock(location.id);
+
+      if (locationMap.has(location.description)) {
+        const existingLocation = locationMap.get(location.description);
+        if (existingLocation) {
+          existingLocation.batch_quantity += availableBatches;
+        }
+      } else {
+        locationMap.set(location.description, {
+          id: location.stock_location_id,
+          description: location.description,
+          batch_quantity: availableBatches
+        });
+      }
+    }
+    return Array.from(locationMap.values());
   }
 }

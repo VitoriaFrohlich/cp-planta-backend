@@ -1,7 +1,6 @@
 # **Configurações do Projeto - CP-Planta**
 
 ## Sumário
-
 - [Configurações Gerais](#configurações-gerais)
   - [Instalação do Ambiente de Desenvolvimento](#instalação-do-ambiente-de-desenvolvimento)
 - [Backend](#backend)

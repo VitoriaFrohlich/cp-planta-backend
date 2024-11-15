@@ -51,6 +51,8 @@ export class CreateStockItemsDto {
   @ApiHideProperty()
   readonly batch_expiration: Date;
 
+  readonly sku: string;
+
   @ApiProperty({
     description: 'Quantity',
     example: '1',

@@ -2,14 +2,17 @@ export class ProductionItem {
   id: number;
   production_order_id: number;
   sequence: number;
-  final_product_id: number;
-  prodution_quantity_estimated: number;
-  production_quantity_real: number;
-  production_quantity_loss: number;
-  lote: string;
-  lote_expiration: string;
+  raw_product_id: number;
+  raw_product_initial_quantity: number;
+  raw_product_used_quantity: number;
   created_at: Date;
   updated_at: Date;
   created_by: string;
   updated_by: string;
+  used_batchs: ProductionBatchDto[];
+}
+export class ProductionBatchDto {
+  stock_item_id: number;
+  batch: string;
+  quantity: number;
 }

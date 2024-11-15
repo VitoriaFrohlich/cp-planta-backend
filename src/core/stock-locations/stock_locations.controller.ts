@@ -49,7 +49,6 @@ export class StockLocationsController {
     return {
       id: createdStockLocation.id,
       description: createdStockLocation.description,
-      active: createdStockLocation.active,
       created_at: createdStockLocation.created_at,
       updated_at: createdStockLocation.updated_at
     };
@@ -70,7 +69,6 @@ export class StockLocationsController {
     return stockLocation.map(stockLocation => ({
       id: stockLocation.id,
       description: stockLocation.description,
-      active: stockLocation.active,
       created_at: stockLocation.created_at,
       updated_at: stockLocation.updated_at
     }));
@@ -87,7 +85,6 @@ export class StockLocationsController {
     return stockLocation.then(stockLocation => ({
       id: stockLocation.id,
       description: stockLocation.description,
-      active: stockLocation.active,
       created_at: stockLocation.created_at,
       updated_at: stockLocation.updated_at
     }));
@@ -125,7 +122,6 @@ export class StockLocationsController {
     return {
       id: updatedStockLocation.id,
       description: updatedStockLocation.description,
-      active: updatedStockLocation.active,
       created_at: updatedStockLocation.created_at,
       updated_at: updatedStockLocation.updated_at
     };

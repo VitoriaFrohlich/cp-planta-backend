@@ -8,12 +8,14 @@ import {
   Delete,
   Query,
   BadRequestException,
-  NotFoundException
+  NotFoundException,
+  HttpStatus
 } from '@nestjs/common';
 import { ProductionService } from './production.service';
 import { CreateProductionDto } from './dto/create.production.dto';
 import { UpdateProductionDto } from './dto/update.production.dto';
 import { ApiQuery } from '@nestjs/swagger';
+import { ShortResponseProductionDto } from './dto/response.production.dto';
 
 @Controller('orders')
 export class ProductionController {
@@ -57,6 +59,19 @@ export class ProductionController {
     }
     return this.productionService.findAll(orderBy);
   }
+  @Get('short-list')
+  async shortFindAll(): Promise<ShortResponseProductionDto[]> {
+    const orderBy = 'id';
+    const orders = await this.productionService.findAll(orderBy);
+
+    return orders.map(order => {
+      return {
+        id: order.id,
+        description: order.description,
+        Production_Status: order.Production_Status as string
+      };
+    });
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -72,18 +87,29 @@ export class ProductionController {
     @Param('id') id: string,
     @Body() updateProductionDto: UpdateProductionDto
   ) {
-    const idNumber = +id;
-    if (isNaN(idNumber)) {
-      throw new BadRequestException('Invalid ID format');
+    const maintenanceMode = true;
+
+    if (maintenanceMode) {
+      return {
+        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+        success: false,
+        message:
+          'Este endpoint está em manutenção no momento. Por favor, tente novamente mais tarde.',
+        data: null
+      };
     }
 
+    const idNumber = +id;
+    if (isNaN(idNumber)) {
+      throw new BadRequestException('Formato de ID inválido');
+    }
     const existingProduction = await this.productionService.findOne(idNumber);
     if (!existingProduction) {
       throw new NotFoundException(
-        `Production order with ID ${idNumber} not found`
+        `Ordem de produção com ID ${idNumber} não encontrada`
       );
     }
-    return this.productionService.update(+idNumber, updateProductionDto);
+    return this.productionService.update(idNumber, updateProductionDto);
   }
 
   @Delete(':id')
