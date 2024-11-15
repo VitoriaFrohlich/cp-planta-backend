@@ -14,7 +14,7 @@ import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
 import { Origin, Stock_Moviment } from '../common/enums';
-import { ResponseCategoriesBatchsDto } from './dto/response.categories.batchs.dto';
+import { ResponseCategoriesBatchsDto } from './dto/response.stock.dto';
 import {
   ResponseBatchDto,
   ResponseBatchsByProductDto,

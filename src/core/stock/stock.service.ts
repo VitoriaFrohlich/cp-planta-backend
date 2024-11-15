@@ -19,9 +19,10 @@ import {
   ResponseBatchsByRawDto,
   ResponseStockDto,
   ResponseRawBatchsByIdDto,
-  ResponseProductsWithBatches
+  ResponseProductsWithBatches,
+  ResponseProductsWithLocationsDto
 } from './dto/response.stock.dto';
-import { ResponseCategoriesBatchsDto } from './dto/response.categories.batchs.dto';
+import { ResponseCategoriesBatchsDto } from './dto/response.stock.dto';
 
 @Injectable()
 export class StockService {
@@ -478,10 +479,10 @@ export class StockService {
     }));
   }
 
-  async getAllBatchsByLocations(): Promise<ResponseProductsWithLocations[]> {
+  async getAllBatchsByLocations(): Promise<ResponseProductsWithLocationsDto[]> {
     const stockLocations = await this.stockRepository.getStockWithLocations();
 
-    const locationMap = new Map<string, ResponseProductsWithLocations>();
+    const locationMap = new Map<string, ResponseProductsWithLocationsDto>();
 
     for (const location of stockLocations) {
       const availableBatches =

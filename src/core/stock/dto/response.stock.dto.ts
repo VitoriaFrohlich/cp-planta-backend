@@ -85,7 +85,13 @@ export class ResponseRawBatchsByIdDto {
   quantity: number;
 }
 
-export class ResponseLocationBatchsDto {
+export class ResponseCategoriesBatchsDto {
+  id: string;
+  description: string;
+  batch_quantity: number;
+}
+
+export class ResponseProductsWithLocationsDto {
   id: number;
   description: string;
   batch_quantity: number;
