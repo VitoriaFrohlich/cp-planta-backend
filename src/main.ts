@@ -22,6 +22,13 @@ async function bootstrap(): Promise<void> {
 
     const app = await NestFactory.create(AppModule);
 
+    app.enableCors({
+      origin: ['http://3.135.202.176:3001', 'http://3.144.10.123:3001'],
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    });
+
     app.enableVersioning({
       type: VersioningType.HEADER,
       header: 'API-Version'

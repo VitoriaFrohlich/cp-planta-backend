@@ -64,3 +64,23 @@ export class ResponseProductsWithBatches {
   category: string;
   batch_quantity: number;
 }
+
+export class ResponseBatchsByProductDto {
+  id: string;
+  description: string;
+  current_quantity: number;
+}
+
+export class ResponseBatchsByRawDto {
+  raw_material_description: string;
+  measure_unit: string;
+  quantity: number;
+  sku: string;
+}
+
+export class ResponseRawBatchsByIdDto {
+  id: string;
+  sku: number;
+  measure_unit: string;
+  quantity: number;
+}

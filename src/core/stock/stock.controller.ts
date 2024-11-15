@@ -14,7 +14,12 @@ import { CreateStockDto } from './dto/create.stock.dto';
 import { UpdateStockDto } from './dto/update.stock.dto';
 import { ApiQuery } from '@nestjs/swagger';
 import { Origin, Stock_Moviment } from '../common/enums';
-import { ResponseBatchDto } from './dto/response.stock.dto';
+import {
+  ResponseBatchDto,
+  ResponseBatchsByProductDto,
+  ResponseBatchsByRawDto,
+  ResponseRawBatchsByIdDto
+} from './dto/response.stock.dto';
 
 @Controller('stock')
 export class StockController {
@@ -125,6 +130,34 @@ export class StockController {
       batch: batch[0],
       batch_expiration: batch[1]
     } as ResponseBatchDto;
+  }
+
+  @Get('batchs/:id')
+  async getBatchesByProductId(
+    @Param('id') productId: string
+  ): Promise<ResponseBatchsByProductDto[]> {
+    if (isNaN(+productId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.stockService.getBatchesByProductId(+productId);
+    return result;
+  }
+
+  @Get('batchs-raw')
+  async getBatchesByCategoryRaw(): Promise<ResponseBatchsByRawDto[]> {
+    const result = await this.stockService.getBatchesRaw();
+    return result;
+  }
+
+  @Get('raw-batchs/:id')
+  async getRawBatchesByProductId(
+    @Param('id') productId: string
+  ): Promise<ResponseRawBatchsByIdDto[]> {
+    if (isNaN(+productId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.stockService.getRawBatchesByProductId(+productId);
+    return result;
   }
 
   @Get(':id')

@@ -593,4 +593,88 @@ export class StockRepository {
       category: product.categories.description
     }));
   }
+  async findBatchesByProductId(productId: number) {
+    return this.prisma.stock_items
+      .findMany({
+        where: {
+          product_id: productId,
+          products: {
+            origin: 'RAW_MATERIAL'
+          }
+        },
+        select: {
+          id: true,
+          quantity: true,
+          products: {
+            select: {
+              description: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          id: item.id,
+          description:
+            item.products?.description || 'Description not available',
+          current_quantity: item.quantity
+        }))
+      );
+  }
+  async getRawMaterialsByOrigin(origin: Origin) {
+    return this.prisma.products
+      .findMany({
+        where: {
+          origin
+        },
+        select: {
+          id: true, // Supondo que o campo ID é o identificador único de cada produto
+          description: true, // Descrição do produto
+          unit_measure: true, // Unidade de medida
+          stock_items: {
+            // Join with stock_items table
+            select: {
+              sku: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          product_id: item.id, // Ajuste para retornar o campo id como product_id
+          raw_material_description: item.description,
+          measure_unit: item.unit_measure,
+          sku: item.stock_items[0].sku
+        }))
+      );
+  }
+  async findRawBatchesByProductId(productId: number) {
+    return this.prisma.stock_items
+      .findMany({
+        where: {
+          product_id: productId,
+          products: {
+            origin: 'RAW_MATERIAL'
+          }
+        },
+        select: {
+          id: true,
+          quantity: true,
+          sku: true,
+          products: {
+            select: {
+              unit_measure: true
+            }
+          }
+        }
+      })
+      .then(items =>
+        items.map(item => ({
+          product_id: item.id, // Ajuste para retornar o campo id como product_id
+          measure_unit: item.products.unit_measure,
+          sku: item.sku,
+          quantity: item.quantity
+        }))
+      );
+  }
 }
