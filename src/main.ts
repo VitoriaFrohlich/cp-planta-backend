@@ -29,7 +29,7 @@ async function bootstrap(): Promise<void> {
       exposedHeaders: '*', // Permite que o frontend veja todos os cabeçalhos da resposta
       preflightContinue: false,
       optionsSuccessStatus: 204, // Retorna status apropriado para requisições preflight
-      credentials: false,
+      credentials: false
     });
 
     app.enableVersioning({
