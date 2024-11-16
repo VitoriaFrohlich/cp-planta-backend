@@ -23,10 +23,13 @@ async function bootstrap(): Promise<void> {
     const app = await NestFactory.create(AppModule);
 
     app.enableCors({
-      origin: ['*'],
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      origin: '*', // Permite requisições de qualquer origem
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Permite todos os métodos comuns
+      allowedHeaders: '*', // Permite todos os cabeçalhos
+      exposedHeaders: '*', // Permite que o frontend veja todos os cabeçalhos da resposta
       preflightContinue: false,
-      optionsSuccessStatus: 204
+      optionsSuccessStatus: 204, // Retorna status apropriado para requisições preflight
+      credentials: false,
     });
 
     app.enableVersioning({
