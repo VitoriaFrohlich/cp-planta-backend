@@ -29,6 +29,13 @@ export class CreateStockDto {
     required: true
   })
   readonly stock_items: CreateStockItemsDto[];
+
+  @ApiProperty({
+    description: 'Supplier Name',
+    example: 'one supplier',
+    required: false
+  })
+  readonly supplierName?: string;
 }
 
 export class CreateStockItemsDto {
@@ -86,7 +93,7 @@ export class CreateStockItemsDto {
     example: '1',
     required: false
   })
-  readonly supplier?: number;
+  supplier?: number;
 
   @ApiProperty({
     description: 'Costumer',
