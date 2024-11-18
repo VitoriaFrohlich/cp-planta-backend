@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { stock } from '@prisma/client';
 import { Origin, Stock_Moviment } from '../common/enums';
 import { SessionService } from '../common/sessionService';
+import { PersonsService } from '../persons/persons.service';
 import { formatDate } from '../common/utils';
 import {
   ResponseBatchsByProductDto,
@@ -30,7 +31,8 @@ export class StockService {
     private readonly sessionService: SessionService,
     private readonly stockRepository: StockRepository,
     private readonly settingsService: SettingsService,
-    private readonly batchService: BatchService
+    private readonly batchService: BatchService,
+    private readonly personsService: PersonsService
   ) {}
 
   stockMovimentsToCheck = new Set([
@@ -42,6 +44,25 @@ export class StockService {
   async create(createStockDto: CreateStockDto): Promise<ResponseStockDto> {
     const stock_items: CreateStockItemsDto[] = createStockDto.stock_items;
     const errorMessages = [];
+
+    if (createStockDto.supplierName) {
+      let supplier = await this.personsService.matchPersonByData(
+        createStockDto.supplierName
+      );
+
+      if (supplier.length === 0) {
+        const createPersonsDto = {
+          name: createStockDto.supplierName,
+          person_type: 'SUPPLIER'
+        };
+        supplier = [await this.personsService.create(createPersonsDto)];
+      }
+
+      const supplierId = supplier[0].id;
+      stock_items.forEach(item => {
+        item.supplier = supplierId;
+      });
+    }
 
     const currentUser = this.sessionService.getCurrentUser();
     let documentNumber = '';
