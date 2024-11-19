@@ -43,6 +43,26 @@ export class StockService {
     const stock_items: CreateStockItemsDto[] = createStockDto.stock_items;
     const errorMessages = [];
 
+    // TODO
+    // if (createStockDto.supplierName) {
+    //   let supplier = await this.personsService.matchPersonByData(
+    //     createStockDto.supplierName
+    //   );
+
+    //   if (supplier.length === 0) {
+    //     const createPersonsDto = {
+    //       name: createStockDto.supplierName,
+    //       person_type: 'SUPPLIER'
+    //     };
+    //     supplier = [await this.personsService.create(createPersonsDto)];
+    //   }
+
+    //   const supplierId = supplier[0].id;
+    //   stock_items.forEach(item => {
+    //     item.supplier = supplierId;
+    //   });
+    // }
+
     const currentUser = this.sessionService.getCurrentUser();
     let documentNumber = '';
     let isInput = false;
@@ -461,8 +481,8 @@ export class StockService {
         batchResponses.push({
           raw_material_description: material.raw_material_description,
           measure_unit: material.measure_unit,
-          quantity: batch.current_quantity,
-          sku: material.sku
+          quantity: batch.current_quantity
+          //sku: material.sku
         });
       }
     }

@@ -75,7 +75,7 @@ export class ResponseBatchsByRawDto {
   raw_material_description: string;
   measure_unit: string;
   quantity: number;
-  sku: string;
+  //sku: string;
 }
 
 export class ResponseRawBatchsByIdDto {
