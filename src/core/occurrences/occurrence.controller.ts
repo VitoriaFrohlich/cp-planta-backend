@@ -6,7 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  BadRequestException
+  BadRequestException,
+  NotFoundException
 } from '@nestjs/common';
 import { OccurrenceService } from './occurrence.service';
 import { CreateOccurrenceDto } from './dto/create-occurrence.dto';
@@ -44,7 +45,9 @@ export class OccurrenceController {
       id: createdOccurence.id,
       description: createdOccurence.description,
       created_at: createdOccurence.created_at,
-      created_by: createdOccurence.created_by
+      created_by: createdOccurence.created_by,
+      updated_at: createdOccurence.updated_at,
+      updated_by: createdOccurence.updated_by
     };
   }
 
@@ -71,21 +74,35 @@ export class OccurrenceController {
 
     const occurrence = await this.occurrenceService.findOne(idNumber);
     if (!occurrence) {
-      throw new BadRequestException('Ocorrencia não encontrada');
+      throw new NotFoundException('Ocorrencia não encontrada');
     }
     return occurrence;
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateOccurrenceDto: UpdateOccurrenceDto
   ) {
-    return this.occurrenceService.update(+id, updateOccurrenceDto);
+    try {
+      return await this.occurrenceService.update(+id, updateOccurrenceDto);
+    } catch (error) {
+      if ((error as Error).message === 'Occurrence not found') {
+        throw new NotFoundException('Ocorrencia não encontrada');
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.occurrenceService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      return await this.occurrenceService.remove(+id);
+    } catch (error) {
+      if ((error as Error).message === 'Occurrence not found') {
+        throw new NotFoundException('Ocorrencia não encontrada');
+      }
+      throw error;
+    }
   }
 }

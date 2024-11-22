@@ -10,5 +10,4 @@ export const UpdateOccurrenceSchema = z.object({
   description: z
     .string()
     .min(10, 'Descrição deve conter no mínimo 10 caracteres')
-    .optional()
 });
