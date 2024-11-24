@@ -22,7 +22,7 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "esModuleInterop": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "lib": ["ES2020"]
   },
   "paths": {
