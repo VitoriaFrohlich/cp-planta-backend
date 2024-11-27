@@ -45,6 +45,13 @@ export class CompositionsRepository {
         },
         created_by: data.created_by,
         updated_by: data.updated_by
+      },
+      include: {
+        product_raw: {
+          select: {
+            description: true
+          }
+        }
       }
     });
   }
@@ -76,6 +83,13 @@ export class CompositionsRepository {
         quantity: data.quantity,
         updated_at: new Date(),
         updated_by: data.updated_by
+      },
+      include: {
+        product_raw: {
+          select: {
+            description: true
+          }
+        }
       }
     });
 
@@ -98,10 +112,17 @@ export class CompositionsRepository {
 
   async getCompositionsItems(
     compositionsId: number
-  ): Promise<composition_items[]> {
+  ): Promise<(composition_items & { product_raw: { description: string } })[]> {
     return await this.prisma.composition_items.findMany({
       where: { composition_id: compositionsId },
-      orderBy: { sequence: 'asc' }
+      orderBy: { sequence: 'asc' },
+      include: {
+        product_raw: {
+          select: {
+            description: true
+          }
+        }
+      }
     });
   }
 
@@ -138,6 +159,11 @@ export class CompositionsRepository {
             composition_id: true,
             sequence: true,
             raw_product: true,
+            product_raw: {
+              select: {
+                description: true
+              }
+            },
             quantity: true,
             created_at: true,
             updated_at: true,
@@ -162,6 +188,11 @@ export class CompositionsRepository {
             composition_id: true,
             sequence: true,
             raw_product: true,
+            product_raw: {
+              select: {
+                description: true
+              }
+            },
             quantity: true,
             created_at: true,
             updated_at: true,
