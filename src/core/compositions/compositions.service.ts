@@ -110,6 +110,7 @@ export class CompositionsService {
         compositions_id: item.composition_id,
         sequence: item.sequence,
         raw_product: item.raw_product,
+        description: item.product_raw?.description,
         quantity: item.quantity,
         created_at: formatDate(item.created_at)
       }));
@@ -148,6 +149,7 @@ export class CompositionsService {
         compositions_id: item.compositions_id,
         sequence: item.sequence,
         raw_product: item.raw_product,
+        description: item.product_raw?.description,
         quantity: item.quantity,
         created_at: formatDate(composition.created_at),
         updated_at: formatDate(composition.updated_at)
@@ -177,6 +179,7 @@ export class CompositionsService {
         compositions_id: item.compositions_id,
         sequence: item.sequence,
         raw_product: item.raw_product,
+        description: item.product_raw?.description,
         quantity: item.quantity,
         created_at: formatDate(item.created_at),
         updated_at: formatDate(item.updated_at)
@@ -252,17 +255,21 @@ export class CompositionsService {
         }
       }
     }
-
+    const updatedItems = [];
     const allItems = await this.compositionsRepository.getCompositionsItems(id);
-    const updatedItems = allItems.map(item => ({
-      id: item.id,
-      compositions_id: item.composition_id,
-      sequence: item.sequence,
-      raw_product: item.raw_product,
-      quantity: item.quantity,
-      created_at: formatDate(item.created_at),
-      updated_at: formatDate(item.updated_at)
-    }));
+
+    updatedItems.push(
+      ...allItems.map(item => ({
+        id: item.id,
+        compositions_id: item.composition_id,
+        sequence: item.sequence,
+        raw_product: item.raw_product,
+        description: item.product_raw?.description,
+        quantity: item.quantity,
+        created_at: formatDate(item.created_at),
+        updated_at: formatDate(item.updated_at)
+      }))
+    );
 
     return {
       compositionsDocument: {
