@@ -348,6 +348,12 @@ VALUES
     (3,'Production C','2024-12-31 23:59:59', 'IN_PROGRESS', 'esteira 2', 10, 1000.0, 950.0, 50.0, 'root', 'root'),
     (4,'Production D','2024-12-15 23:59:59','SCHEDULED', 'esteira 2', 11, 2000.0, 1900.0, 100.0, 'root', 'root'),
     (5,'Production E','2024-12-31 23:59:59', 'OPEN', 'esteira 2', 12, 2000.0, 1900.0, 100.0, 'root', 'root');
+    (6,'Production F','2024-12-20 23:59:59', 'IN_PROGRESS', 'esteira 3', 13, 1500.0, 1450.0, 50.0, 'admin', 'admin'),
+    (7,'Production G','2024-12-25 23:59:59', 'IN_PROGRESS', 'esteira 1', 14, 1200.0, 1150.0, 50.0, 'admin', 'admin'),
+    (8,'Production H','2024-12-28 23:59:59', 'CANCELED', 'esteira 3', 15, 1800.0, 1750.0, 50.0, 'admin', 'admin'),
+    (9,'Production I','2024-12-30 23:59:59', 'SCHEDULED', 'esteira 4', 16, 2200.0, 2150.0, 50.0, 'admin', 'admin'),
+    (10,'Production J','2024-12-31 23:59:59', 'IN_PROGRESS', 'esteira 5', 17, 2500.0, 2450.0, 50.0, 'admin', 'admin');
+    
 
 -- Insert into production_orders_items
 INSERT INTO "production_orders_items" (
@@ -367,7 +373,11 @@ VALUES
     (3, 1, 2, 1000.0, 950.0, 'root', 'root', '[{"stock_item_id": 13, "batch": "LoteA135", "quantity": 50}, {"stock_item_id": 14, "batch": "LoteA136", "quantity": 20}, {"stock_item_id": 15, "batch": "LoteA137", "quantity": 30}]'),
     (4, 1, 6, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 16, "batch": "LoteA138", "quantity": 25}, {"stock_item_id": 17, "batch": "LoteA139", "quantity": 25}]'),
     (5, 1, 7, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 18, "batch": "LoteA140", "quantity": 30}, {"stock_item_id": 19, "batch": "LoteA141", "quantity": 20}]');
-
+    (6, 1, 6, 1500.0, 1450.0, 'admin', 'admin', '[{"stock_item_id": 16, "batch": "LoteA138", "quantity": 25}, {"stock_item_id": 17, "batch": "LoteA139", "quantity": 25}]'),
+    (7, 1, 7, 1200.0, 1150.0, 'admin', 'admin', '[{"stock_item_id": 18, "batch": "LoteA140", "quantity": 30}, {"stock_item_id": 19, "batch": "LoteA141", "quantity": 20}]'),
+    (8, 1, 8, 1800.0, 1750.0, 'admin', 'admin', '[{"stock_item_id": 20, "batch": "LoteA142", "quantity": 50}, {"stock_item_id": 21, "batch": "LoteA143", "quantity": 50}]'),
+    (9, 1, 9, 2200.0, 2150.0, 'admin', 'admin', '[{"stock_item_id": 22, "batch": "LoteA144", "quantity": 50}, {"stock_item_id": 23, "batch": "LoteA145", "quantity": 50}]'),
+    (10, 1, 10, 2500.0, 2450.0, 'admin', 'admin', '[{"stock_item_id": 24, "batch": "LoteA146", "quantity": 50}, {"stock_item_id": 25, "batch": "LoteA147", "quantity": 50}]');
 
 -- INSERT INTO "production_steps_progress"
 INSERT INTO "production_steps_progress" (
