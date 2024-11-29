@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateStockLocationDto } from './create.stock-locations.dto';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class UpdateStockLocationDto extends PartialType(
   CreateStockLocationDto
@@ -12,17 +12,12 @@ export class UpdateStockLocationDto extends PartialType(
   })
   readonly description?: string;
 
-  @ApiProperty({
-    description: 'Status de atividade do local de estoque',
-    default: true,
-    example: true
-  })
+  @ApiHideProperty()
   readonly active?: boolean;
 
-  @ApiProperty({
-    description: 'Data da última atualização do local de estoque',
-    example: '2024-01-10T12:00:00.000Z'
-  })
+  @ApiHideProperty()
   readonly updated_at?: Date;
+
+  @ApiHideProperty()
   readonly updated_by?: string;
 }

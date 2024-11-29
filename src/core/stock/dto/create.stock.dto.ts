@@ -3,11 +3,7 @@ import { Stock_Moviment } from 'src/core/common/enums';
 import { object } from 'zod';
 
 export class CreateStockDto {
-  @ApiProperty({
-    description: 'Document date',
-    example: '2021-05-01',
-    required: true
-  })
+  @ApiHideProperty()
   readonly document_date: Date;
 
   @ApiHideProperty()
@@ -45,12 +41,25 @@ export class CreateStockItemsDto {
   })
   readonly product_id: number;
 
-  @ApiHideProperty()
+  @ApiProperty({
+    description: 'Batch',
+    example: '123456',
+    required: true
+  })
   readonly batch: string;
 
-  @ApiHideProperty()
+  @ApiProperty({
+    description: 'Batch expiration',
+    example: '2022-12-31',
+    required: true
+  })
   readonly batch_expiration: Date;
 
+  @ApiProperty({
+    description: 'SKU',
+    example: '123456',
+    required: true
+  })
   readonly sku: string;
 
   @ApiProperty({
@@ -67,11 +76,7 @@ export class CreateStockItemsDto {
   })
   readonly unit_price?: number;
 
-  @ApiProperty({
-    description: 'Total price',
-    example: '1.00',
-    required: false
-  })
+  @ApiHideProperty()
   readonly total_price?: number;
 
   @ApiProperty({

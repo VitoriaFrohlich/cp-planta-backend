@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class CreateStockLocationDto {
   @ApiProperty({
@@ -7,9 +7,19 @@ export class CreateStockLocationDto {
     example: 'Freezer'
   })
   readonly description: string;
+
+  @ApiHideProperty()
   readonly active?: boolean;
+
+  @ApiHideProperty()
   readonly created_at?: Date;
+
+  @ApiHideProperty()
   readonly updated_at?: Date;
+
+  @ApiHideProperty()
   readonly created_by?: string;
+
+  @ApiHideProperty()
   readonly updated_by?: string;
 }

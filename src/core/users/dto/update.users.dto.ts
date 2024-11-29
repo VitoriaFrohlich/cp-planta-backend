@@ -18,7 +18,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiProperty({
     example: 'John',
     description: 'First name of the user',
-    examples: ['DEFAULT', 'ADMIN', 'ROOT', 'DEMO', 'ERP', 'API', 'SYSTEM'],
+    examples: ['DEFAULT', 'ADMIN', 'ROOT', 'DEMO', 'API', 'SYSTEM'],
     default: Role.DEFAULT
   })
   readonly role: Role;
