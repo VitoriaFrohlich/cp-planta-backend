@@ -1,5 +1,5 @@
 import { Role } from '../../common/enums';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -17,11 +17,17 @@ export class CreateUserDto {
   @ApiProperty({
     example: 'John',
     description: 'Role of the user',
-    examples: ['DEFAULT', 'ADMIN', 'ROOT', 'DEMO', 'ERP', 'API', 'SYSTEM'],
+    examples: ['DEFAULT', 'ADMIN', 'ROOT', 'DEMO', 'API', 'SYSTEM'],
     default: Role.DEFAULT
   })
   readonly role: Role;
+
+  @ApiHideProperty()
   username: string;
+
+  @ApiHideProperty()
   created_by: string;
+
+  @ApiHideProperty()
   updated_by: string;
 }

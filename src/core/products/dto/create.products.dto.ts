@@ -1,10 +1,11 @@
 import { Origin, Unit_Measure } from '../../common/enums';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
   @ApiProperty({
     description: 'Product description',
     minLength: 3,
+    required: true,
     example: 'Batata Branca'
   })
   readonly description: string;
@@ -12,20 +13,18 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'Product code',
     minLength: 3,
+    required: true,
     example: 'ABC123'
   })
   readonly code: string;
 
-  @ApiProperty({
-    description: 'Product origin',
-    default: 'RAW_MATERIAL',
-    examples: ['RAW_MATERIAL', 'MADE']
-  })
+  @ApiHideProperty()
   origin: Origin;
 
   @ApiProperty({
     description: 'Product unit measure',
     default: 'UN',
+    required: false,
     examples: ['UN', 'KG', 'L', 'GR', 'ML', 'PC']
   })
   readonly unit_measure: Unit_Measure;
@@ -33,6 +32,7 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'Product category id',
     default: 1,
+    required: true,
     example: 'search for the category id in the database'
   })
   readonly category_id: number;
@@ -40,31 +40,21 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'Product group id',
     default: 1,
+    required: false,
     example: 'search for the group id in the database'
   })
-  readonly group_id: number;
+  readonly group_id?: number;
 
   @ApiProperty({
     description: 'Product supplier id',
+    required: false,
     example: 'search for the supplier id in the database'
   })
-  readonly supplier_id: number;
+  readonly supplier_id?: number;
 
   @ApiProperty({
-    description: 'Product nutritional info'
+    description: 'Product nutritional info',
+    required: false
   })
-  readonly nutritional_info: string;
-
-  //quantidade e preço vão ser tratados por outro serviço
-  @ApiProperty({
-    description: 'Product price',
-    example: '10.00 or other number > 0'
-  })
-  readonly price: number;
-
-  @ApiProperty({
-    description: 'Product quantity',
-    example: 'number > 0'
-  })
-  readonly quantity: number;
+  readonly nutritional_info?: string;
 }
