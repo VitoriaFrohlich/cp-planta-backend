@@ -372,7 +372,7 @@ VALUES
     (2, 1, 1, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 10, "batch": "LoteA132", "quantity": 50}, {"stock_item_id": 11, "batch": "LoteA133", "quantity": 50}, {"stock_item_id": 12, "batch": "LoteA134", "quantity": 30}]'),
     (3, 1, 2, 1000.0, 950.0, 'root', 'root', '[{"stock_item_id": 13, "batch": "LoteA135", "quantity": 50}, {"stock_item_id": 14, "batch": "LoteA136", "quantity": 20}, {"stock_item_id": 15, "batch": "LoteA137", "quantity": 30}]'),
     (4, 1, 6, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 16, "batch": "LoteA138", "quantity": 25}, {"stock_item_id": 17, "batch": "LoteA139", "quantity": 25}]'),
-    (5, 1, 7, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 18, "batch": "LoteA140", "quantity": 30}, {"stock_item_id": 19, "batch": "LoteA141", "quantity": 20}]');
+    (5, 1, 7, 2000.0, 1900.0, 'root', 'root', '[{"stock_item_id": 18, "batch": "LoteA140", "quantity": 30}, {"stock_item_id": 19, "batch": "LoteA141", "quantity": 20}]'),
     (6, 1, 6, 1500.0, 1450.0, 'admin', 'admin', '[{"stock_item_id": 16, "batch": "LoteA138", "quantity": 25}, {"stock_item_id": 17, "batch": "LoteA139", "quantity": 25}]'),
     (7, 1, 7, 1200.0, 1150.0, 'admin', 'admin', '[{"stock_item_id": 18, "batch": "LoteA140", "quantity": 30}, {"stock_item_id": 19, "batch": "LoteA141", "quantity": 20}]'),
     (8, 1, 8, 1800.0, 1750.0, 'admin', 'admin', '[{"stock_item_id": 20, "batch": "LoteA142", "quantity": 50}, {"stock_item_id": 21, "batch": "LoteA143", "quantity": 50}]'),
