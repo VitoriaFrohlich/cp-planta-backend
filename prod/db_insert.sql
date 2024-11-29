@@ -347,7 +347,7 @@ VALUES
     (2,'Production B','2024-12-15 23:59:59','SCHEDULED', 'esteira 2', 9, 2000.0, 1900.0, 100.0, 'root', 'root'),
     (3,'Production C','2024-12-31 23:59:59', 'IN_PROGRESS', 'esteira 2', 10, 1000.0, 950.0, 50.0, 'root', 'root'),
     (4,'Production D','2024-12-15 23:59:59','SCHEDULED', 'esteira 2', 11, 2000.0, 1900.0, 100.0, 'root', 'root'),
-    (5,'Production E','2024-12-31 23:59:59', 'OPEN', 'esteira 2', 12, 2000.0, 1900.0, 100.0, 'root', 'root');
+    (5,'Production E','2024-12-31 23:59:59', 'OPEN', 'esteira 2', 12, 2000.0, 1900.0, 100.0, 'root', 'root'),
     (6,'Production F','2024-12-20 23:59:59', 'IN_PROGRESS', 'esteira 3', 13, 1500.0, 1450.0, 50.0, 'admin', 'admin'),
     (7,'Production G','2024-12-25 23:59:59', 'IN_PROGRESS', 'esteira 1', 14, 1200.0, 1150.0, 50.0, 'admin', 'admin'),
     (8,'Production H','2024-12-28 23:59:59', 'CANCELED', 'esteira 3', 15, 1800.0, 1750.0, 50.0, 'admin', 'admin'),
