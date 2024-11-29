@@ -352,9 +352,8 @@ VALUES
     (7,'Production G','2024-12-25 23:59:59', 'IN_PROGRESS', 'esteira 1', 14, 1200.0, 1150.0, 50.0, 'admin', 'admin'),
     (8,'Production H','2024-12-28 23:59:59', 'CANCELED', 'esteira 3', 15, 1800.0, 1750.0, 50.0, 'admin', 'admin'),
     (9,'Production I','2024-12-30 23:59:59', 'SCHEDULED', 'esteira 4', 16, 2200.0, 2150.0, 50.0, 'admin', 'admin'),
-    (10,'Production J','2024-12-31 23:59:59', 'IN_PROGRESS', 'esteira 5', 17, 2500.0, 2450.0, 50.0, 'admin', 'admin');
+    (10,'Production J','2024-12-31 23:59:59', 'IN_PROGRESS', 'esteira 5', 14, 2500.0, 2450.0, 50.0, 'admin', 'admin');
     
-
 -- Insert into production_orders_items
 INSERT INTO "production_orders_items" (
   "production_order_id", 
