@@ -30,24 +30,13 @@ export class UpdateStockDto {
   stock_items?: UpdateStockItemsDto[];
 }
 export class UpdateStockItemsDto extends PartialType(CreateStockItemsDto) {
-  @ApiProperty({
-    description: 'Stock id',
-    example: '1',
-    required: false
-  })
+  @ApiHideProperty()
   readonly id?: number;
-  @ApiProperty({
-    description: 'Product id',
-    example: '1',
-    required: false
-  })
+
+  @ApiHideProperty()
   readonly sequence?: number;
 
-  @ApiProperty({
-    description: 'Product id',
-    example: '1',
-    required: false
-  })
+  @ApiHideProperty()
   quantity?: number;
 
   @ApiProperty({
@@ -61,7 +50,7 @@ export class UpdateStockItemsDto extends PartialType(CreateStockItemsDto) {
   total_price?: number;
 
   @ApiProperty({
-    description: 'Product id',
+    description: 'Supplier id',
     example: '1',
     required: false
   })
@@ -87,11 +76,4 @@ export class UpdateStockItemsDto extends PartialType(CreateStockItemsDto) {
     required: false
   })
   observation?: string;
-
-  @ApiProperty({
-    description: 'Image link',
-    example: 'http://example.com/image.jpg',
-    required: false
-  })
-  image_link?: string;
 }
